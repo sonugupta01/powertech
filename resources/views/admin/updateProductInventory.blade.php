@@ -11,7 +11,6 @@
     <ol class="breadcrumb">
       <li><a href="{{url('/admin')}}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
       <li><a href="{{url('/admin/dealerTemplatesProducts')}}/{{$dealer_id}}/{{$primary_id}}"><i class="fa fa-dashboard"></i> Template Products</a></li>
-      <!-- <li><a href="{{url(Session::get('prevUrl'))}}"><i class="fa fa-dashboard"></i> Treatment List</a></li> -->
       <li class="active">Update inventory</li>
     </ol>
   </section>
@@ -36,6 +35,7 @@
               <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
               <input type="hidden" name="template_id" value="{{$temp_id}}">
               <input type="hidden" name="dealer_id" value="{{$dealer_id}}">               
+              <input type="hidden" name="selectedMonth" value="{{Session::get('selectedMonth')}}">               
               <div class="row">
                 <div class="col-md-12">
                   <table class="table table-bordered table-hover" id="inventoryTbl">

@@ -9248,7 +9248,7 @@ class AdminController extends Controller
     public function updateDealerProductInventory(Request $request)
     {
         $post = $request->all();
-
+        $selectedMonth = $post['selectedMonth'];
         $data = array(
             'dealer_id' => $post['dealer_id'],
             'product_id' => $post['product_id'],
@@ -9260,12 +9260,15 @@ class AdminController extends Controller
         $check = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id'], 'uom'=>$post['pro_unit']])->first();
 
         $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
-        dd($checkMonth);
-        if (!empty($check) && !empty($checkMonth)) {
-            $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
-            DB::table('dealer_product_inventory')->where('id',$check->id)->update($data);
+        if ($selectedMonth != date('Y-m')) {
+            return redirect()->back()->with('error', "You can update only current month inventory");
         } else {
-            DB::table('dealer_product_inventory')->insert($data);
+            if (!empty($check) && !empty($checkMonth)) {
+                $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
+                DB::table('dealer_product_inventory')->where('id',$check->id)->update($data);
+            } else {
+                DB::table('dealer_product_inventory')->insert($data);
+            }
         }
         return redirect(Session::get('prevUrl'))->with('success', "Inventory updated successfully");
     }
