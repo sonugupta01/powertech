@@ -55,6 +55,7 @@
                   <th>Sr. No.</th>
                   <th>Product Name</th>
                   <th>Minimum Stock</th>
+                  <th>Stock in Hand</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -71,6 +72,13 @@
                       <td>
                       @if(!empty($value->stock))
                       {{$value->stock}} {{$value->unit_name}}
+                      @else
+                      {{'-'}}
+                      @endif
+                      </td>
+                      <td>
+                      @if(!empty($value->stock_in_hand))
+                      {{$value->stock_in_hand}} {{$value->unit_name}}
                       @else
                       {{'-'}}
                       @endif
@@ -93,6 +101,7 @@
                   <th>Sr. No.</th>
                   <th>Product Name</th>
                   <th>Minimum Stock</th>
+                  <th>Stock in Hand</th>
                   <th>Action</th>
                 </tr>
               </tfoot>
