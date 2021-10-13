@@ -1,0 +1,635 @@
+.floatright{
+
+	float: right;
+
+}
+
+.form-group .select2-container .select2-selection--single{
+
+	height: 35px;
+
+}
+
+.form-group .select2-container .select2-selection--single .select2-selection__rendered{
+
+	padding-left: 0;
+
+}
+
+.padleft0{
+
+	padding-left: 0 !important;
+
+}
+
+.padright0{
+
+	padding-right: 1 !important;
+
+}
+
+.has-error .select2-container--default,.has-error .select2-selection--single{
+
+	border-color: #dd4b39 !important;
+
+}
+
+#appenddata{
+
+	color: #dd4b39;
+
+	font-weight: bold;
+
+}
+
+.red{
+
+    color: #dd4b39;
+
+}
+
+.blue{
+
+    color: #00c0ef;
+
+}
+
+.required-title{
+
+	color: red;
+
+}
+
+#geterror{
+
+	color: red;
+
+}
+
+#geterrorinvoice{
+
+	color: red;
+
+}
+
+#geterrorname{
+
+	color: red;
+
+}
+
+#geterroremail{
+
+	color: red;
+
+}
+
+#geterrormobile{
+
+	color: red;
+
+}
+
+#geterroraddress{
+
+	color: red;
+
+}
+
+#geterrorsource{
+
+	color: red;
+
+}
+
+#geterrordestination{
+
+	color: red;
+
+}
+
+#geterrorprice{
+
+	color: red;
+
+}
+
+.pdf_format{
+
+	display: block;
+
+    margin: 0 auto;
+
+    width: 30px;
+
+}
+
+.booking_invoice{
+
+	display: block;
+
+	margin: 0px auto;
+
+	width: 100%;
+
+}
+
+strong .invalid-feedback {
+
+  color: red;
+
+}
+
+#map {
+
+	height: 100%;
+
+}
+
+.map-point{
+
+	color: red; 
+
+	font-size: 30px;
+
+}
+
+.map-points{
+
+	border: 1px solid #ddd; 
+
+	padding: 5px; 
+
+	background:#fff; 
+
+	font-size: 13px;
+
+}
+
+.map-points img{
+
+	width: 20px;
+
+}
+
+.pagination{
+
+	float: right;
+
+}
+
+#myImg {
+
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+
+    width: 60px;
+
+}
+
+
+
+#myImg:hover {opacity: 0.7;}
+
+
+
+/* The Modal (background) */
+
+.modal {
+
+    display: none; /* Hidden by default */
+
+    position: fixed; /* Stay in place */
+
+    z-index: 1; /* Sit on top */
+
+    padding-top: 100px; /* Location of the box */
+
+    left: 0;
+
+    top: 0;
+
+    width: 100%; /* Full width */
+
+    height: 100%; /* Full height */
+
+    overflow: auto; /* Enable scroll if needed */
+
+    background-color: rgb(0,0,0); /* Fallback color */
+
+    background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+
+}
+
+
+
+/* Modal Content (image) */
+
+.modal-content {
+
+    margin: auto;
+
+    display: block;
+
+    width: 80%;
+
+    max-width: 700px;
+
+}
+
+
+
+/* Caption of Modal Image */
+
+#caption {
+
+    margin: auto;
+
+    display: block;
+
+    width: 80%;
+
+    max-width: 700px;
+
+    text-align: center;
+
+    color: #ccc;
+
+    padding: 10px 0;
+
+    height: 150px;
+
+}
+
+
+
+/* Add Animation */
+
+.modal-content, #caption {    
+
+    -webkit-animation-name: zoom;
+
+    -webkit-animation-duration: 0.6s;
+
+    animation-name: zoom;
+
+    animation-duration: 0.6s;
+
+}
+
+
+
+@-webkit-keyframes zoom {
+
+    from {-webkit-transform:scale(0)} 
+
+    to {-webkit-transform:scale(1)}
+
+}
+
+
+
+@keyframes zoom {
+
+    from {transform:scale(0)} 
+
+    to {transform:scale(1)}
+
+}
+
+
+
+/* The Close Button */
+
+.close {
+
+    position: absolute;
+
+    top: 65px;
+
+    right: 35px;
+
+    color: #f1f1f1;
+
+    font-size: 40px;
+
+    font-weight: bold;
+
+    transition: 0.3s;
+
+}
+
+
+
+.close:hover,
+
+.close:focus {
+
+    color: #bbb;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+}
+
+
+
+/* 100% Image Width on Smaller Screens */
+
+@media only screen and (max-width: 700px){
+
+    .modal-content {
+
+        width: 100%;
+
+    }
+    .tab-select-outer {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
+.widget-user {
+ margin:0 0 15px 0;
+}
+}
+
+.collection_image{
+
+    width: 200px;
+
+}
+
+.info-box-icon a{
+
+    text-decoration: none;
+
+    color: #fff;
+
+}
+
+.info-box-icon:hover{
+
+    font-size: 50px;
+
+}
+
+
+
+.gallery-box{
+
+    background-color: #f4f4f4;
+
+}
+
+.widget-user{
+
+    margin: 70px;
+
+}
+
+.widget-user-username{
+
+    text-align: center;
+
+}
+.caltable{
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+}
+.caltable h2{
+    text-align: center;
+}
+
+
+/* calendar */
+table.calendar      { border-left:1px solid #999; }
+tr.calendar-row {  }
+td.calendar-day { min-height:80px; font-size:11px; position:relative; } * html div.calendar-day { height:80px; }
+td.calendar-day:hover   { background:#eceff5; }
+td.calendar-day-np  { background:#eee; min-height:80px; } * html div.calendar-day-np { height:80px; }
+td.calendar-day-head { background:#ccc; font-weight:bold; text-align:center; width:120px; padding:5px; border-bottom:1px solid #999; border-top:1px solid #999; border-right:1px solid #999; }
+div.day-number      { background:#999; padding:5px; color:#fff; font-weight:bold; float:right; margin:-5px -5px 0 0; width:20px; text-align:center; }
+/* shared */
+td.calendar-day, td.calendar-day-np { height: 80px; width:120px; padding:5px; border-bottom:1px solid #999; border-right:1px solid #999; }
+.calendar-day.today{
+    background: #ccc;   
+}
+/*------------------------------Tabs in reports----------------------------*/
+.tabs {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+#tab-button {
+  display: table;
+  table-layout: fixed;
+  width: 35%;
+  padding: 0;
+  list-style: none;
+  margin: 0 auto;
+}
+.tab-button1 {
+  width: 50% !important;
+}
+#tab-button li {
+  display: table-cell;
+  width: 20%;
+  margin-left: 20%;
+}
+#tab-button li a {
+  display: block;
+  padding: .5em;
+  background: #eee;
+  border: 1px solid #ddd;
+  text-align: center;
+  color: #000;
+  text-decoration: none;
+}
+#tab-button li:not(:first-child) a {
+  border-left: none;
+}
+#tab-button li a:hover,
+#tab-button .is-active a {
+  border-bottom-color: transparent;
+  background: #fff;
+}
+.tab-contents {
+  padding: .5em 2em 1em;
+  border: 1px solid #ddd;
+}
+.tab-button-outer {
+  display: none;
+}
+.tab-contents {
+  margin-top: 20px;
+}
+@media screen and (min-width: 768px) {
+  .tab-button-outer {
+    position: relative;
+    z-index: 2;
+    display: block;
+  }
+  .tab-select-outer {
+    display: none;
+  }
+  .tab-contents {
+    position: relative;
+    top: -1px;
+    margin-top: 0;
+  }
+}
+
+.ad{
+  color: #8d8d8d;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.report-btn{
+  margin-left: 190px !important;
+}
+
+
+.table-bordered.calendar-table td, .table-bordered.calendar-table th{
+  padding: 10px;
+   border: 1px solid #c5c5c5;
+}
+
+.fc-content {
+    white-space: normal !important;
+}
+.skin-red .main-header .logo {
+background-color: #4b4e50 !important;
+}
+
+.table.table-bordered.table-striped.tab-contents.report-table tr td,.table.table-bordered.table-striped.tab-contents.report-table tr th{
+  border: 1px solid #000;
+}
+.table.table-bordered.table-striped.report-table tr td,.table.table-bordered.table-striped.report-table tr th{
+  border: 1px solid #000;
+}
+
+/*.sidebar-toggle{
+  display: none;
+}*/
+
+/*.report-field{
+  margin: 10px;
+}
+.report-field input, select{
+  float: left;
+  margin-bottom: 15px;
+  width: 70%;
+}
+.report-field label{
+  float: left;
+  margin-bottom: 15px;
+  width: 70%;
+}*/
+/********Sandeep Resposive Style*********/
+
+@media(max-width: 1199px){
+
+}
+@media (max-width: 991px){
+ #tab-button {
+  width: auto !important;
+  padding-bottom: 15px;
+}
+
+}
+@media(max-width: 800px){
+
+}
+
+@media (max-width: 640px){
+.img-box{
+  margin:15px 0 0 0 !important;
+}
+.widget-user {
+ margin:0 0 15px 0;
+}
+}
+
+@media (max-width: 480px){
+  .img-box{
+  margin:15px 0 0 0 !important;
+}
+.tab-select-outer {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .btn-div{
+  width: 100%;
+  float: left;
+  margin-bottom: 15px;
+}
+.widget-user {
+ margin:0 0 15px 0;
+}
+}
+@media(max-width: 360px){
+  .img-box{
+  margin:15px 0 0 0 !important;
+}
+.tab-select-outer {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .btn-div{
+  width: 100%;
+  float: left;
+  margin-bottom: 15px;
+}
+.widget-user {
+ margin:0 0 15px 0;
+}
+}
+
+@media(max-width: 320px){
+  .img-box{
+  margin:15px 0 0 0 !important;
+}
+.tab-select-outer {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  .btn-div{
+  width: 100%;
+  float: left;
+  margin-bottom: 15px;
+}
+.widget-user {
+  margin:0 0 15px 0;
+}
+}
+
+/*end*/
+/*css-08-20-2018*/
+
+.mis-table {
+  position: unset;
+}
+.email-id {
+  max-width:200px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  word-wrap: break-word;
+  word-break: break-all;
+}
+.table th{
+  word-wrap: break-word;
+
+}

@@ -1,0 +1,331 @@
+@media screen and (min-width: 320px) and (max-width: 767px) {
+   .search-from, .search-to, .search-calender {
+	    width: 50%;
+	}
+	#first-slider .carousel .item {
+	    min-height: 700px;
+	}
+	.search-calender.input-group.bootstrap-timepicker {
+	    width: 50%;
+	}
+	.search-bar{
+		top:50%;
+		padding: 20px 10px 0;
+        width: 100%;
+	}
+
+	.category-img img{
+		height: auto;
+	}
+    
+    .content .search-bar-ourfleet {
+	    top: 54.2%;
+	    padding: 30px;
+	}
+
+	.search-numbering {
+	    width: 100%;
+	}
+	.search-bar .nav-tabs{
+		width: 100%;
+	}
+	.search-bar h3{
+		font-size: 22px;
+	}
+	.cargo-service{
+		border-right: 1px solid transparent;
+	}
+	.about h3{
+		font-size: 22px;
+	}
+
+	.header-container .navbar-collapse{
+		background: #000;
+		margin-top: 25px;
+	}
+	.header-container .navbar-toggle{
+		margin-top: 22px;
+	}
+
+	.navbar-right li{
+		width: 100%;
+		text-align: center;
+	}
+
+	.main-navbar.navbar-inverse .navbar-nav>li>a{
+		padding: 15px 20px;
+	}
+	
+	.dropdown-li {
+	    margin-top: 0px;
+	}
+
+	.navbar-inverse .navbar-nav .open .dropdown-menu > li > a{
+		color: #fff;
+		border-bottom: 1px solid #fff;
+	}
+
+	.dropdown ul li{
+		border-bottom: 1px solid transparent;
+	}
+
+	.control{
+		font-size: 14px;
+	}
+
+	.forgot-password{
+		font-size: 14px;
+	}
+
+	.cms-container .booknow{
+		width: 35%;
+	}
+
+	.depature-calender{
+		padding: 0;
+	}
+
+	.depature-time.input-group.bootstrap-timepicker{
+		padding: 0;
+	}
+	.depature-calender i{
+		left: 10px;
+	}
+
+	.depature-time i{
+		left: 10px;
+	}
+
+	.order-details .table-responsive{
+		margin:0 auto;
+	}
+	.Expiry select {
+	    width: 48%;
+	    margin-right: 0;
+	}	
+	.order-md span {   
+	    font-size: 18px;
+	}
+	.tooltip1 .tooltiptext1 {
+	    visibility: hidden;
+	    width: 280px;
+	    top: 42px;
+	    left: 0%;
+	}
+
+	.booking-img .parallax-text {
+	    top: 88.5%;
+	    font-size: 22px;
+	}
+
+	.booking-info{
+		text-transform: none;
+		font-size: 16px;
+	}
+
+	.depature-price {
+	    padding: 0;
+	}
+
+	.order-details .btn {
+	    width: 100%;
+	    margin-bottom: 10px;
+   }
+ }
+
+
+@media screen and (min-width: 383px) and (max-width: 767px) {
+   
+	.search-bar {
+	    top: 330px;
+	}
+}
+
+@media screen and (min-width: 768px) and (max-width: 991px) {
+   #first-slider .carousel .item {
+     min-height: 600px;
+   }
+   .search-bar{
+   	 top: 18%;
+     width: 90%;
+   }
+   .services img{
+   	 width: 160px;
+   	 height: 160px;
+   }
+   .cms-container .booknow{
+		width: 15%;
+   }
+   .search-bar-ourfleet{
+		top: 59.6%;
+        width: 100%;
+    }
+    .order-md span {
+	    font-size: 16px;
+	}
+	.Expiry select{
+		width: 46%;
+	}
+
+	.tooltip .tooltiptext{
+		top: 45px;
+        left: -160px;
+	}
+
+	.tooltip1 .tooltiptext1{
+		width: 235px;
+	}
+
+	.booking-info {
+	    font-size: 14px;
+	    text-transform: none;
+	}
+
+	.booking-details .booking-div {
+	    height: 66px;
+	    overflow: hidden;
+	}
+
+	.booking-container .booking-details .radio-btn{
+		overflow: visible;
+	}
+
+	.action{
+		width: 80%;
+	}
+}
+
+@media screen and (min-width: 992px) and (max-width: 1024px) {
+	 .services img {
+	    width: 220px;
+	    height: 220px;
+	}
+	.search-bar{
+		top: 512px;
+	}
+	#first-slider .carousel .item {
+	    min-height: 740px;
+	}
+	.search-bar-ourfleet{
+	   top: 59.6%;
+      width: 100%;
+	}
+}
+
+@media screen and (min-width: 1025px) and (max-width: 1199px) {
+	 .services img {
+	    width: 220px;
+	    height: 220px;
+	}
+	.search-bar{
+		top: 25%;
+        width: 65%;
+	}
+
+	#first-slider .carousel .item {
+	    min-height: 700px;
+	}
+	.search-bar-ourfleet{
+		top: 59.8%;
+	    width: 100%;
+	}
+}
+
+
+@media screen and (min-width: 1200px) and (max-width: 1280px) {
+	#first-slider .carousel .item {
+	    min-height: 790px;
+	}
+	.search-bar{
+		top: 38%;
+		width: 60%;
+	}
+
+	.search-bar-ourfleet{
+		top: 56.6%;
+        width: 100%;
+	}
+}
+
+
+@media screen and (min-width: 1281px) and (max-width: 1366px) {
+	.search-bar{
+		top: 200px;
+		width: 55%;
+	}
+
+	.search-bar-ourfleet{
+		top: 61.9%;
+        width: 100%;
+	}
+
+	.our-fleet-searchbar{
+		top:51.6%;
+	}
+
+	 .services img {
+	    width: 220px;
+	    height: 220px;
+	}
+
+	#first-slider .carousel .item{
+	    min-height: 660px;
+	}
+}
+
+@media screen and (min-width: 1367px) and (max-width: 1440px) {
+	.search-bar{
+		top: 265px;
+		width: 55%;
+	}
+
+	.our-fleet-searchbar{
+		top:51.6%;
+	}
+	 .services img {
+	    width: 220px;
+	    height: 220px;
+	}
+	#first-slider .carousel .item{
+	    min-height: 730px;
+	}
+
+	.search-bar-ourfleet{
+		top: 59.6%;
+        width: 100%;
+	}
+}
+
+@media screen and (min-width: 1441px) and (max-width: 1600px) {
+	#first-slider .carousel .item {
+       min-height: 895px; 
+   }
+   .search-bar-ourfleet{
+   	  top:271px;
+   }
+   .search-bar{
+   	  top: 400px;
+	  width: 55%;
+   }
+   .search-bar-ourfleet{
+		top: 59.6%;
+        width: 100%;
+	}
+}
+
+@media screen and (min-width: 1601px) and (max-width: 1900px) {
+	#first-slider .carousel .item {
+       min-height: 900px; 
+   }
+
+   .search-bar{
+   	  top:50%;
+   }
+   .search-bar-ourfleet{
+	  top: 59.6%;
+        width: 100%;
+	}
+}
+
+
+

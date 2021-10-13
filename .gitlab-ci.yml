@@ -1,0 +1,40 @@
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  - composer install
+  - cp env.txt .env
+  - mkdir storage
+  - mkdir storage/framework
+  - mkdir storage/framework/views
+  - mkdir storage/framework/sessions
+  - mkdir storage/framework/cache
+  - mkdir storage/log
+  # Generate an application key. Re-cache.
+  - php artisan key:generate
+  - php artisan config:cache
+  # Run database migrations.
+  # - php artisan migrate
+  # # Run database seed
+  # - php artisan db:seed
+
+stages:
+  - build
+
+build:
+  stage: build
+  image: alpine
+  script:
+    - ls -la
+    - pwd
+    - cd ..
+    - rm -rf /home/devzr01s/public_html/powertech/staging
+    - cp -R powertech /home/devzr01s/public_html/powertech/staging
+    - cd /home/devzr01s/public_html/powertech/staging
+    - pwd
+    - composer dump-autoload
+    - php artisan config:cache && php artisan cache:clear
+    - find . -type f -exec chmod 644 {} \; && find . -type d -exec chmod 755 {} \;
+    - chmod -R 777 storage
+    # - wget https://dev.01s.in/powertech/public/api/sendmail/m.zamin@ldh.01s.in/Live%20deployment%20done%20successfully.

@@ -1,0 +1,32 @@
+.profile-user-img {
+
+    width: 150px !important;
+
+    height: 150px;
+
+}
+.offer-link .offer-icon{
+	  background-image: url("/offer_images/offers.png");
+    background-size: cover;
+    display: inline-block;
+    height: 16px;
+    margin: 0 5px 0 0;
+    position: relative;
+    top: 3px;
+    width: 16px;
+}
+.offer-link:hover .offer-icon{
+	background-image: url('/offer_images/offers-white.png');
+}
+.sidebar-mini.sidebar-collapse .sidebar-menu > li > a > span.offer-icon{
+    display: inline-block !important;
+}
+.help-block strong{
+    color: red;
+}
+#sub{
+    margin-top: 10px;
+}
+#add_chart{
+    margin-bottom: 10px;
+}
