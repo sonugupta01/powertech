@@ -174,7 +174,7 @@
       'file' => 
       array (
         'driver' => 'file',
-        'path' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\framework/cache/data',
+        'path' => 'C:\\xampp\\htdocs\\powertech\\storage\\framework/cache/data',
       ),
       'memcached' => 
       array (
@@ -286,7 +286,7 @@
         'host' => 'localhost',
         'port' => 11211,
       ),
-      'dir' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\cache',
+      'dir' => 'C:\\xampp\\htdocs\\powertech\\storage\\cache',
     ),
     'properties' => 
     array (
@@ -352,7 +352,7 @@
       ),
       'store' => 
       array (
-        'path' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\exports',
+        'path' => 'C:\\xampp\\htdocs\\powertech\\storage\\exports',
         'returnInfo' => false,
       ),
       'pdf' => 
@@ -362,15 +362,15 @@
         array (
           'DomPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\powertech-1\\vendor/dompdf/dompdf/',
+            'path' => 'C:\\xampp\\htdocs\\powertech\\vendor/dompdf/dompdf/',
           ),
           'tcPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\powertech-1\\vendor/tecnick.com/tcpdf/',
+            'path' => 'C:\\xampp\\htdocs\\powertech\\vendor/tecnick.com/tcpdf/',
           ),
           'mPDF' => 
           array (
-            'path' => 'C:\\xampp\\htdocs\\powertech-1\\vendor/mpdf/mpdf/',
+            'path' => 'C:\\xampp\\htdocs\\powertech\\vendor/mpdf/mpdf/',
           ),
         ),
       ),
@@ -556,12 +556,12 @@
       'local' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\app',
+        'root' => 'C:\\xampp\\htdocs\\powertech\\storage\\app',
       ),
       'public' => 
       array (
         'driver' => 'local',
-        'root' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\app/public',
+        'root' => 'C:\\xampp\\htdocs\\powertech\\storage\\app/public',
         'url' => 'http://clients.02pg.com/powertech//storage',
         'visibility' => 'public',
       ),
@@ -606,13 +606,13 @@
       'single' => 
       array (
         'driver' => 'single',
-        'path' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp\\htdocs\\powertech\\storage\\logs/laravel.log',
         'level' => 'debug',
       ),
       'daily' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\logs/laravel.log',
+        'path' => 'C:\\xampp\\htdocs\\powertech\\storage\\logs/laravel.log',
         'level' => 'debug',
         'days' => 7,
       ),
@@ -646,7 +646,7 @@
       'customlog' => 
       array (
         'driver' => 'daily',
-        'path' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\logs/command.log',
+        'path' => 'C:\\xampp\\htdocs\\powertech\\storage\\logs/command.log',
         'level' => 'debug',
         'days' => 14,
       ),
@@ -671,7 +671,7 @@
       'theme' => 'default',
       'paths' => 
       array (
-        0 => 'C:\\xampp\\htdocs\\powertech-1\\resources\\views/vendor/mail',
+        0 => 'C:\\xampp\\htdocs\\powertech\\resources\\views/vendor/mail',
       ),
     ),
   ),
@@ -752,7 +752,7 @@
     'lifetime' => '120',
     'expire_on_close' => false,
     'encrypt' => false,
-    'files' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\framework/sessions',
+    'files' => 'C:\\xampp\\htdocs\\powertech\\storage\\framework/sessions',
     'connection' => NULL,
     'table' => 'sessions',
     'store' => NULL,
@@ -786,9 +786,9 @@
   array (
     'paths' => 
     array (
-      0 => 'C:\\xampp\\htdocs\\powertech-1\\resources\\views',
+      0 => 'C:\\xampp\\htdocs\\powertech\\resources\\views',
     ),
-    'compiled' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\framework\\views',
+    'compiled' => 'C:\\xampp\\htdocs\\powertech\\storage\\framework\\views',
   ),
   'dompdf' => 
   array (
@@ -796,10 +796,10 @@
     'orientation' => 'portrait',
     'defines' => 
     array (
-      'font_dir' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\fonts/',
-      'font_cache' => 'C:\\xampp\\htdocs\\powertech-1\\storage\\fonts/',
+      'font_dir' => 'C:\\xampp\\htdocs\\powertech\\storage\\fonts/',
+      'font_cache' => 'C:\\xampp\\htdocs\\powertech\\storage\\fonts/',
       'temp_dir' => 'C:\\Users\\DAVIND~1\\AppData\\Local\\Temp',
-      'chroot' => 'C:\\xampp\\htdocs\\powertech-1',
+      'chroot' => 'C:\\xampp\\htdocs\\powertech',
       'enable_font_subsetting' => false,
       'pdf_backend' => 'CPDF',
       'default_media_type' => 'screen',

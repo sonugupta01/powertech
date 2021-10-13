@@ -9204,8 +9204,10 @@ class AdminController extends Controller
             ->first();
             if (!empty($getStock)) {
                 $detail->stock = $getStock->minimum_stock;
+                $detail->stock_in_hand = $getStock->stock_in_hand;
             } else {
                 $detail->stock ='';
+                $detail->stock_in_hand ='';
             }
             $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
             $productDetail[] = $detail;
@@ -9253,6 +9255,7 @@ class AdminController extends Controller
             'dealer_id' => $post['dealer_id'],
             'product_id' => $post['product_id'],
             'minimum_stock' => $post['minimum_stock'],
+            'stock_in_hand' => $post['stock_in_hand'],
             'uom' => $post['pro_unit'],
             'updated_at' => getCurrentTimestamp()
         );
@@ -9260,15 +9263,15 @@ class AdminController extends Controller
         $check = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id'], 'uom'=>$post['pro_unit']])->first();
 
         $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
-        if ($selectedMonth != date('Y-m')) {
-            return redirect()->back()->with('error', "You can update only current month inventory");
-        } else {
+
+        if ($selectedMonth == date('Y-m') || empty($selectedMonth)) {
             if (!empty($check) && !empty($checkMonth)) {
-                $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
-                DB::table('dealer_product_inventory')->where('id',$check->id)->update($data);
+                DB::table('dealer_product_inventory')->where('id',$post['inventory_id'])->update($data);
             } else {
                 DB::table('dealer_product_inventory')->insert($data);
             }
+        } else {
+            return redirect()->back()->with('error', "You can update only current month inventory");
         }
         return redirect(Session::get('prevUrl'))->with('success', "Inventory updated successfully");
     }
@@ -9285,17 +9288,7 @@ class AdminController extends Controller
             $productAllData = array();
             foreach ($productData as $key1 => $value1) {
                 $products[] = $value1->pro_id;
-                // foreach (array_unique($products) as $key2 => $value2) {
-                //     $checkTotal = DB::table('products_treatments')->where(['pro_id'=>$value2, 'uom'=>$value1->uom])->first();
-                //     if ($checkTotal->pro_id == $value2) {
-                //         $consumptionQuantity += $value1->quantity;
-                //         $productData[$key1]->quantity = $consumptionQuantity;
-                //     } else {
-                //         $productData[$key1]->quantity = $value1->quantity;
-                //     }
-                // }
             }
-            // $productAllData[] = $productData;
         }
         $products = array_unique($products);
         $productDetail = array();
@@ -9305,6 +9298,7 @@ class AdminController extends Controller
             $detail->pro_name = get_product_name($value2);
             $detail->pro_unit = get_product_unit($value2);
             $getStock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$value2, 'template_id'=>$template_id, 'uom'=>get_product_unit($value2)])->first();
+            $getConsumptionOfProducts = '';
             if (!empty($getStock)) {
                 $detail->stock = $getStock->minimum_stock;
             } else {
@@ -9313,8 +9307,6 @@ class AdminController extends Controller
             $detail->unit_name = get_unit_name(get_product_unit($value2));
             $productDetail[] = $detail;
         }
-        // dd($productDetail);
-        // $productDetail = $productDetail->paginate(20);
         return view('admin.minimunInventoryLevel', compact('template_id', 'dealer_id', 'productDetail'));
     }
 
