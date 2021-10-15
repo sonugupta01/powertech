@@ -34,7 +34,7 @@
             @endif
             <form role="form" id="inventoryForm" name="inventoryForm" method="POST" action="{{url('/admin/updateDealerProductInventory')}}">
               <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
-              <input type="hidden" name="inventory_id" value="{{$minimum_stock->id}}">             
+              <input type="hidden" name="inventory_id" value="{{@$minimum_stock->id}}">             
               <input type="hidden" name="dealer_id" value="{{$dealer_id}}">             
               <input type="hidden" name="selectedMonth" value="{{Session::get('selectedMonth')}}">               
               <div class="row">
@@ -43,8 +43,8 @@
                     <thead>
                       <tr>
                         <td><b>Name</b></td>
-                        <td><b>Minimum Inventory</b></td>
-                        <!-- <td><b>Stock in Hand</b></td> -->
+                        <td><b>Minimum Stock</b></td>
+                        <td><b>Stock in Hand</b></td>
                         <td><b>Unit</b></td>
                       </tr>
                     </thead>
@@ -52,7 +52,7 @@
                       <tr>
                         <td class="col-sm-3"><input type="hidden" name="product_id" value="{{$product_id}}">{{get_product_name($product_id)}}</td>
                         <td class="col-sm-3"><input type="text" name="minimum_stock" id="minimum_stock" class="minimum_stock" value="{{@$minimum_stock->minimum_stock!=''?@$minimum_stock->minimum_stock:''}}" OnKeypress="return isNumber(event)" required/></td>
-                        <!-- <td class="col-sm-3"><input type="text" name="stock_in_hand" id="stock_in_hand" class="stock_in_hand" value="{{@$minimum_stock->stock_in_hand!=''?@$minimum_stock->stock_in_hand:''}}" OnKeypress="return isNumber(event)"/></td> -->
+                        <td class="col-sm-3"><input type="text" name="stock_in_hand" id="stock_in_hand" class="stock_in_hand" value="{{@$minimum_stock->stock_in_hand!=''?@$minimum_stock->stock_in_hand:''}}" OnKeypress="return isNumber(event)"/></td>
                         <td class="col-sm-3"><input type="hidden" name="pro_unit" value="{{get_product_unit($product_id)}}" readonly/>@if(get_product_unit($product_id)==1){{'Litre'}}@elseif(get_product_unit($product_id)==2){{'ML'}}@elseif(get_product_unit($product_id)==3){{'Pcs.'}}@elseif(get_product_unit($product_id)==4){{'Gms.'}}@endif</td>
                       </tr>
                     </tbody>

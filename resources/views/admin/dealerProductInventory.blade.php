@@ -28,16 +28,22 @@
               <div class="col-md-6">
                 <h3 class="box-title pull-right">Minimum Inventory Level for <b>{{get_dealer_name($dealer_id)}}</b> For Month: </h3>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-2">
                 <form action="" id="inventoryForm" method="GET">
                   {{-- <input type="hidden" name="dealer_id" id="dealer_id" value="{{$dealer_id}}"> --}}
                   <div class="row">
-                    <div class="col-md-3">
+                    <div class="col-md-8">
                       <div class="form-group">
                         <input type="text" id="month" name="month" placeholder="Select Month" value="{{@$selectedDate}}" class="datePicker form-control" autocomplete="off" readonly />
                       </div>
                     </div>
                   </div>
+                </form>
+              </div>
+              <div class="col-md-3">
+                  <form action="{{url('admin/downloadProductInventory')}}/{{$dealer_id}}" id="downloadProductInventory" method="GET">
+                  <input type="hidden" name="month" value="{{@$selectedDate}}">
+                  <input type="submit" class="btn btn-success floatright btn-div pull-left" name="download" id="download" value="Download" style="margin-right: 10px;">
                 </form>
               </div>
             </div>
@@ -55,6 +61,8 @@
                   <th>Sr. No.</th>
                   <th>Product Name</th>
                   <th>Minimum Stock</th>
+                  <th>Treatmentwise Consumption</th>
+                  <th>Expected Stock</th>
                   <th>Stock in Hand</th>
                   <th>Action</th>
                 </tr>
@@ -64,18 +72,45 @@
                   $i = 0;
                   // $s = $productDetail->perPage() * ($productDetail->currentPage() - 1);
                   foreach ($productDetail as $value) {
+                    if (!empty($value->minimum_stock) || $value->minimum_stock!=0) {
+                      $minimum_stock = $value->minimum_stock;
+                    } else {
+                      $minimum_stock = 0;
+                    }
+
+                    if (!empty($value->consumedQuantity)) {
+                      $consumedQuantity = $value->consumedQuantity;
+                    } else {
+                      $consumedQuantity = 0;
+                    }
+                    
                 ?>
 
                     <tr id="defaultData">
                       <td>{{++$i}}</td>
                       <td>{{$value->pro_name}}</td>
                       <td>
-                      @if(!empty($value->stock))
-                      {{$value->stock}} {{$value->unit_name}}
+                      @if(!empty($minimum_stock))
+                      {{$minimum_stock}} {{$value->unit_name}}
                       @else
                       {{'-'}}
                       @endif
                       </td>
+                      <td>
+                      @if(!empty($consumedQuantity))
+                      {{$consumedQuantity}} {{$value->unit_name}}
+                      @else
+                      {{'-'}}
+                      @endif
+                      </td>
+                      <?php 
+                        if (!empty($minimum_stock)) {
+                          $expectedStock = ($value->minimum_stock - $consumedQuantity).' '.$value->unit_name;
+                        } else {
+                          $expectedStock = '-';
+                        }                        
+                      ?>
+                      <td>{{$expectedStock}} </td>
                       <td>
                       @if(!empty($value->stock_in_hand))
                       {{$value->stock_in_hand}} {{$value->unit_name}}
@@ -92,7 +127,7 @@
                   }
                 } else { ?>
                   <tr>
-                    <td colspan="4">No Record</td>
+                    <td colspan="7">No Record</td>
                   </tr>
                 <?php } ?>
               </tbody>
@@ -101,6 +136,8 @@
                   <th>Sr. No.</th>
                   <th>Product Name</th>
                   <th>Minimum Stock</th>
+                  <th>Treatmentwise Consumption</th>
+                  <th>Expected Stock</th>
                   <th>Stock in Hand</th>
                   <th>Action</th>
                 </tr>

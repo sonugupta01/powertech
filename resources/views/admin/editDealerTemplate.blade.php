@@ -22,7 +22,7 @@
         <div class="box">
           <div class="box-header">
             <h3 class="box-title">Edit Template</h3>
-            <a href="{{ URL::previous() }}" class="btn btn-info floatright" style="margin-right: 10px;">Back</a>
+            <a href="{{url('/admin/dealerTemplates/')}}/{{$dealer_id}}" class="btn btn-info floatright" style="margin-right: 10px;">Back</a>
           </div><!-- /.box-header -->
           <div class="box-body">
             @if(Session::has('error'))
@@ -33,8 +33,8 @@
             @endif
             <form role="form" id="templateForm" method="POST" action="{{url('/admin/updateDealerTemplate')}}" enctype="multipart/form-data">
                 <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
-                <input type="hidden" name="dealer_id" value="{{$dealer_id}}">
                 <input type="hidden" name="temp_id" value="{{$result->id}}">
+                <input type="hidden" name="dealer_id" value="{{$dealer_id}}">
                 <div class="box-body">
                   <div class="form-group{{ $errors->has('dealer_name') ? ' has-error' : '' }}">
                     <label for="dealer_name">Dealer Name</label>

@@ -141,24 +141,27 @@ class HomeController extends Controller
         $post = $request->all();
         $dealer = $request->dealer;
         if (!empty($dealer)) {
-            $template = DB::table('dealer_templates')->where('dealer_id', $dealer)->first();
-            if (!empty($template)) {
-                $models = DB::table('treatments')
-                    ->select('model_id')
-                    ->where('temp_id', $template->template_id)
-                    ->groupBy('model_id')
-                    ->get();
+            // $template = DB::table('dealer_templates')->where('dealer_id', $dealer)->first();
+            // if (!empty($template)) {
+                // $models = DB::table('treatments')
+                //     ->select('model_id')
+                //     ->where('temp_id', $template->template_id)
+                //     ->groupBy('model_id')
+                //     ->get();
+                $models = DB::table('dealer_templates as dt')
+                ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+                ->select('t.model_id')
+                ->groupBy('t.model_id')
+                ->where('dt.dealer_id', $dealer)->get();
                 if (!empty($models)) {
                     $model = array();
                     foreach ($models as $val) {
                         $model[] = $val->model_id;
                     }
-                    //dd($model);
                     $result = DB::table('models')
                         ->select('id', 'model_name')
                         ->whereIn('id', $model)
                         ->get();
-                    //dd($result);
                     if (count($result) > 0) {
                         $res = '<option value="">Select Model</option>';
                         foreach ($result as $model) {
@@ -172,24 +175,12 @@ class HomeController extends Controller
                 } else {
                     $res = "<option value=''>No Model found</option>";
                 }
-            } else {
-                $res = "<option value=''>No Model found</option>";
-            }
+            // } else {
+            //     $res = "<option value=''>No Model found</option>";
+            // }
         } else {
             $res = "<option value=''>No Model found</option>";
         }
-        // $models = DB::table('models')->where('dealer_id', $dealer)->orderBy('model_name','ASC')->get();
-        // $models = json_decode(json_encode($models),true);
-        // if(@$models){
-        //     $res = '<option value="">Select Model</option>';
-        //     foreach ($models as $model) {
-        //         $model_name = $model['model_name'];
-        //         $id = $model['id'];
-        //         $res .= "<option value='$id'>$model_name</option>";
-        //     }
-        // }else{
-        //     $res = "<option value=''>No Model found</option>";
-        // }
         return $res;
     }
 

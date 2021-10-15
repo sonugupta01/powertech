@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Auth;
 use App\User;
 use App\Contact;
@@ -4752,9 +4753,11 @@ class AdminController extends Controller
             ->where('delete_job', 1)
             ->orderBy('j.job_date', 'ASC')
             ->get();
+
         $array4 = array();
         $result4 = array();
         $total_incentive = 0;
+        
         foreach ($firmResult as $k => $v1) {
             $array4['job_date'] = $v1->job_date;
             $array4['dealer_id'] = $v1->dealer_id;
@@ -4765,7 +4768,12 @@ class AdminController extends Controller
             $array4['model_id'] = $v1->model_id;
             $array4['remarks'] = $v1->remarks;
             // $array4['foc_options'] = $v1->foc_options;
-            $total_incentive = $total_incentive + $v1->incentive;
+            if (!empty($v1->incentive)) {
+                $v1->incentive = $v1->incentive;
+            } else {
+                $v1->incentive = 0;
+            }
+            $total_incentive = $total_incentive + @$v1->incentive;
             $trtmnts = json_decode($v1->treatments);
 
             foreach ($trtmnts as $v2) {
@@ -4776,7 +4784,7 @@ class AdminController extends Controller
                 $array4['actual_price'] = @$v2->actualPrice;
                 $array4['difference_price'] = @$v2->difference;
                 $array4['dealer_price'] = @$v2->dealer_price;
-                $array4['incentive'] = $v2->incentive;
+                $array4['incentive'] = @$v2->incentive;
                 $result4[] = $array4;
             }
         }
@@ -4849,7 +4857,12 @@ class AdminController extends Controller
             $array3['model_id'] = $v->model_id;
             $array3['remarks'] = $v->remarks;
             // $array3['foc_options'] = $v->foc_options;
-            $total_incentive = $total_incentive + $v->incentive;
+            if (!empty($v->incentive)) {
+                $v->incentive = $v->incentive;
+            } else {
+                $v->incentive = 0;
+            }
+            $total_incentive = $total_incentive + @$v->incentive;
             $treatments = json_decode($v->treatments);
 
             foreach ($treatments as $v1) {
@@ -4860,7 +4873,7 @@ class AdminController extends Controller
                 $array3['actual_price'] = @$v1->actualPrice;
                 $array3['difference_price'] = @$v1->difference;
                 $array3['dealer_price'] = @$v1->dealer_price;
-                $array3['incentive'] = $v1->incentive;
+                $array3['incentive'] = @$v1->incentive;
                 $result3[] = $array3;
             }
         }
@@ -4926,7 +4939,12 @@ class AdminController extends Controller
             $array['model_id'] = $value->model_id;
             $array['remarks'] = $value->remarks;
             // $array['foc_options'] = $value->foc_options;
-            $total_incentive = $total_incentive + $value->incentive;
+            if (!empty($value->incentive)) {
+                $value->incentive = $value->incentive;
+            } else {
+                $value->incentive = 0;
+            }
+            $total_incentive = $total_incentive + @$value->incentive;
             $decoded = json_decode($value->treatments);
 
             foreach ($decoded as $val) {
@@ -4937,7 +4955,7 @@ class AdminController extends Controller
                 $array['actual_price'] = @$val->actualPrice;
                 $array['difference_price'] = @$val->difference;
                 $array['dealer_price'] = @$val->dealer_price;
-                $array['incentive'] = $val->incentive;
+                $array['incentive'] = @$val->incentive;
                 $result1[] = $array;
             }
         }
@@ -4992,7 +5010,7 @@ class AdminController extends Controller
             ->where('delete_job', 1)
             ->groupBy('advisor_id')
             ->get();
-        // dd($data);
+        
         $advisors = array();
         $i = $mtd_total = 0;
         if (count($data) > 0) {
@@ -5007,6 +5025,11 @@ class AdminController extends Controller
                         foreach ($decoded_treatments as $key => $val1) {
                             if (@$val1->job_type == 5) {
                                 $customer_price = $customer_price + $val1->customer_price;
+                                if (!empty($val1->incentive)) {
+                                    $val1->incentive = $val1->incentive;
+                                } else {
+                                    $val1->incentive = 0;
+                                }
                                 $incentive = $incentive + $val1->incentive;
                             } else {
                                 $customer_price = $customer_price + 0;
@@ -5018,6 +5041,7 @@ class AdminController extends Controller
                         }
                     }
                 }
+                
                 $advisor['advisor_id'] = $value->advisor_id;
                 // $advisor['vas_customer_price'] = $value->vas_customer_price;
                 // $advisor['vas_incentive'] = $value->vas_incentive;
@@ -5027,9 +5051,9 @@ class AdminController extends Controller
                 $advisor['vas_difference'] = $value->vas_difference;
                 $advisor['hvt_customer_price'] = $value->hvt_customer_price;
                 $advisor['hvt_actual_price'] = $value->hvt_actual_price;
-                $advisor['hvt_incentive'] = $hvt_incentive;
+                $advisor['hvt_incentive'] = @$hvt_incentive;
                 $advisors[] = $advisor;
-
+                
                 @$total_service = DB::table('jobs_by_date')
                     ->select(DB::raw('SUM(total_jobs) as mtd_total'))
                     ->where(function ($query) use ($search, $first_day, $today, $value) {
@@ -5065,7 +5089,7 @@ class AdminController extends Controller
                     })
                     ->first();
 
-                //dd($total_service);
+                // dd($total_service);
 
                 @$total_jobs = DB::table('jobs')
                     ->select(DB::raw('SUM(vas_value) as mtd_vas_value,SUM(actual_price) as mtd_actual_value,SUM(vas_total) as mtd_vas_total, SUM(hvt_value) as mtd_hvt_value,SUM(hvt_total) as mtd_hvt_total'))
@@ -5113,6 +5137,7 @@ class AdminController extends Controller
                     })
                     ->where('delete_job', 1)
                     ->first();
+                
                 $total_job_array = array(
                     'mtd_total' => @$total_service->mtd_total,
                     'mtd_vas_value' => @$total_jobs->mtd_vas_value,
@@ -5619,8 +5644,8 @@ class AdminController extends Controller
                         foreach ($decoded as $val) {
                             if ($val->job_type == 5) {
                                 $customer_price = $customer_price + round($val->customer_price);
-                                $dealer_price = $dealer_price + round($val->dealer_price);
-                                $incentive = $incentive + round($val->incentive);
+                                $dealer_price = $dealer_price + round(@$val->dealer_price);
+                                $incentive = $incentive + round(@$val->incentive);
                                 $actual_price = $actual_price + round(@$val->actualPrice);
                                 $difference_price = $difference_price + round(@$val->difference);
                             }
@@ -5664,8 +5689,8 @@ class AdminController extends Controller
                             $array['Labour_Code'] = $val->labour_code;
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
-                            $array['Dealer_Price'] = round($val->dealer_price);
-                            $array['Incentive'] = round($val->incentive);
+                            $array['Dealer_Price'] = round(@$val->dealer_price);
+                            $array['Incentive'] = round(@$val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
@@ -7097,10 +7122,9 @@ class AdminController extends Controller
                 'treatment_id' => $value['id'],
             );
             DB::table('jobs_treatment')->insert($data);
-            // }
-            Session::flash('success', 'Job added successfully!');
-            return redirect('/admin/jobs');
         }
+        Session::flash('success', 'Job added successfully!');
+        return redirect('/admin/jobs');
     }
     // view edit job page
     public function editJob($id)
@@ -9128,17 +9152,19 @@ class AdminController extends Controller
     public function updateDealerTemplate(Request $request)
     {
         $post = $request->all();
+       
         $this->validate(
             $request,
             [
                 'dealer_id' => 'required',
-                'template_id' => 'required',
+                'template_id' =>  'required',                
             ],
             [
                 'dealer_id.required' => 'Please enter Dealer',
                 'template_id.required' => 'Please Select Template',
             ]
         );
+        
         $data = array(
             'dealer_id' => $post['dealer_id'],
             'template_id' => $post['template_id'],
@@ -9183,17 +9209,34 @@ class AdminController extends Controller
             $year = $currentMonthYear[0];
         }
 
-        $productPrice = 0;
-        $consumptionQuantity = 0;
-        $data = DB::table('dealer_templates as dt')->where(['dt.dealer_id'=>$dealer_id])
+        $products = DB::table('dealer_templates as dt')->where(['dt.dealer_id'=>$dealer_id])
         ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
         ->join('products_treatments as pt', 't.id', '=', 'pt.tre_id')
         ->select('pt.pro_id')
         ->groupBy('pt.pro_id')
         ->get();
-        
+
+        $treatmentConsumptionOfProduct = DB::table('jobs as j')
+            ->join('jobs_treatment as jt', 'jt.job_id', '=', 'j.id')
+            ->join('products_treatments as pt', 'pt.tre_id', '=', 'jt.treatment_id')
+            ->where(['j.dealer_id'=>$dealer_id])
+            ->whereMonth('j.job_date', $month)
+            ->whereYear('j.job_date', $year)
+            ->get(['pt.id', 'pt.tre_id', 'pt.pro_id', 'pt.quantity', 'pt.uom', 'pt.price', 'pt.status', 'pt.created_at']);
+
+        $result = array();
+        foreach($treatmentConsumptionOfProduct as $k => $v) {
+            $id = $v->pro_id;
+            $result[$id]['quantity'][] = $v->quantity;
+            $result[$id]['price'][] = $v->price;
+            $result[$id]['uom'] = $v->uom;
+        }
+        $consumeData = array();
+        foreach($result as $i => $j) {
+            $consumeData[] = array('id' => $i, 'quanity' => array_sum($j['quantity']), 'price' => array_sum($j['price']), 'uom' => $j['uom']);
+        } 
         $productDetail = array();
-        foreach ($data as $key => $value) {
+        foreach ($products as $key => $value) {
             $detail = new \stdClass();
             $detail->id = $value->pro_id;
             $detail->pro_name = get_product_name($value->pro_id);
@@ -9203,15 +9246,29 @@ class AdminController extends Controller
             ->whereYear('updated_at', $year)
             ->first();
             if (!empty($getStock)) {
-                $detail->stock = $getStock->minimum_stock;
+                $detail->minimum_stock = $getStock->minimum_stock;
                 $detail->stock_in_hand = $getStock->stock_in_hand;
             } else {
-                $detail->stock ='';
+                $detail->minimum_stock ='';
                 $detail->stock_in_hand ='';
             }
             $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
+            foreach ($consumeData as $key1 => $value1) {
+                if ($value1['id'] == $detail->id  && $value1['uom'] == $detail->pro_unit) {
+                    $detail->consumedQuantity = (string)$value1['quanity'];
+                    $detail->totalPrice = (string)$value1['price'];
+                }
+            }
             $productDetail[] = $detail;
         }
+
+        foreach ($productDetail as $key3 => $value3) {
+           if (!isset($value3->consumedQuantity)) {
+               $productDetail[$key3]->consumedQuantity = '';
+               $productDetail[$key3]->totalPrice = '';
+           }
+        }
+        // dd($productDetail);
         $selectedDate = $year.'-'.$month;
         return view('admin.dealerProductInventory', compact('dealer_id', 'productDetail', 'selectedDate'));
     }
@@ -9265,15 +9322,139 @@ class AdminController extends Controller
         $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
 
         if ($selectedMonth == date('Y-m') || empty($selectedMonth)) {
-            if (!empty($check) && !empty($checkMonth)) {
-                DB::table('dealer_product_inventory')->where('id',$post['inventory_id'])->update($data);
+            if ($post['stock_in_hand']>=$post['minimum_stock']) {
+                return redirect()->back()->with('error', "Stock in hand should be less then Minimum Stock");
             } else {
-                DB::table('dealer_product_inventory')->insert($data);
+                if (!empty($check) && !empty($checkMonth)) {
+                    DB::table('dealer_product_inventory')->where('id',$post['inventory_id'])->update($data);
+                } else {
+                    DB::table('dealer_product_inventory')->insert($data);
+                }
             }
         } else {
             return redirect()->back()->with('error', "You can update only current month inventory");
         }
         return redirect(Session::get('prevUrl'))->with('success', "Inventory updated successfully");
+    }
+
+    public function downloadProductInventory(Request $request, $dealer_id)
+    {
+        // dd($dealer_id, $request->all());
+        $month = $request->month;
+        if (!empty($month)) {
+            $selectedMonth = explode('-', $month);
+            $month = $selectedMonth[1];
+            $year = $selectedMonth[0];
+        } else {
+            $currentMonthYear = explode('-', date('Y-m'));
+            $month = $currentMonthYear[1];
+            $year = $currentMonthYear[0];
+        }
+
+        $products = DB::table('dealer_templates as dt')->where(['dt.dealer_id'=>$dealer_id])
+        ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+        ->join('products_treatments as pt', 't.id', '=', 'pt.tre_id')
+        ->select('pt.pro_id')
+        ->groupBy('pt.pro_id')
+        ->get();
+
+        $treatmentConsumptionOfProduct = DB::table('jobs as j')
+            ->join('jobs_treatment as jt', 'jt.job_id', '=', 'j.id')
+            ->join('products_treatments as pt', 'pt.tre_id', '=', 'jt.treatment_id')
+            ->where(['j.dealer_id'=>$dealer_id])
+            ->whereMonth('j.job_date', $month)
+            ->whereYear('j.job_date', $year)
+            ->get(['pt.id', 'pt.tre_id', 'pt.pro_id', 'pt.quantity', 'pt.uom', 'pt.price', 'pt.status', 'pt.created_at']);
+
+        $result = array();
+        foreach($treatmentConsumptionOfProduct as $k => $v) {
+            $id = $v->pro_id;
+            $result[$id]['quantity'][] = $v->quantity;
+            $result[$id]['price'][] = $v->price;
+            $result[$id]['uom'] = $v->uom;
+        }
+        $consumeData = array();
+        foreach($result as $i => $j) {
+            $consumeData[] = array('id' => $i, 'quanity' => array_sum($j['quantity']), 'price' => array_sum($j['price']), 'uom' => $j['uom']);
+        } 
+        $productDetail = array();
+        foreach ($products as $key => $value) {
+            $detail = new \stdClass();
+            $detail->id = $value->pro_id;
+            $detail->pro_name = get_product_name($value->pro_id);
+            $detail->pro_unit = get_product_unit($value->pro_id);
+            $getStock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$value->pro_id, 'uom'=>get_product_unit($value->pro_id)])
+            ->whereMonth('updated_at', $month)
+            ->whereYear('updated_at', $year)
+            ->first();
+            if (!empty($getStock)) {
+                $detail->minimum_stock = $getStock->minimum_stock;
+                $detail->stock_in_hand = $getStock->stock_in_hand;
+            } else {
+                $detail->minimum_stock ='';
+                $detail->stock_in_hand ='';
+            }
+            $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
+            foreach ($consumeData as $key1 => $value1) {
+                if ($value1['id'] == $detail->id  && $value1['uom'] == $detail->pro_unit) {
+                    $detail->consumedQuantity = (string)$value1['quanity'];
+                    $detail->totalPrice = (string)$value1['price'];
+                }
+            }
+            $productDetail[] = $detail;
+        }
+
+        foreach ($productDetail as $key3 => $value3) {
+           if (!isset($value3->consumedQuantity)) {
+               $productDetail[$key3]->consumedQuantity = '';
+               $productDetail[$key3]->totalPrice = '';
+           }
+        }
+
+        return Excel::create('Dealers ' . date("d M,Y"), function ($excel) use ($productDetail) {
+            $excel->sheet('mySheet', function ($sheet) use ($productDetail) {
+                $sheet->setCellValue('A1', 'Product Name');
+                $sheet->setCellValue('B1', 'Minimum Stock');
+                $sheet->setCellValue('C1', 'Treatmentwise Consumption');
+                $sheet->setCellValue('D1', 'Expected Stock');
+                $sheet->setCellValue('E1', 'Stock in Hand');
+                $i = 2;
+                $loop = 1;
+                foreach ($productDetail as $key => $value) {
+                    if (!empty($value->minimum_stock) || $value->minimum_stock!=0) {
+                      $minimum_stock = (int)$value->minimum_stock.' '.$value->unit_name;
+                    } else {
+                      $minimum_stock = '';
+                    }
+                    
+                    if (!empty($value->consumedQuantity)) {
+                      $consumedQuantity = (int)$value->consumedQuantity.' '.$value->unit_name;
+                    } else {
+                      $consumedQuantity = '';
+                    }
+
+                    if (!empty($minimum_stock)) {
+                        $expectedStock = ((float)$value->minimum_stock - (float)$consumedQuantity).' '.$value->unit_name;
+                    } else {
+                        $expectedStock = '';
+                    }
+                    
+                    if (!empty($value->unit_name)) {
+                        $stock_in_hand = (int)$value->stock_in_hand.' '.$value->unit_name;
+                    } else {
+                        $stock_in_hand = '';
+                    }
+                    
+                    $sheet->setCellValue('A' . $i, $value->pro_name);
+                    $sheet->setCellValue('B' . $i, $minimum_stock);
+                    $sheet->setCellValue('C' . $i, $consumedQuantity);
+                    $sheet->setCellValue('D' . $i, $expectedStock);
+                    $sheet->setCellValue('E' . $i, $value->stock_in_hand);
+                    $i++;
+                    $loop++;
+                }
+            });
+        })->download('csv');
     }
 
     public function dealerTemplatesProducts($dealer_id, $id)
@@ -9298,7 +9479,6 @@ class AdminController extends Controller
             $detail->pro_name = get_product_name($value2);
             $detail->pro_unit = get_product_unit($value2);
             $getStock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$value2, 'template_id'=>$template_id, 'uom'=>get_product_unit($value2)])->first();
-            $getConsumptionOfProducts = '';
             if (!empty($getStock)) {
                 $detail->stock = $getStock->minimum_stock;
             } else {
@@ -9363,9 +9543,6 @@ class AdminController extends Controller
         } else {
             $month = explode('-', date('Y-m'));
         }
-
-
-
         $dealers = User::where(['role' => 2, 'status' => 1])->select('id', 'name')->get();
         $result = DB::table('jobs')
             ->where(function ($query) use ($search) {

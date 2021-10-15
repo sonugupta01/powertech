@@ -87,7 +87,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusDealerTemplate/{status}/{dealer_id}/{id}', 'AdminController@statusDealerTemplate');
   Route::get('/dealerProducts/{dealer_id}', 'AdminController@dealerProducts');
   Route::get('/dealerProductInventory/{dealer_id}/{product_id}', 'AdminController@dealerProductInventory');
-  Route::get('/dealerProductInventory/{dealer_id}/{product_id}', 'AdminController@dealerProductInventory');
+  Route::get('/downloadProductInventory/{dealer_id}','AdminController@downloadProductInventory');
   Route::post('/updateDealerProductInventory', 'AdminController@updateDealerProductInventory');
   Route::get('/dealerTemplatesProducts/{dealer_id}/{id}', 'AdminController@dealerTemplatesProducts');
   Route::get('/set_min_level/{dealer_id}/{temp_id}/{pro_id}', 'AdminController@set_min_level');
