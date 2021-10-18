@@ -153,6 +153,7 @@ class HomeController extends Controller
                 ->select('t.model_id')
                 ->groupBy('t.model_id')
                 ->where('dt.dealer_id', $dealer)->get();
+                
                 if (!empty($models)) {
                     $model = array();
                     foreach ($models as $val) {
@@ -162,6 +163,7 @@ class HomeController extends Controller
                         ->select('id', 'model_name')
                         ->whereIn('id', $model)
                         ->get();
+                    
                     if (count($result) > 0) {
                         $res = '<option value="">Select Model</option>';
                         foreach ($result as $model) {
@@ -214,9 +216,15 @@ class HomeController extends Controller
         $post = $request->all();
         $dealer = $request->dealer;
         $model = $request->model;
+        $dealer_templates = DB::table('dealer_templates')->where('dealer_id', $dealer)->get(['template_id']);
+        $templates = array();
+        foreach ($dealer_templates as $key => $value) {
+            $templates[] = $value->template_id;
+        }
         $treatments = DB::table('treatments')
             ->select('id', 'treatment', 'treatment_type', 'dealer_price', 'incentive', 'customer_price', 'labour_code')
             //->where('dealer_id',$dealer)
+            ->whereIn('temp_id',$templates)
             ->where('model_id', $model)
             ->where('status', 1)
             ->get();

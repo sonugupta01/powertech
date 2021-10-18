@@ -323,7 +323,7 @@ if (@$advisor_id) {
 
       // cols += '<td><input type="text" value="" class="form-control" name="dealer[]" required/></td>';
       // cols += '<td><input type="text" value="" class="form-control" name="incentive[]" required/></td>';
-      cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+      cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete-btn" value="Delete"></td>';
       newRow.append(cols);
       // console.log(selected);
       $("table.order-list").append(newRow);

@@ -138,30 +138,33 @@
               @if(Session::get('oldReport')=='firm_id')
                 <table class="table table-bordered table-striped report-table">
                   <thead>
-                   <?php 
-                   $i=1;  
-                      $total_cp=$total_ap=$total_diff=$total_dp=$total_int=0; 
+                    <?php 
+                    $i=1;  
+                    $total_cp=$total_ap=$total_diff=$total_dp=$total_pt_share=$total_int=0;
                     foreach($result4 as $value4) {
-                        if ($value4['job_type'] == '5') {
-                          $customer_price = $value4['customer_price'];
-                          $actual_price = $value4['actual_price'];
-                          $difference_price = $value4['difference_price'];
-                          $dealer_price = $value4['dealer_price'];
-                          $incentive = $value4['incentive'];
-                        } else {
-                          $customer_price = 0;
-                          $actual_price = 0;
-                          $difference_price = 0;
-                          $dealer_price = 0;
-                          $incentive = 0;
-                        }
-                        $total_cp= $total_cp+$customer_price;
-                        $total_ap= $total_ap+$actual_price;
-                        $total_diff= $total_diff+$difference_price;
-                        $total_dp= $total_dp+$dealer_price;
-                        $total_int= $total_int+$incentive;
-                      
-                      }  ?>
+                      if ($value4['job_type'] == '5') {
+                        $customer_price = $value4['customer_price'];
+                        $actual_price = $value4['actual_price'];
+                        $difference_price = $value4['difference_price'];
+                        $powertech_share = 0;
+                        $dealer_price = $value4['dealer_price'];
+                        $incentive = $value4['incentive'];
+                      } else {
+                        $customer_price = 0;
+                        $actual_price = 0;
+                        $difference_price = 0;
+                        $dealer_price = 0;
+                        $powertech_share = 0;
+                        $incentive = 0;
+                      }
+                      $total_cp= $total_cp+$customer_price;
+                      $total_ap= $total_ap+$actual_price;
+                      $total_diff= $total_diff+$difference_price;
+                      $total_dp= $total_dp+$dealer_price;
+                      $total_pt_share= $total_pt_share+$powertech_share;
+                      $total_int= $total_int+$incentive;
+                    
+                    }  ?>
                     <tr>
                       <th style="text-align:center;">
                         @if(count($result4)>0)
@@ -173,6 +176,7 @@
                       <th style="background-color: #EEECE1;">{{round($total_ap)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_diff)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_dp)}}</th>
+                      <th style="background-color: #EEECE1;">{{$total_pt_share}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_int)}}</th>
                       <th></th>
                     </tr>
@@ -190,6 +194,7 @@
                       <th style="background-color: #FFFF00;">Actual Price</th>
                       <th style="background-color: #FFFF00;">Difference</th>
                       <th style="background-color: #FFFF00;">Dealer Price</th>
+                      <th style="background-color: #FFFF00;">PT Share</th>
                       <th style="background-color: #FFFF00;">Incentive</th>
                       <th>Remark</th>
                     </tr>
@@ -212,47 +217,50 @@
                           <td>{{round(@$val4['actual_price'])}}</td>
                           <td>{{round(@$val4['difference_price'])}}</td>
                           <td>{{round($val4['dealer_price'])}}</td>
+                          <td>{{round($powertech_share)}}</td>
                           <td>{{round($val4['incentive'])}}</td>
                           <td>{{$val4['remarks']}}</td>
                         </tr>                            
                     <?php
                       $i++;
                       } 
-                     }else{?>
+                    }else{?>
                       <tr>
-                        <td colspan="15">No Record</td>                          
+                        <td colspan="16">No Record</td>                          
                       </tr>
                     <?php }?>
                   </tbody>
                   <tfoot>
-                    
                   </tfoot>
                 </table>
-                @endif
-                @if(Session::get('oldReport')=='asm_id')
+              @endif
+              @if(Session::get('oldReport')=='asm_id')
                 <table class="table table-bordered table-striped report-table">
                   <thead>
-                   <?php 
+                  <?php 
                     $i=1;  
-                    $total_cp=$total_ap=$total_diff=$total_dp=$total_int=0;
+                    $total_cp=$total_ap=$total_diff=$total_dp=$total_pt_share=$total_int=0;
                     foreach($result3 as $value3) {
                         if (@$value3['job_type'] == '5') {
                           $customer_price = $value3['customer_price'];
                           $actual_price = @$value3['actual_price'];
                           $difference_price = @$value3['difference_price'];
                           $dealer_price = $value3['dealer_price'];
+                          $powertech_share = 0;
                           $incentive = $value3['incentive'];
                         } else {
                           $customer_price = 0;
                           $actual_price = 0;
                           $difference_price = 0;
                           $dealer_price = 0;
+                          $powertech_share = 0;
                           $incentive = 0;
                         }
                         $total_cp= $total_cp+$customer_price;
                         $total_ap= $total_ap+$actual_price;
                         $total_diff= $total_diff+$difference_price;
                         $total_dp= $total_dp+$dealer_price;
+                        $total_pt_share= $total_pt_share+$powertech_share;
                         $total_int= $total_int+$incentive;
                       
                       }  ?>
@@ -267,6 +275,7 @@
                       <th style="background-color: #EEECE1;">{{round($total_ap)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_diff)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_dp)}}</th>
+                      <th style="background-color: #EEECE1;">{{round($total_pt_share)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_int)}}</th>
                       <th></th>
                     </tr>
@@ -284,6 +293,7 @@
                       <th style="background-color: #FFFF00;">Actual Price</th>
                       <th style="background-color: #FFFF00;">Difference</th>
                       <th style="background-color: #FFFF00;">Dealer Price</th>
+                      <th style="background-color: #FFFF00;">PT Share</th>
                       <th style="background-color: #FFFF00;">Incentive</th>
                       <th>Remark</th>
                     </tr>
@@ -306,15 +316,16 @@
                           <td>{{round(@$val3['actual_price'])}}</td>
                           <td>{{round(@$val3['difference_price'])}}</td>
                           <td>{{round($val3['dealer_price'])}}</td>
+                          <td>{{round($powertech_share)}}</td>
                           <td>{{round($val3['incentive'])}}</td>
                           <td>{{$val3['remarks']}}</td>
                         </tr>                            
                     <?php
                       $i++;
                       } 
-                     }else{?>
+                    }else{?>
                       <tr>
-                        <td colspan="15">No Record</td>                          
+                        <td colspan="16">No Record</td>                          
                       </tr>
                     <?php }?>
                   </tbody>
@@ -322,31 +333,34 @@
                     
                   </tfoot>
                 </table>
-                @endif
-                @if(Session::get('oldReport')=='dealer')
+              @endif
+              @if(Session::get('oldReport')=='dealer')
                 <table class="table table-bordered table-striped report-table">
                   <thead>
-                   <?php 
-                   $i=1;  
-                    $total_cp=$total_ap=$total_diff=$total_dp=$total_int=0;
+                  <?php 
+                  $i=1;  
+                    $total_cp=$total_ap=$total_diff=$total_dp=$total_pt_share=$total_int=0;
                     foreach($result as $value1) {
                         if (@$value1['job_type'] == '5') {
                           $customer_price = $value1['customer_price'];
                           $actual_price = @$value1['actual_price'];
                           $difference_price = @$value1['difference_price'];
                           $dealer_price = $value1['dealer_price'];
+                          $powertech_share = 0;
                           $incentive = $value1['incentive'];
                         } else {
                           $customer_price = 0;
                           $actual_price = 0;
                           $difference_price = 0;
                           $dealer_price = 0;
+                          $powertech_share = 0;
                           $incentive = 0;
                         }
                         $total_cp= $total_cp+$customer_price;
                         $total_ap= $total_ap+$actual_price;
                         $total_diff= $total_diff+$difference_price;
                         $total_dp= $total_dp+$dealer_price;
+                        $total_pt_share= $total_pt_share+$powertech_share;
                         $total_int= $total_int+$incentive;
                       
                       }
@@ -363,6 +377,7 @@
                       <th style="background-color: #EEECE1;">{{round($total_ap)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_diff)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_dp)}}</th>
+                      <th style="background-color: #EEECE1;">{{round($total_pt_share)}}</th>
                       <th style="background-color: #EEECE1;">{{round($total_int)}}</th>
                       <th></th>
                     </tr>
@@ -379,6 +394,7 @@
                       <th style="background-color: #FFFF00;">Actual Price</th>
                       <th style="background-color: #FFFF00;">Difference</th>
                       <th style="background-color: #FFFF00;">Dealer Price</th>
+                      <th style="background-color: #FFFF00;">PT Share</th>
                       <th style="background-color: #FFFF00;">Incentive</th>
                       <th>Remark</th>
                     </tr>
@@ -400,15 +416,16 @@
                           <td>{{round(@$value['actual_price'])}}</td>
                           <td>{{round(@$value['difference_price'])}}</td>
                           <td>{{round($value['dealer_price'])}}</td>
+                          <td>{{round($powertech_share)}}</td>
                           <td>{{round($value['incentive'])}}</td>
                           <td>{{$value['remarks']}}</td>
                         </tr>                            
                     <?php
                       $i++;
                       } 
-                     }else{?>
+                    }else{?>
                       <tr>
-                        <td colspan="14">No Record</td>                          
+                        <td colspan="15">No Record</td>                          
                       </tr>
                     <?php }?>
                   </tbody>
@@ -416,49 +433,49 @@
                     
                   </tfoot>
                 </table>
-                @endif
-                @if(Session::get('oldReport')=='advisor')
-                    <div class="col-md-3 table-responsive">
-                      <table style="width: 100%; border: 1px solid #ccc !important; background-color: #fff;" class="table-bordered calendar-table">
-                        <tr>
-                          <th colspan="2" style="text-align: center;">Monthly Treatments till Date</th>
-                        </tr>
-                        <tr>
-                          <td>RO:</td>
-                          <td>{{number_format(@$total_job_array['mtd_total'])}}</td>
-                        </tr>
-                        <tr>
-                          <th colspan="2">VAS</th>
-                        </tr>
-                        <tr>
-                          <td>No of Trmt:</td>
-                          <td>{{number_format(@$total_job_array['mtd_vas_total'])}}</td>
-                        </tr>
-                        <tr>
-                          <td>Amount:</td>
-                          <!-- <td>{{number_format(@$total_job_array['mtd_vas_value'])}}</td> -->
-                          <td>{{number_format(@$total_job_array['mtd_actual_value'])}}</td>
-                        </tr>
-                        <tr>
-                          <td>Value Per Treatment</td>
-                          <th>{{vas_in_percentage(@$total_job_array['mtd_actual_value'],@$total_job_array['mtd_vas_total'])}}</th>
-                        </tr>
-                        <tr>
-                          <th colspan="2">HVT</th>
-                        </tr>
-                        <tr>
-                          <td>No of Trmt:</td>
-                          <td>{{number_format(@$total_job_array['mtd_hvt_total'])}}</td>
-                        </tr>
-                        <tr>
-                          <td>Amount:</td>
-                          <td>{{number_format(@$total_job_array['mtd_hvt_value'])}}</td>
-                        </tr>
-                        <tr>
-                          <td>HVT %</td>
-                          <th>{{hvt_in_percentage(@$total_job_array['mtd_hvt_value'],@$total_job_array['mtd_vas_value'])}}%</th>
-                        </tr>
-                      </table>
+              @endif
+              @if(Session::get('oldReport')=='advisor')
+                <div class="col-md-3 table-responsive">
+                  <table style="width: 100%; border: 1px solid #ccc !important; background-color: #fff;" class="table-bordered calendar-table">
+                    <tr>
+                      <th colspan="2" style="text-align: center;">Monthly Treatments till Date</th>
+                    </tr>
+                    <tr>
+                      <td>RO:</td>
+                      <td>{{number_format(@$total_job_array['mtd_total'])}}</td>
+                    </tr>
+                    <tr>
+                      <th colspan="2">VAS</th>
+                    </tr>
+                    <tr>
+                      <td>No of Trmt:</td>
+                      <td>{{number_format(@$total_job_array['mtd_vas_total'])}}</td>
+                    </tr>
+                    <tr>
+                      <td>Amount:</td>
+                      <!-- <td>{{number_format(@$total_job_array['mtd_vas_value'])}}</td> -->
+                      <td>{{number_format(@$total_job_array['mtd_actual_value'])}}</td>
+                    </tr>
+                    <tr>
+                      <td>Value Per Treatment</td>
+                      <th>{{vas_in_percentage(@$total_job_array['mtd_actual_value'],@$total_job_array['mtd_vas_total'])}}</th>
+                    </tr>
+                    <tr>
+                      <th colspan="2">HVT</th>
+                    </tr>
+                    <tr>
+                      <td>No of Trmt:</td>
+                      <td>{{number_format(@$total_job_array['mtd_hvt_total'])}}</td>
+                    </tr>
+                    <tr>
+                      <td>Amount:</td>
+                      <td>{{number_format(@$total_job_array['mtd_hvt_value'])}}</td>
+                    </tr>
+                    <tr>
+                      <td>HVT %</td>
+                      <th>{{hvt_in_percentage(@$total_job_array['mtd_hvt_value'],@$total_job_array['mtd_vas_value'])}}%</th>
+                    </tr>
+                  </table>
                 </div>
                 <div class="col-md-9">
                   <div class="table-responsive">
@@ -510,7 +527,7 @@
                     </table>
                   </div>
                 </div>
-                @endif
+              @endif
             </div>
           </div>
         </div><!-- /.box -->

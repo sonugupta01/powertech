@@ -4103,7 +4103,7 @@ class AdminController extends Controller
             ->where('delete_job', 1)
             ->where('foc', 0)
             ->get();
-        //dd($result);                      
+        // dd($result);                      
         $array = array();
         $result1 = array();
         $total_incentive = 0;
@@ -4277,6 +4277,7 @@ class AdminController extends Controller
             ->where('delete_job', 1)
             ->groupBy('advisor_id')
             ->get();
+            
         $advisors = array();
         $i = $mtd_total = 0;
         if (count($data) > 0) {
@@ -4691,7 +4692,7 @@ class AdminController extends Controller
             $allAdvisors = DB::table('advisors')->select('*', 'id as advisor_id')->where('status', 1)->orderBy('dealer_id', 'ASC')->get();
             $departments = DB::table('dealer_department')->where('status', 1)->get();
         }
-
+        
         $firms = DB::table('firms')->get();
         $asms = DB::table('users')->where(["firm_id" => @$search['firm'], "role" => 5, 'status' => 1])->get();
         /************************************ Firm Wise Report Start *************************/
@@ -4788,6 +4789,7 @@ class AdminController extends Controller
                 $result4[] = $array4;
             }
         }
+        
         /************************************ Firm Wise Report End *************************/
         /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
@@ -4881,8 +4883,13 @@ class AdminController extends Controller
         /************************************ Dealer Wise Report Start *************************/
         $result = DB::table('jobs as j')
             ->select('j.*')
-            ->where(function ($query) use ($search) {
+            ->where(function ($query) use ($search, $d_ids) {
                 if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('j.dealer_id', $d_ids);
+                        }
+                    }
                     if (isset($search['dealer'])) {
                         if (!empty(trim($search['dealer']))) {
                             $query->where('j.dealer_id', '=', $search['dealer']);
@@ -4959,13 +4966,18 @@ class AdminController extends Controller
                 $result1[] = $array;
             }
         }
-        /************************************ Dealer Wise Report End *************************/
+        /************************************ Dealer Wise Report End ****************************/
 
         /************************************ Advisor Wise Report Start *************************/
         $data = DB::table('jobs')
             ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
-            ->where(function ($query) use ($search) {
+            ->where(function ($query) use ($search, $d_ids) {
                 if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('dealer_id', $d_ids);
+                        }
+                    }
                     if (isset($search['dealer'])) {
                         if (!empty(trim($search['dealer']))) {
                             $query->where('dealer_id', '=', $search['dealer']);
@@ -5043,9 +5055,9 @@ class AdminController extends Controller
                 }
                 
                 $advisor['advisor_id'] = $value->advisor_id;
-                // $advisor['vas_customer_price'] = $value->vas_customer_price;
+                $advisor['vas_customer_price'] = $value->vas_customer_price;
                 // $advisor['vas_incentive'] = $value->vas_incentive;
-                $advisor['vas_customer_price'] = $customer_price;
+                // $advisor['vas_customer_price'] = $customer_price;
                 $advisor['vas_incentive'] = $incentive;
                 $advisor['vas_actual_price'] = $value->vas_actual_price;
                 $advisor['vas_difference'] = $value->vas_difference;
@@ -5093,7 +5105,7 @@ class AdminController extends Controller
 
                 @$total_jobs = DB::table('jobs')
                     ->select(DB::raw('SUM(vas_value) as mtd_vas_value,SUM(actual_price) as mtd_actual_value,SUM(vas_total) as mtd_vas_total, SUM(hvt_value) as mtd_hvt_value,SUM(hvt_total) as mtd_hvt_total'))
-                    //   ->where('foc_options',5)
+                    //  ->where('foc_options',5)
                     ->where(function ($query) use ($search, $first_day, $today, $value) {
                         if (!empty($search)) {
                             if (isset($search['dealer'])) {
@@ -5150,8 +5162,9 @@ class AdminController extends Controller
             }
         }
         /************************************ Advisor Wise Report End *************************/
-
+        
         Session::put('oldReport', $type);
+        
         return view('admin.dailyReport', [
             'result' => $result1,
             'result3' => $result3,
@@ -5253,7 +5266,7 @@ class AdminController extends Controller
                 // ->where('jobs.foc_options',5)
                 // ->groupBy('jobs.dealer_id')
                 ->get();
-
+            
             $treatment_total = $hvt_incentive = $customer_price = $actual_price = $incentive = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
             if (count($mis) == 0) {
@@ -5275,6 +5288,13 @@ class AdminController extends Controller
             }
             foreach ($mis as $key1 => $value1) {
                 $treatment_total += $value1->treatment_total;
+                if (!empty($value1->incentive) || !empty($value1->dealer_price)) {
+                    $value1->incentive = $value1->incentive;
+                    $value1->dealer_price = $value1->dealer_price;
+                } else {
+                    $value1->incentive = 0;
+                    $value1->dealer_price = 0;
+                }
                 $incentive       += $value1->incentive;
                 $actual_price    += (int)$value1->actual_price;
                 $hvt_total       += $value1->hvt_total;
@@ -5292,10 +5312,10 @@ class AdminController extends Controller
                             foreach ($decoded_treatments as $key => $val1) {
                                 if (@$val1->job_type == 5) {
                                     $customer_price = $customer_price + $val1->customer_price;
-                                    $incentive = $incentive + $val1->incentive;
+                                    // $incentive = $incentive + $val1->incentive;
                                 } else {
                                     $customer_price = $customer_price + 0;
-                                    $incentive = $incentive + 0;
+                                    // $incentive = $incentive + 0;
                                 }
                                 if ($val1->treatment_type == 1) {
                                     $hvt_incentive = $hvt_incentive + $val1->incentive;
@@ -6045,6 +6065,11 @@ class AdminController extends Controller
                         foreach ($decoded_treatments as $key => $val1) {
                             if ($val1->job_type == 5) {
                                 $customer_price = $customer_price + $val1->customer_price;
+                                if (!empty($val1->incentive)) {
+                                    $val1->incentive = $val1->incentive;
+                                } else {
+                                    $val1->incentive = 0;
+                                }
                                 $incentive = $incentive + $val1->incentive;
                             } else {
                                 $customer_price = $customer_price + 0;
@@ -6056,9 +6081,9 @@ class AdminController extends Controller
                         }
                     }
                     $advisor['advisor_id'] = $value->advisor_id;
-                    // $advisor['vas_customer_price'] = $value->vas_customer_price;
+                    $advisor['vas_customer_price'] = round($value->vas_customer_price);
                     // $advisor['vas_incentive'] = $value->vas_incentive;
-                    $advisor['vas_customer_price'] = round($customer_price);
+                    // $advisor['vas_customer_price'] = round($customer_price);
                     $advisor['vas_incentive'] = round($incentive);
                     $advisor['vas_actual_price'] = round($value->vas_actual_price);
                     $advisor['vas_difference'] = round($value->vas_difference);
@@ -6953,7 +6978,7 @@ class AdminController extends Controller
     public function getdealerUsers(Request $request)
     {
         $dealer_id = $request->dealer;
-        $users = DB::table('users')->where(['role'=>3, 'dealer_id'=>$dealer_id])->where('reporting_authority','!=','')->select('id','name')->get();
+        $users = DB::table('users')->where(['role'=>3, 'dealer_id'=>$dealer_id])->where('dealer_id','!=','')->where('reporting_authority','!=','')->select('id','name')->get();
         if(count($users)>0){
             $res = '<option value="">Select User</option>';
             foreach ($users as $user) {
@@ -7157,22 +7182,37 @@ class AdminController extends Controller
         //     $treatment[]=$tr;
         // }
         // dd($treatments);
-        $template = DB::table('dealer_templates')->where('dealer_id', $result->dealer_id)->first();
-        if (!empty($template)) {
-            $models = DB::table('treatments')
-                ->select('model_id')
-                ->where('temp_id', $template->template_id)
-                ->groupBy('model_id')
+        $dealer_templates = DB::table('dealer_templates')->where('dealer_id', $result->dealer_id)->get(['template_id']);
+        $templates = array();
+        foreach ($dealer_templates as $key => $value) {
+            $templates[] = $value->template_id;
+        }
+        
+        if (count($templates)>0) {
+            $models = DB::table('dealer_templates as dt')
+                ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+                ->select('t.model_id')
+                ->groupBy('t.model_id')
+                ->whereIn('dt.template_id', $templates)
+                ->where('dt.dealer_id', $result->dealer_id)
                 ->get();
+            
+            // $models = DB::table('treatments')
+            //     ->select('model_id')
+            //     ->where('temp_id', $template->template_id)
+            //     ->groupBy('model_id')
+            //     ->get();
+
             if (!empty($models)) {
                 $model = array();
                 foreach ($models as $val) {
                     $model[] = $val->model_id;
                 }
-                //dd($model);
+                
                 $result_models = DB::table('models')
                     ->select('id', 'model_name')
-                    ->whereIn('id', $model)
+                    // ->whereIn('id', $model)
+                    ->where('id', $result->model_id)
                     ->get();
             } else {
                 $result_models = "";
@@ -7183,7 +7223,7 @@ class AdminController extends Controller
         // $models = DB::table('models')->select('id','model_name')->where('dealer_id',$result->dealer_id)->get();
         // dd($models);
         $advisors = DB::table('advisors')->select('id', 'name')->where('dealer_id', $result->dealer_id)->where('status', 1)->get();
-        $dealers = User::where('role', 2)->select('id as dealer_id', 'name as dealer_name')->where('status', 1)->orderBy('name')->get();
+        $dealers = User::where('role', 2)->select('id as dealer_id', 'name as dealer_name')->where(['id'=>$result->dealer_id, 'status'=> 1])->orderBy('name')->get();
         return view('admin.editJob', [
             'result' => $result,
             'users' => $users,

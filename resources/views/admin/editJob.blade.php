@@ -219,7 +219,7 @@ if (@$advisor_id) {
                       {{-- <input type="hidden" name="dealer[]" value="{{$value['dealer_price']}}" class="form-control" required/>
                       <input type="hidden" name="incentive[]" value="{{$value['incentive']}}" class="form-control" required /> --}}
                       <td class="col-sm-2">
-                        <input type="button" class="ibtnDel btn btn-md btn-danger " value="Delete">
+                        <input type="button" class="ibtnDel btn btn-md btn-danger" id="delete-btn" value="Delete">
                       </td>
                     </tr>
                     <script>
@@ -360,7 +360,7 @@ if (@$advisor_id) {
       cols += '<td><input type="text" value="" class="form-control actualPrice' + counter + '" id="actualPrice' + counter + '" name="actualPrice[]" readonly/></td>';
       // cols += '<input type="hidden" value="" class="form-control" name="dealer[]" required/>';
       // cols += '<input type="hidden" value="" class="form-control" name="incentive[]" required/>';
-      cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger "  value="Delete"></td>';
+      cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete-btn"  value="Delete"></td>';
       newRow.append(cols);
       // console.log(selected);
 
@@ -369,7 +369,10 @@ if (@$advisor_id) {
       counter++;
     });
     $("table.order-list").on("click", ".ibtnDel", function(event) {
-      $(this).closest("tr").remove();
+      // $(this).closest("tr").remove();
+      if ($(this).closest('tr').siblings().length > 2) {
+        $(this).closest('tr').remove();
+      } 
       counter -= 1
     });
 
@@ -446,81 +449,81 @@ if (@$advisor_id) {
     $("#grandtotal").text(grandTotal.toFixed(2));
   }
 
-  $('#dealer_id').on("change", function(e) {
-    var dealer = $("#dealer_id").val();
-    token = $('input[name=_token]').val();
-    url1 = '<?php echo url("/"); ?>/getModels';
-    url2 = '<?php echo url("/"); ?>/getAdvisors';
-    url3 = '{{ url("admin/getdealerUsers") }}';
-    data = {
-      dealer: dealer,
-    };
-    $.ajax({
-      url: url1,
-      headers: {
-        'X-CSRF-TOKEN': token
-      },
-      data: data,
-      type: 'POST',
-      datatype: 'JSON',
-      success: function(resp) {
-        $("#model_id").html(resp);
-        return false;
-      }
-    });
-    $.ajax({
-      url: url3,
-      headers: {
-        'X-CSRF-TOKEN': token
-      },
-      data: data,
-      type: 'POST',
-      datatype: 'JSON',
-      success: function(resp) {
-        $("#user_id").html(resp);
-        return false;
-      }
-    });
-    $.ajax({
-      url: url2,
-      headers: {
-        'X-CSRF-TOKEN': token
-      },
-      data: data,
-      type: 'POST',
-      datatype: 'JSON',
-      success: function(resp) {
-        $("#advisor_id").html(resp);
-        return false;
-      }
-    });
-    return false;
-  });
+  // $('#dealer_id').on("change", function(e) {
+  //   var dealer = $("#dealer_id").val();
+  //   token = $('input[name=_token]').val();
+  //   url1 = '<?php echo url("/"); ?>/getModels';
+  //   url2 = '<?php echo url("/"); ?>/getAdvisors';
+  //   url3 = '{{ url("admin/getdealerUsers") }}';
+  //   data = {
+  //     dealer: dealer,
+  //   };
+  //   $.ajax({
+  //     url: url1,
+  //     headers: {
+  //       'X-CSRF-TOKEN': token
+  //     },
+  //     data: data,
+  //     type: 'POST',
+  //     datatype: 'JSON',
+  //     success: function(resp) {
+  //       $("#model_id").html(resp);
+  //       return false;
+  //     }
+  //   });
+  //   $.ajax({
+  //     url: url3,
+  //     headers: {
+  //       'X-CSRF-TOKEN': token
+  //     },
+  //     data: data,
+  //     type: 'POST',
+  //     datatype: 'JSON',
+  //     success: function(resp) {
+  //       $("#user_id").html(resp);
+  //       return false;
+  //     }
+  //   });
+  //   $.ajax({
+  //     url: url2,
+  //     headers: {
+  //       'X-CSRF-TOKEN': token
+  //     },
+  //     data: data,
+  //     type: 'POST',
+  //     datatype: 'JSON',
+  //     success: function(resp) {
+  //       $("#advisor_id").html(resp);
+  //       return false;
+  //     }
+  //   });
+  //   return false;
+  // });
 
-  $('#model_id').on("change", function(e) {
-    var dealer = $("#dealer_id").val();
-    var model = $("#model_id").val();
-    token = $('input[name=_token]').val();
-    url = '<?php echo url("/"); ?>/getTreatments';
-    data = {
-      dealer: dealer,
-      model: model,
-    };
-    $.ajax({
-      url: url,
-      headers: {
-        'X-CSRF-TOKEN': token
-      },
-      data: data,
-      type: 'POST',
-      datatype: 'JSON',
-      success: function(resp) {
-        $("#treatment_id").html(resp);
-        return false;
-      }
-    });
-    return false;
-  });
+  // $('#model_id').on("change", function(e) {
+  //   var dealer = $("#dealer_id").val();
+  //   var model = $("#model_id").val();
+  //   token = $('input[name=_token]').val();
+  //   url = '<?php echo url("/"); ?>/getTreatments';
+  //   data = {
+  //     dealer: dealer,
+  //     model: model,
+  //   };
+  //   $.ajax({
+  //     url: url,
+  //     headers: {
+  //       'X-CSRF-TOKEN': token
+  //     },
+  //     data: data,
+  //     type: 'POST',
+  //     datatype: 'JSON',
+  //     success: function(resp) {
+  //       $("#treatment_id").html(resp);
+  //       return false;
+  //     }
+  //   });
+  //   return false;
+  // });
 
   function getdifference(a) {
     var customer = ".customer" + a;
