@@ -52,6 +52,7 @@
               <thead>
                 <tr>
                   <th>Sr. No.</th>
+                  <th>OEM</th>
                   <th>Template Name</th>
                   <th>Template Description</th>
                   <th>Action</th>
@@ -65,6 +66,7 @@
                 ?>
                     <tr>
                       <td>{{++$s}}</td>
+                      <td>{{get_oem_name($value->oem_id)}}</td>
                       <td>{{ucwords($value->temp_name)}}</td>
                       <td>{{$value->temp_description}}</td>
                       <td>
@@ -97,6 +99,7 @@
               <tfoot>
                 <tr>
                   <th>Sr. No.</th>
+                  <th>OEM</th>
                   <th>Template Name</th>
                   <th>Template Description</th>
                   <th>Action</th>

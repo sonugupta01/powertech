@@ -134,9 +134,9 @@
                         <label for="treatment_option">Treatment Option<span class="required-title">*</span></label>
                         <select class="form-control required" id="treatment_option" name="treatment_option">
                           <option value="">Select Option</option>
-                          <option value="5">Paid</option>
-                          <option value="1">Free of Cost</option>
-                          <option value="2">Demo</option>
+                          <!-- <option value="5">Paid</option> -->
+                          <!-- <option value="1">Free of Cost</option>
+                          <option value="2">Demo</option> -->
                           <option value="3">Recheck</option>
                           <option value="4">Repeat Work</option>
                         </select>

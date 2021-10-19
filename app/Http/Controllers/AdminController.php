@@ -2881,20 +2881,23 @@ class AdminController extends Controller
         $this->validate(
             $request,
             [
+                'oem_id' => 'required',
+                'template_id' => 'required',
                 'name' => 'required',
                 'size' => 'required',
-                'oem_id' => 'required',
             ],
             [
+                'oem_id.required' => 'Please select OEM',
+                'template_id.required' => 'Please select template',
                 'name.required' => 'Please enter name',
                 'size.required' => 'Please select size',
-                'oem_id.required' => 'Please select OEM',
             ]
         );
         $data = array(
+            'oem_id' => $post['oem_id'],
+            'template_id' => $post['template_id'],
             'model_name' => $post['name'],
             'model_size' => $post['size'],
-            'oem_id' => $post['oem_id'],
             'date_added' => getCurrentTimestamp(),
             //'dealer_id' => $post['dealer_id'],
         );
@@ -2906,10 +2909,12 @@ class AdminController extends Controller
     public function editModel($id)
     {
         $result = DB::table('models')->where('id', $id)->first();
+        $templates = DB::table('treatment_templates')->where('oem_id',  $result->oem_id)->get();
         $oemlist = DB::table('oems')->where('status', 1)->orderBy('id', 'ASC')->get();
         return view('admin.editModel', [
             'result' => $result,
             'oemlist' => $oemlist,
+            'templates' => $templates,
         ]);
     }
     // update existing Model
@@ -2919,24 +2924,27 @@ class AdminController extends Controller
         $this->validate(
             $request,
             [
+                'oem_id' => 'required',
+                'template_id' => 'required',
                 'name' => 'required',
                 'size' => 'required',
-                'oem_id' => 'required',
             ],
             [
+                'oem_id.required' => 'Please select OEM',
+                'template_id.required' => 'Please select Template',
                 'name.required' => 'Please enter name',
                 'size.required' => 'Please select size',
-                'oem_id.required' => 'Please select OEM',
             ]
         );
         $data = array(
+            'oem_id' => $post['oem_id'],
+            'template_id' => $post['template_id'],
             'model_name' => $post['name'],
             'model_size' => $post['size'],
-            'oem_id' => $post['oem_id'],
         );
         DB::table('models')->where('id', $post['id'])->update($data);
         Session::flash('success', 'Model updated successfully!');
-        return redirect('/admin/models/');
+        return redirect('/admin/models');
     }
 
     //Change Model status or delete
@@ -3655,7 +3663,8 @@ class AdminController extends Controller
     // view add new Treatments Templates page
     public function addTreatmentTemplate()
     {
-        return view('admin.addTreatTemp');
+        $oems = DB::table('oems')->where('status',1)->get();
+        return view('admin.addTreatTemp', compact('oems'));
     }
 
     // save new Treatments Templates
@@ -3665,17 +3674,21 @@ class AdminController extends Controller
         $this->validate(
             $request,
             [
+                'oem_id' => 'required',
                 'temp_name' => 'required|unique:treatment_templates,temp_name',
                 'temp_description' => 'required|unique:treatment_templates,temp_description',
             ],
             [
+                'oem_id.required' => 'Please select OEM',
                 'temp_name.required' => 'Please enter Template Name',
                 'temp_description.required' => 'Please enter Template Description',
             ]
         );
         $data = array(
+            'oem_id' => $post['oem_id'],
             'temp_name' => $post['temp_name'],
             'temp_description' => $post['temp_description'],
+            'created_at' => getCurrentTimestamp(),
         );
         DB::table('treatment_templates')->insert($data);
         Session::flash('success', 'Treatment Template added successfully!');
@@ -3685,9 +3698,11 @@ class AdminController extends Controller
     // view edit Treatments Templates page
     public function editTreatmentTemplate($id)
     {
+        $oems = DB::table('oems')->where('status',1)->get();
         $result = DB::table('treatment_templates')->where('id', $id)->first();
         return view('admin.editTreatTemp', [
             'result' => $result,
+            'oems' => $oems,
         ]);
     }
 
@@ -3698,17 +3713,21 @@ class AdminController extends Controller
         $this->validate(
             $request,
             [
+                'oem_id' => 'required',
                 'temp_name' => 'required',
                 'temp_description' => 'required',
             ],
             [
+                'oem_id.required' => 'Please select oem',
                 'temp_name.required' => 'Please enter Template Name',
                 'temp_description.required' => 'Please enter Template Description',
             ]
         );
         $data = array(
+            'oem_id' => $post['oem_id'],
             'temp_name' => $post['temp_name'],
             'temp_description' => $post['temp_description'],
+            'updated_at'=> getCurrentTimestamp(),
         );
         DB::table('treatment_templates')->where('id', $post['tempId'])->update($data);
         Session::flash('success', 'Treatment Template updated successfully!');
@@ -9282,15 +9301,18 @@ class AdminController extends Controller
             $detail->pro_name = get_product_name($value->pro_id);
             $detail->pro_unit = get_product_unit($value->pro_id);
             $getStock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$value->pro_id, 'uom'=>get_product_unit($value->pro_id)])
+            ->orderBy('updated_at', 'DESC')
             ->whereMonth('updated_at', $month)
             ->whereYear('updated_at', $year)
             ->first();
             if (!empty($getStock)) {
                 $detail->minimum_stock = $getStock->minimum_stock;
                 $detail->stock_in_hand = $getStock->stock_in_hand;
+                $detail->updated_at = $getStock->updated_at;
             } else {
                 $detail->minimum_stock ='';
                 $detail->stock_in_hand ='';
+                $detail->updated_at ='';
             }
             $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
             foreach ($consumeData as $key1 => $value1) {
@@ -9338,10 +9360,15 @@ class AdminController extends Controller
         // }
         
         $minimum_stock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$product_id])
+        ->orderBy('updated_at', 'DESC')
         ->whereMonth('updated_at', $month)
         ->whereYear('updated_at', $year)
         ->first();
-        return view('admin.updateDealerProductInventory', compact('dealer_id', 'product_id', 'minimum_stock'));
+
+        $updateHistory = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$product_id])->orderBy('updated_at', 'DESC')->whereMonth('updated_at', $month)
+        ->whereYear('updated_at', $year)->get();
+
+        return view('admin.updateDealerProductInventory', compact('dealer_id', 'product_id', 'minimum_stock', 'updateHistory'));
     }
 
     public function updateDealerProductInventory(Request $request)
@@ -9358,18 +9385,19 @@ class AdminController extends Controller
         );
         
         $check = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id'], 'uom'=>$post['pro_unit']])->first();
-
+        
         $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id'=>$post['dealer_id'], 'product_id'=>$post['product_id']])->whereMonth('updated_at',date('m'))->first();
-
+        
         if ($selectedMonth == date('Y-m') || empty($selectedMonth)) {
             if ($post['stock_in_hand']>=$post['minimum_stock']) {
                 return redirect()->back()->with('error', "Stock in hand should be less then Minimum Stock");
             } else {
-                if (!empty($check) && !empty($checkMonth)) {
-                    DB::table('dealer_product_inventory')->where('id',$post['inventory_id'])->update($data);
-                } else {
+                // if (!empty($check) && !empty($checkMonth)) {
+                //     DB::table('dealer_product_inventory')->where('id',$post['inventory_id'])->update($data);
+                // } else {
                     DB::table('dealer_product_inventory')->insert($data);
-                }
+                // }
+                
             }
         } else {
             return redirect()->back()->with('error', "You can update only current month inventory");

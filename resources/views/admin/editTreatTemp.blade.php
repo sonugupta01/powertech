@@ -36,14 +36,34 @@
                 <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
                 <input type="hidden" name="tempId" value="{{$result->id}}">
                 <div class="box-body">
-                  <div class="form-group{{ $errors->has('temp_name') ? ' has-error' : '' }}">
-                    <label for="temp_name">Template Name<span class="required-title">*</span></label>
-                    <input type="text" class="form-control required" value="{{ old('temp_name', $result->temp_name) }}" id="temp_name" name="temp_name" placeholder="Enter Template Name">
-                    @if ($errors->has('temp_name'))
-                      <span class="help-block">
-                        <strong>{{ $errors->first('temp_name') }}</strong>
-                      </span>
-                    @endif
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <div class="form-group{{ $errors->has('oem_id') ? ' has-error' : '' }}">
+                        <label for="oem_id">OEM<span class="required-title">*</span></label>
+                        <select class="form-control required" id="oem_id" name="oem_id">
+                          <option value="">Select OEM</option>
+                          @foreach($oems as $oem)
+                          <option @if($result->oem_id==$oem->id) {{ 'selected' }} @endif value="{{ $oem->id }}">{{ ucwords($oem->oem) }}</option>
+                          @endforeach
+                        </select>
+                        @if ($errors->has('oem_id'))
+                        <span class="help-block">
+                          <strong>{{ $errors->first('oem_id') }}</strong>
+                        </span>
+                        @endif
+                      </div>
+                    </div>
+                    <div class="col-sm-6">
+                      <div class="form-group{{ $errors->has('temp_name') ? ' has-error' : '' }}">
+                        <label for="temp_name">Template Name<span class="required-title">*</span></label>
+                        <input type="text" class="form-control required" value="{{ old('temp_name', $result->temp_name) }}" id="temp_name" name="temp_name" placeholder="Enter Template Name">
+                        @if ($errors->has('temp_name'))
+                          <span class="help-block">
+                            <strong>{{ $errors->first('temp_name') }}</strong>
+                          </span>
+                        @endif
+                      </div>
+                    </div>
                   </div>
                   <div class="form-group{{ $errors->has('temp_description') ? ' has-error' : '' }}">
                     <label for="temp_description">Template Description<span class="required-title">*</span></label>

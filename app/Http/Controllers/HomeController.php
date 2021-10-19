@@ -186,6 +186,27 @@ class HomeController extends Controller
         return $res;
     }
 
+    // Get OEM templates through dealer id in Ajax
+    public function getOEMtemplates(Request $request)
+    {
+        $oem_id = $request->oem_id;
+        $templates = DB::table('treatment_templates')
+            ->where(['oem_id'=>$oem_id])
+            ->get();
+        $templates = json_decode(json_encode($templates), true);
+        if (@$templates) {
+            $res = '<option value="">Select Template</option>';
+            foreach ($templates as $template) {
+                $name = ucwords($template['temp_name']);
+                $id = $template['id'];
+                $res .= "<option value='$id'>$name</option>";
+            }
+        } else {
+            $res = "<option value=''>No template found</option>";
+        }
+        return $res;
+    }
+
     // Get advisors through dealer id in Ajax
     public function getAdvisors(Request $request)
     {

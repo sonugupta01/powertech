@@ -77,6 +77,83 @@
       </div><!-- /.col -->
     </div><!-- /.row -->
   </section><!-- /.content -->
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-header">
+            <h3 class="box-title">Update History</h3>
+          </div><!-- /.box-header -->
+          <div class="box-body">
+            <table id="exa" class="table table-bordered table-striped" id="targetsTbl">
+              <thead>
+                <tr>
+                  <th>Sr. No.</th>
+                  <th>Minimum Stock</th>
+                  <th>Stock in Hand</th>
+                  <th>Last update</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (count($updateHistory) >= 1) {
+                  $i = 0;
+                  // $s = $productDetail->perPage() * ($productDetail->currentPage() - 1);
+                  foreach ($updateHistory as $value) {
+                    if (!empty($value->minimum_stock) || $value->minimum_stock!=0) {
+                      $minimum_stock = $value->minimum_stock;
+                    } else {
+                      $minimum_stock = 0;
+                    } 
+                ?>
+
+                    <tr id="defaultData">
+                      <td>{{++$i}}</td>
+                      <td>
+                      @if(!empty($minimum_stock))
+                      {{$minimum_stock}} {{get_unit_name($value->uom)}}
+                      @else
+                      {{'-'}}
+                      @endif
+                      </td>
+                      <td>
+                      @if(!empty($value->stock_in_hand))
+                      {{$value->stock_in_hand}} {{get_unit_name($value->uom)}}
+                      @else
+                      {{'-'}}
+                      @endif
+                      </td>
+                      <td>
+                      @if(!empty($value->updated_at))
+                      {{$value->updated_at}} </td>
+                      @else
+                      {{'-'}}
+                      @endif
+                    </tr>
+                  <?php
+                  //   $i++;
+                  }
+                } else { ?>
+                  <tr>
+                    <td colspan="7">No Record</td>
+                  </tr>
+                <?php } ?>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Sr. No.</th>
+                  <th>Minimum Stock</th>
+                  <th>Stock in Hand</th>
+                  <th>Last update</th>
+                </tr>
+              </tfoot>
+            </table>
+            <?php // echo $productDetail->links(); ?>
+          </div><!-- /.box-body -->
+        </div><!-- /.box -->
+      </div><!-- /.col -->
+    </div><!-- /.row -->
+  </section><!-- /.content -->
 </div><!-- /.content-wrapper --> 
 <script>
 function isNumber(evt, element)

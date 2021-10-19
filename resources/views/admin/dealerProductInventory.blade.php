@@ -64,6 +64,7 @@
                   <th>Treatmentwise Consumption</th>
                   <th>Expected Stock</th>
                   <th>Stock in Hand</th>
+                  <th>Last update</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -119,6 +120,12 @@
                       @endif
                       </td>
                       <td>
+                        @if(!empty($value->updated_at))
+                        {{$value->updated_at}} </td>
+                        @else
+                        {{'-'}}
+                        @endif
+                      <td>
                         <a href="{{ url('/admin/dealerProductInventory')}}/{{$dealer_id}}/{{$value->id}}" class="btn btn-success" {{$selectedDate != date('Y-m')?'disabled':''}}>Update</a>
                       </td>
                     </tr>
@@ -139,6 +146,7 @@
                   <th>Treatmentwise Consumption</th>
                   <th>Expected Stock</th>
                   <th>Stock in Hand</th>
+                  <th>Last update</th>
                   <th>Action</th>
                 </tr>
               </tfoot>

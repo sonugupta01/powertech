@@ -53,6 +53,7 @@
                       <tr>
                         <th>Name</th>
                         <th>Size</th>
+                        <th>Template</th>
                         <th>OEM</th>
                         <th>Action</th>
                       </tr>
@@ -69,10 +70,11 @@
                                 elseif($value->model_size==2){echo 'Medium';}
                                 elseif($value->model_size==3){echo 'Small';} ?>
                             </td>
+                            <td>@if(!empty($value->template_id)){{get_template_name($value->template_id)}}@else{{'-'}}@endif</td>
                             <td>@if(!empty($value->oem_id)){{get_oem_name($value->oem_id)}}@else{{'-'}}@endif</td>
                             <td>
-                                  <a href="{{ url('/admin/editModel/')}}/{{$value->id}}" class="btn btn-success">Edit</a>
-                                  <!-- <a href="{{ url('/admin/statusModel/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a> -->
+                              <a href="{{ url('/admin/editModel/')}}/{{$value->id}}" class="btn btn-success">Edit</a>
+                              <!-- <a href="{{ url('/admin/statusModel/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a> -->
                             </td>
                           </tr>   
                       <?php
@@ -88,6 +90,7 @@
                       <tr>
                         <th>Name</th>
                         <th>Size</th>
+                        <th>Template</th>
                         <th>OEM</th>
                         <th>Action</th>
                       </tr>

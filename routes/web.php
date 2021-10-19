@@ -27,6 +27,7 @@ Route::get('/changepassword', 'HomeController@changepassword')->middleware('auth
 Route::post('/updatePassword', 'HomeController@updatePassword')->middleware('auth'); //update password
 Route::post('/getDistrict', 'HomeController@getDistrict'); //get districts through ajax
 Route::post('/getModels', 'HomeController@getModels'); //get models through ajax
+Route::post('/getOEMtemplates', 'HomeController@getOEMtemplates'); //get models through ajax
 Route::post('/getOemModels', 'HomeController@getOemModels'); //get OEM models through ajax
 Route::post('/getAdvisors', 'HomeController@getAdvisors'); //get advisors through ajax
 Route::post('/getTreatments', 'HomeController@getTreatments'); //get treatments through ajax

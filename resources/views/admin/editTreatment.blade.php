@@ -138,9 +138,9 @@
                         <label for="treatment_option">Treatment Option<span class="required-title">*</span></label>
                         <select class="form-control required" id="treatment_option" name="treatment_option">
                           <option value="">Select Option</option>
-                          <option value="5" {{$result->treatment_option==5?'selected':''}}>Paid</option>
+                          <!-- <option value="5" {{$result->treatment_option==5?'selected':''}}>Paid</option>
                           <option value="1" {{$result->treatment_option==1?'selected':''}}>Free of Cost</option>
-                          <option value="2" {{$result->treatment_option==2?'selected':''}}>Demo</option>
+                          <option value="2" {{$result->treatment_option==2?'selected':''}}>Demo</option> -->
                           <option value="3" {{$result->treatment_option==3?'selected':''}}>Recheck</option>
                           <option value="4" {{$result->treatment_option==4?'selected':''}}>Repeat Work</option>
                         </select>
