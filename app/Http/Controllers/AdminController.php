@@ -3112,8 +3112,8 @@ class AdminController extends Controller
         $this->validate(
             $request,
             [
-                'tempId' => 'required',
                 'oem_id' => 'required',
+                'tempId' => 'required',
                 'model_id' => 'required',
                 'treatment' => 'required',
                 'treatment_type' => 'required',
@@ -3121,8 +3121,8 @@ class AdminController extends Controller
                 'treatment_option' => 'required',
             ],
             [
-                'tempId.required' => 'Please select Template',
                 'oem_id.required' => 'Please select OEM',
+                'tempId.required' => 'Please select Template',
                 'model_id.required' => 'Please select model',
                 'treatment.required' => 'Please enter treatment',
                 'treatment_type.required' => 'Please select type of treatment',
@@ -3131,8 +3131,8 @@ class AdminController extends Controller
             ]
         );
         $checkData = DB::table('treatments')
-            ->where('temp_id', $post['tempId'])
             ->where('oem_id', $post['oem_id'])
+            ->where('temp_id', $post['tempId'])
             ->where('model_id', $post['model_id'])
             ->where('treatment', $post['treatment'])
             ->where('treatment_type', $post['treatment_type'])
@@ -3204,8 +3204,9 @@ class AdminController extends Controller
         $templates = DB::table('treatment_templates')->get();
         $oemlist = DB::table('oems')->where('status', 1)->orderBy('id', 'ASC')->get();
         $oem_id = ($result->oem_id == '') ? 0 : $result->oem_id;
-        $models = DB::table('models')->where('oem_id', $oem_id)->get();
-
+        $template_id = ($result->temp_id == '') ? 0 : $result->temp_id;
+        $models = DB::table('models')->where(['oem_id'=>$oem_id, 'template_id'=>$template_id])->get();
+        
         // $dealers = User::where('role',2)
         // ->select('id as dealer_id','name as dealer_name')
         // ->where('status',1)
@@ -9397,7 +9398,6 @@ class AdminController extends Controller
                 // } else {
                     DB::table('dealer_product_inventory')->insert($data);
                 // }
-                
             }
         } else {
             return redirect()->back()->with('error', "You can update only current month inventory");
@@ -9452,15 +9452,18 @@ class AdminController extends Controller
             $detail->pro_name = get_product_name($value->pro_id);
             $detail->pro_unit = get_product_unit($value->pro_id);
             $getStock = DB::table('dealer_product_inventory')->where(['dealer_id'=>$dealer_id, 'product_id'=>$value->pro_id, 'uom'=>get_product_unit($value->pro_id)])
+            ->orderBy('updated_at', 'DESC')
             ->whereMonth('updated_at', $month)
             ->whereYear('updated_at', $year)
             ->first();
             if (!empty($getStock)) {
                 $detail->minimum_stock = $getStock->minimum_stock;
                 $detail->stock_in_hand = $getStock->stock_in_hand;
+                $detail->updated_at = $getStock->updated_at;
             } else {
                 $detail->minimum_stock ='';
                 $detail->stock_in_hand ='';
+                $detail->updated_at ='';
             }
             $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
             foreach ($consumeData as $key1 => $value1) {
@@ -9486,6 +9489,7 @@ class AdminController extends Controller
                 $sheet->setCellValue('C1', 'Treatmentwise Consumption');
                 $sheet->setCellValue('D1', 'Expected Stock');
                 $sheet->setCellValue('E1', 'Stock in Hand');
+                $sheet->setCellValue('F1', 'Last Updated');
                 $i = 2;
                 $loop = 1;
                 foreach ($productDetail as $key => $value) {
@@ -9518,6 +9522,7 @@ class AdminController extends Controller
                     $sheet->setCellValue('C' . $i, $consumedQuantity);
                     $sheet->setCellValue('D' . $i, $expectedStock);
                     $sheet->setCellValue('E' . $i, $value->stock_in_hand);
+                    $sheet->setCellValue('F' . $i, $value->updated_at);
                     $i++;
                     $loop++;
                 }

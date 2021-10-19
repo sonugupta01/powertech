@@ -195,7 +195,7 @@ class HomeController extends Controller
             ->get();
         $templates = json_decode(json_encode($templates), true);
         if (@$templates) {
-            $res = '<option value="">Select Template</option>';
+            $res = '<option value="">Select template</option>';
             foreach ($templates as $template) {
                 $name = ucwords($template['temp_name']);
                 $id = $template['id'];
@@ -203,6 +203,29 @@ class HomeController extends Controller
             }
         } else {
             $res = "<option value=''>No template found</option>";
+        }
+        return $res;
+    }
+
+    //get Models Of selected OEM
+    public function getOemModels(Request $request)
+    {
+        $oem_id = ($request->oem_id=='') ? 0 : $request->oem_id ;
+        $template_id = ($request->template_id=='') ? 0 : $request->template_id ;
+        $models = DB::table('models')
+            ->where(['oem_id'=>$oem_id, 'template_id'=>$template_id])
+            ->orderBy('id', 'ASC')
+            ->get();
+        $models = json_decode(json_encode($models), true);
+        if (@$models) {
+            $res = '<option value="">Select Model</option>';
+            foreach ($models as $model) {
+                $model_name = $model['model_name'];
+                $model_id = $model['id'];
+                $res .= "<option value='$model_id'>$model_name</option>";
+            }
+        } else {
+            $res = "<option value=''>No Model Found</option>";
         }
         return $res;
     }
@@ -259,28 +282,6 @@ class HomeController extends Controller
             }
         } else {
             $res = "<option value=''>No Treatment found</option>";
-        }
-        return $res;
-    }
-
-    //get Models Of selected OEM
-    public function getOemModels(Request $request)
-    {
-        $oem_id = ($request->oem_id=='') ? 0 : $request->oem_id ;
-        $models = DB::table('models')
-            ->where('oem_id', $oem_id)
-            ->orderBy('models.id', 'ASC')
-            ->get();
-        $models = json_decode(json_encode($models), true);
-        if (@$models) {
-            $res = '<option value="">Select Model</option>';
-            foreach ($models as $model) {
-                $model_name = $model['model_name'];
-                $model_id = $model['id'];
-                $res .= "<option value='$model_id'>$model_name</option>";
-            }
-        } else {
-            $res = "<option value=''>No Model Found</option>";
         }
         return $res;
     }

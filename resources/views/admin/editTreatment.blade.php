@@ -55,24 +55,6 @@
                       </div>
                     </div>
                     <div class="col-md-6">
-                      <div class="form-group{{ $errors->has('tempId') ? ' has-error' : '' }}">
-                        <label for="tempId">Treatment Template<span class="required-title">*</span></label>
-                        <select class="form-control required" id="tempId" name="tempId">
-                          <option value="">Select Template</option>
-                          @foreach($templates as $template)
-                            <option value="{{ $template->id }}" @if($result->temp_id == $template->id) {{ 'selected' }} @endif>{{ $template->temp_name }}</option>
-                          @endforeach
-                        </select>
-                        @if ($errors->has('tempId'))
-                          <span class="help-block">
-                            <strong>{{ $errors->first('tempId') }}</strong>
-                          </span>
-                        @endif
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row">
-                    <div class="col-md-6">
                       <div class="form-group{{ $errors->has('oem_id') ? ' has-error' : '' }}">
                         <label for="oem_id">OEM<span class="required-title">*</span></label>
                         <select class="form-control required" id="oem_id" name="oem_id">
@@ -84,6 +66,24 @@
                         @if ($errors->has('oem_id'))
                           <span class="help-block">
                             <strong>{{ $errors->first('oem_id') }}</strong>
+                          </span>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group{{ $errors->has('tempId') ? ' has-error' : '' }}">
+                        <label for="tempId">Treatment Template<span class="required-title">*</span></label>
+                        <select class="form-control required" id="tempId" name="tempId">
+                          <option value="">Select Template</option>
+                          @foreach($templates as $template)
+                            <option value="{{ $template->id }}" @if($result->temp_id == $template->id) {{ 'selected' }} @endif>{{ $template->temp_name }}</option>
+                          @endforeach
+                        </select>
+                        @if ($errors->has('tempId'))
+                          <span class="help-block">
+                            <strong>{{ $errors->first('tempId') }}</strong>
                           </span>
                         @endif
                       </div>
@@ -166,13 +166,37 @@
   </section><!-- /.content -->
 </div><!-- /.content-wrapper --> 
 <script type="text/javascript">
+$('#oem_id').on("change",function(e) {
+  var oem_id = $("#oem_id").val();
+  token = $('input[name=_token]').val();
+  url = '<?php echo url("/"); ?>/getOEMtemplates';
+  data = {
+    oem_id: oem_id,
+  };
+  $.ajax({
+    url: url,
+    headers: {'X-CSRF-TOKEN': token},
+    data: data,
+    type: 'POST',
+    datatype: 'JSON',
+    success: function (resp) {
+      $("#tempId").html(resp);
+      return false;
+    }
+  });
+  return false;
+});
+
 $(document).ready(function() {
-  $('#oem_id').on("change",function(e) {
+  // $('#oem_id').on("change",function(e) {
+  $('#tempId').on("change",function(e) {
     var oem_id = $("#oem_id").val();
+    var template_id = $("#tempId").val();
     token = $('input[name=_token]').val();
     url = '<?php echo url("/"); ?>/getOemModels';
     data = {
       oem_id: oem_id,
+      template_id: template_id,
     };
     $.ajax({
       url: url,
