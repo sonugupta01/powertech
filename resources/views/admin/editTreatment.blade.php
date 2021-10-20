@@ -38,7 +38,7 @@
             @if(Session::has('success'))
               <div class="alert alert-success">{{ Session::get('success') }}</div>
             @endif
-            <form role="form" id="Treatmentform" method="POST" action="{{url('/admin/updateTreatment')}}" enctype="multipart/form-data">
+            <form role="form" id="Treatmentform" method="POST" action="{{url('/admin/updateTreatment')}}" enctype="multipart/form-data" onsubmit="return validateForm()">
                 <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
                 <input type="hidden" name="id" value="{{$result->id}}">
                 <div class="box-body">
@@ -135,7 +135,7 @@
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-group{{ $errors->has('treatment_option') ? ' has-error' : '' }}">
-                        <label for="treatment_option">Treatment Option<span class="required-title">*</span></label>
+                        <label for="treatment_option">Treatment Option</label>
                         <select class="form-control required" id="treatment_option" name="treatment_option">
                           <option value="">Select Option</option>
                           <!-- <option value="5" {{$result->treatment_option==5?'selected':''}}>Paid</option>
@@ -151,7 +151,26 @@
                         @endif
                       </div>
                     </div>
-                    <div class="col-md-6"></div>
+                    <div class="col-md-6" id="timePeriodSelector" style="display: none;">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group{{ $errors->has('time_period') ? ' has-error' : '' }}">
+                            <label for="time_period">Time Period<span class="required-title">*</span></label>
+                            <input type="text" class="form-control required" value="{{ old('time_period', $result->time_period) }}" id="time_period" name="time_period" placeholder="Enter time period" OnKeypress="return isNumber(event)" maxlength="3">
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group" style="margin-top:25px">
+                            <select class="form-control required" id="time_period_unit" name="time_period_unit">
+                              <option value="">Select</option>
+                              <option value="1" {{$result->time_unit==1?'selected':''}}>Year</option>
+                              <option value="2" {{$result->time_unit==2?'selected':''}}>Month</option>
+                              <option value="3" {{$result->time_unit==3?'selected':''}}>Days</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <!-- /.box-body -->
@@ -166,6 +185,45 @@
   </section><!-- /.content -->
 </div><!-- /.content-wrapper --> 
 <script type="text/javascript">
+function isNumber(evt, element) 
+{
+  var charCode = (evt.which) ? evt.which : event.keyCode
+  if (
+      (charCode != 45 || $(element).val().indexOf('-') != -1) &&      // “-” CHECK MINUS, AND ONLY ONE.
+      /*(charCode != 46 || $(element).val().indexOf('.') != -1) && */     // “.” CHECK DOT, AND ONLY ONE.
+      (charCode < 48 || charCode > 57))
+      return false;
+  else
+  {
+      return true;    
+  }
+}
+
+if ($('#treatment_option').val() == '') {
+  $("#timePeriodSelector").hide();
+} else {
+  $("#timePeriodSelector").show();
+}
+
+$(document).ready(function(){
+  $('#treatment_option').on('change', function() {
+    if (this.value == '') {
+      $("#timePeriodSelector").hide();
+    } else {
+      $("#timePeriodSelector").show();
+    }
+  });
+});
+
+function validateForm() {
+  if ($('#treatment_option').val() != '') {
+    if ($('#time_period').val() == '' || $('#time_period_unit').val() == '') {
+        alert("Please insert time period");
+        return false;
+    }
+  }
+}
+
 $('#oem_id').on("change",function(e) {
   var oem_id = $("#oem_id").val();
   token = $('input[name=_token]').val();

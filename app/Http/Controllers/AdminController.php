@@ -3107,8 +3107,7 @@ class AdminController extends Controller
     // save new Treatment
     public function insertTreatment(Request $request)
     {
-        $post = $request->all();
-        //dd($post);
+        $post = $request->all();        
         $this->validate(
             $request,
             [
@@ -3118,7 +3117,7 @@ class AdminController extends Controller
                 'treatment' => 'required',
                 'treatment_type' => 'required',
                 'labour_code' => 'required',
-                'treatment_option' => 'required',
+                // 'treatment_option' => 'required',
             ],
             [
                 'oem_id.required' => 'Please select OEM',
@@ -3127,9 +3126,10 @@ class AdminController extends Controller
                 'treatment.required' => 'Please enter treatment',
                 'treatment_type.required' => 'Please select type of treatment',
                 'labour_code.required' => 'Please enter labour code',
-                'treatment_option.required' => 'Please select option of treatment',
+                // 'treatment_option.required' => 'Please select option of treatment',
             ]
         );
+
         $checkData = DB::table('treatments')
             ->where('oem_id', $post['oem_id'])
             ->where('temp_id', $post['tempId'])
@@ -3137,7 +3137,6 @@ class AdminController extends Controller
             ->where('treatment', $post['treatment'])
             ->where('treatment_type', $post['treatment_type'])
             ->where('labour_code', $post['labour_code'])
-            ->where('treatment_option', $post['treatment_option'])
             ->get();
         if (count($checkData) > 0) {
             Session::flash('error', 'The treatment is already added for this model! Please select another model or enter different treatment.');
@@ -3150,10 +3149,11 @@ class AdminController extends Controller
                 'treatment' => $post['treatment'],
                 'treatment_type' => $post['treatment_type'],
                 'labour_code' => $post['labour_code'],
-                'treatment_option' => $post['treatment_option'],
+                'treatment_option' => @$post['treatment_option'],
+                'time_period' => @$post['time_period'],
+                'time_unit' => @$post['time_period_unit'],
             );
             $treatment_id = DB::table('treatments')->insertGetId($data);
-            // dd($treatment_id);
             Session::flash('success', 'Treatment added successfully!');
             // return redirect('/admin/treatments');
             return redirect('/admin/treatmentProducts/' . $treatment_id);
@@ -3233,7 +3233,6 @@ class AdminController extends Controller
                 'treatment' => 'required',
                 'treatment_type' => 'required',
                 'labour_code' => 'required',
-                'treatment_option' => 'required',
             ],
             [
                 'tempId.required' => 'Please select Template',
@@ -3242,7 +3241,6 @@ class AdminController extends Controller
                 'treatment.required' => 'Please enter treatment',
                 'treatment_type.required' => 'Please select type of treatment',
                 'labour_code.required' => 'Please enter labour code',
-                'treatment_option.required' => 'Please select option of treatment',
             ]
         );
         $checkData = DB::table('treatments')
@@ -3252,9 +3250,16 @@ class AdminController extends Controller
             ->where('treatment', $post['treatment'])
             ->where('treatment_type', $post['treatment_type'])
             ->where('labour_code', $post['labour_code'])
-            ->where('treatment_option', $post['treatment_option'])
             ->where('id', '!=', $post['id'])
             ->get();
+        if (!empty($post['treatment_option'])) {
+            $post['time_period'] = $post['time_period'];
+            $post['time_period_unit'] = $post['time_period_unit'];
+        } else {
+            $post['time_period'] = NULL;
+            $post['time_period_unit'] = NULL;
+        }
+        
         if (count($checkData) > 0) {
             Session::flash('error', 'The treatment is already added for this model! Please select another model or enter different treatment.');
             return redirect('/admin/editTreatment/' . $post['id']);
@@ -3267,6 +3272,8 @@ class AdminController extends Controller
                 'treatment_type' => $post['treatment_type'],
                 'labour_code' => $post['labour_code'],
                 'treatment_option' => $post['treatment_option'],
+                'time_period' => @$post['time_period'],
+                'time_unit' => @$post['time_period_unit']
             );
             DB::table('treatments')->where('id', $post['id'])->update($data);
             Session::flash('success', 'Treatment updated successfully! Please add Products for the Treatment.');
