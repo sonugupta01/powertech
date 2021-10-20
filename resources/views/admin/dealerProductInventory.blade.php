@@ -84,9 +84,7 @@
                     } else {
                       $consumedQuantity = 0;
                     }
-                    
                 ?>
-
                     <tr id="defaultData">
                       <td>{{++$i}}</td>
                       <td>{{$value->pro_name}}</td>
