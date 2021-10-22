@@ -162,7 +162,7 @@ if(@$district_id){
                   </div>
                 </div>
                 <div class="form-group">
-                  <a href="#" class="btn btn-primary" id="latlong">Get Lat Long From Address</a>
+                  <a href="#" class="btn btn-primary" id="latlong">Auto Populate Lat Long</a>
                   Or
                   <a href="https://www.latlong.net/convert-address-to-lat-long.html" class="btn btn-primary" target="_blank">Get Lat Long From Address</a>
                 </div>

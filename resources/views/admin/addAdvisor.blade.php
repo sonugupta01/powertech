@@ -89,10 +89,10 @@
                             </div>
                           </div>
                         </div>
-                        <div class="row">
+                        {{--  <div class="row">
                           <div class="col-md-6">
                             <div class="form-group{{ $errors->has('advisor_share') ? ' has-error' : '' }}">
-                              <label for="advisor_share">Incentive{{--<span class="required-title">*</span>--}}</label>
+                              <label for="advisor_share">Incentive</label>
                               <input type="text" class="form-control required" value="{{ old('advisor_share') }}" id="advisor_share" name="advisor_share" placeholder="Enter percentage share" maxlength="2" OnKeypress="return isNumber(event)">
                               @if ($errors->has('advisor_share'))
                                 <span class="help-block">
@@ -101,7 +101,7 @@
                               @endif
                             </div>
                           </div>
-                        </div>
+                        </div>  --}}
                       <!-- /.box-body -->
                       <div class="box-footer">
                         <button type="submit" class="btn btn-primary">Submit</button>

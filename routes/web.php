@@ -31,6 +31,7 @@ Route::post('/getOemModels', 'HomeController@getOemModels'); //get OEM models th
 Route::post('/getAdvisors', 'HomeController@getAdvisors'); //get advisors through ajax
 Route::post('/getTreatments', 'HomeController@getTreatments'); //get treatments through ajax
 Route::post('/getTreatmentPrice', 'HomeController@getTreatmentPrice'); //get treatment price through ajax
+Route::post('/getDealerPrice', 'HomeController@getDealerPrice'); //get Dealer price through ajax
 Auth::routes();
 /* Admin Panel */
 Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','admin']], function(){
@@ -62,6 +63,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
 
   // Advisor module
   Route::get('/advisors/{id}','AdminController@advisors');
+  Route::post('/addAdvisorIncentive/{dealer_id}','AdminController@addAdvisorIncentive');
   Route::get('/addAdvisor/{dealer_id}', 'AdminController@addAdvisor');
   Route::post('/insertAdvisor', 'AdminController@insertAdvisor');
   Route::get('/editAdvisor/{dealer_id}/{id}', 'AdminController@editAdvisor');

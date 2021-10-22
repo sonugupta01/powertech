@@ -11,10 +11,45 @@
           <ol class="breadcrumb">
             <li><a href="{{url('/admin')}}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
             <li><a href="{{url('/admin/dealer_management')}}"><i class="fa fa-users"></i> Dealer Management <span class="active">({{get_name($dealer_id)}})</span></a></li>
-            <li class="active">Advisors</li>
+            <li class="active">Advisors </li>
           </ol>
         </section>
 
+        <div class="modal fade" id="myModal" role="dialog" style="z-index: inherit;">
+          <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Add Incentive</h4>
+              </div>
+              <div class="modal-body">
+                <div class=" ro-box box box-primary" style=" margin-top: 10px;">
+                  <div class="box-body">
+                    <form method="POST" action="{{url('/admin/addAdvisorIncentive')}}/{{$dealer_id}}">
+                      <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
+                      <div class="form-group{{ $errors->has('incentive') ? ' has-error' : '' }}">
+                        <label for="incentive">Incentive<span class="required-title">*</span></label>
+                        <input type="text" name="incentive" maxlength="3" OnKeypress="return isNumber(event)" class="form-control required" value="{{ old('incentive') }}" id="incentive" placeholder="Enter Incentive" required>
+                        @if ($errors->has('incentive'))
+                                <span class="help-block">
+                                  <strong>{{ $errors->first('incentive') }}</strong>
+                                </span>
+                              @endif
+                      </div>
+                      <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Main content -->
         <section class="content">
           <div class="row">
@@ -23,6 +58,10 @@
                 <div class="box-header">
                   <h3 class="box-title">Advisors List of <b>{{get_name($dealer_id)}}</b></h3>
                   <a href="{{url('/admin/addAdvisor')}}/{{$dealer_id}}" class="btn btn-success floatright">Add Advisor</a>
+                  @if (count($result) > 0)
+                  <button type="button" class="btn btn-info floatright" data-toggle="modal" data-target="#myModal" style="margin-right: 20px;">Add Incentive</button>
+                  @endif
+                  
                 </div><!-- /.box-header -->
                 <form action="" method="GET"> 
                   <div class="row">
@@ -84,7 +123,7 @@
                                     <a href="{{ url('/admin/statusAdvisor/activate/')}}/{{$dealer_id}}/{{$value->id}}" onclick="return confirm('Are you sure want to activate?')" class="btn btn-info" style="width: 92.16px">Activate</a>
                                   @endif
                                   <a href="{{ url('/admin/editAdvisor/')}}/{{$dealer_id}}/{{$value->id}}" class="btn btn-success">Edit</a>
-                                  <a href="{{ url('/admin/advisor_percentage_history/')}}/{{$dealer_id}}/{{$value->id}}" class="btn btn-danger" title="Percentage History"><i class="fa fa-percent"></i> History</a>
+                                  {{--  <a href="{{ url('/admin/advisor_percentage_history/')}}/{{$dealer_id}}/{{$value->id}}" class="btn btn-danger" title="Percentage History"><i class="fa fa-percent"></i> History</a>  --}}
                                   <!-- <a href="{{ url('/admin/statusAdvisor/delete/')}}/{{$dealer_id}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a> -->
                             </td>
                           </tr>   
@@ -116,4 +155,18 @@
           </div><!-- /.row -->
         </section><!-- /.content -->
       </div><!-- /.content-wrapper -->   
+
+      <script>
+        function isNumber(evt, element) {
+          var charCode = (evt.which) ? evt.which : event.keyCode
+          if (
+          (charCode != 45 || $(element).val().indexOf('-') != -1) && // “-” CHECK MINUS, AND ONLY ONE.
+          /*(charCode != 46 || $(element).val().indexOf('.') != -1) && */ // “.” CHECK DOT, AND ONLY ONE.
+          (charCode < 48 || charCode > 57))
+          return false;
+          else {
+            return true;
+          }
+        }
+      </script>
 @endsection

@@ -230,7 +230,7 @@
                     </div>
                     <div class="col-md-6">
                       <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
-                        <label for="email">Email<span class="required-title">*</span></label>
+                        <label for="email">Email</label>
                         <input type="text" class="form-control required" value="{{ old('email', $result->email) }}" id="email" name="email" placeholder="Enter email">
                         @if ($errors->has('email'))
                         <span class="help-block">
@@ -243,7 +243,7 @@
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-group{{ $errors->has('password') ? ' has-error' : '' }}">
-                        <label for="password">Password<span class="required-title">*</span></label>
+                        <label for="password">Password</label>
                         <input type="password" class="form-control required" value="{{ old('password') }}" id="password" name="password" placeholder="Enter Password">
                         @if ($errors->has('password'))
                         <span class="help-block">

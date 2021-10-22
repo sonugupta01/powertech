@@ -1544,13 +1544,13 @@ class AdminController extends Controller
                 'level' => 'required',
                 'designation' => 'required',
                 'name' => 'required',
-                'email' => 'required|unique:users,email',
-                'password' => 'required',
+                'email' => 'unique:users,email',
+                // 'password' => 'required',
                 'salary' => 'required',
                 'mobile_no' => 'required|digits:10|unique:users,mobile_no',
                 'emp_code' => 'required',
                 'doj' => 'required',
-                'user_group' => 'required',
+                // 'user_group' => 'required',
                 // 'dealer_id' => 'required',
                 // 'office' => 'required',
             ],
@@ -1560,13 +1560,13 @@ class AdminController extends Controller
                 'level.required' => 'Please select designation level',
                 'designation.required' => 'Please select designation',
                 'name.required' => 'Please enter name',
-                'email.required' => 'Please enter email',
-                'password.required' => 'Please enter password',
+                // 'email.required' => 'Please enter email',
+                // 'password.required' => 'Please enter password',
                 'salary.required' => 'Please enter salary',
                 'mobile_no.required' => 'Please enter mobile no.',
                 'emp_code.required' => 'Please enter employee code.',
                 'doj.required' => 'Please enter date Of joining',
-                'user_group.required' => 'Please select user group',
+                // 'user_group.required' => 'Please select user group',
             ]
         );
         $data = array(
@@ -1577,7 +1577,7 @@ class AdminController extends Controller
             'mobile_no' => $post['mobile_no'],
             'alt_mobile_no' => $post['alt_mobile_no'],
             'password' => Hash::make($post['password']),
-            'group_id' => $post['user_group'],
+            // 'group_id' => $post['user_group'],
             'created_at' => date('Y-m-d h:i:s'),
         );
         $user_id = User::insertGetId($data);
@@ -1718,11 +1718,11 @@ class AdminController extends Controller
                 'designation' => 'required',
                 'emp_code' => 'required',
                 'name' => 'required',
-                'email' => 'required|unique:users,email,' . $request->id,
+                'email' => 'unique:users,email,' . $request->id,
                 'salary' => 'required',
                 'mobile_no' => 'required|digits:10|unique:users,mobile_no,' . $request->id,
                 'doj' => 'required',
-                'user_group' => 'required',
+                // 'user_group' => 'required',
                 // 'dealer_id' => 'required',
                 // 'office' => 'required',
             ],
@@ -1733,11 +1733,11 @@ class AdminController extends Controller
                 'designation.required' => 'Please select designation',
                 'emp_code.required' => 'Please enter employee code.',
                 'name.required' => 'Please enter name',
-                'email.required' => 'Please enter email',
+                // 'email.required' => 'Please enter email',
                 'salary.required' => 'Please enter salary',
                 'mobile_no.required' => 'Please enter mobile no.',
                 'doj.required' => 'Please enter date Of joining.',
-                'user_group.required' => 'Please select user group',
+                // 'user_group.required' => 'Please select user group',
                 // 'dealer_id.required' => 'Please select dealer',
                 // 'office.required' => 'Please select office',
             ]
@@ -1754,7 +1754,7 @@ class AdminController extends Controller
                     'email' => $post['email'],
                     'mobile_no' => $post['mobile_no'],
                     'alt_mobile_no' => $post['alt_mobile_no'],
-                    'group_id' => $post['user_group'],
+                    // 'group_id' => $post['user_group'],
                     'updated_at' => date('Y-m-d h:i:s'),
                 );
             } else {
@@ -1767,7 +1767,7 @@ class AdminController extends Controller
                     'email' => $post['email'],
                     'mobile_no' => $post['mobile_no'],
                     'alt_mobile_no' => $post['alt_mobile_no'],
-                    'group_id' => $post['user_group'],
+                    // 'group_id' => $post['user_group'],
                     'updated_at' => date('Y-m-d h:i:s'),
                 );
             }
@@ -1785,7 +1785,7 @@ class AdminController extends Controller
                     'reporting_authority' => $post['dealer_authid'],
                     'mobile_no' => $post['mobile_no'],
                     'alt_mobile_no' => $post['alt_mobile_no'],
-                    'group_id' => $post['user_group'],
+                    // 'group_id' => $post['user_group'],
                     'updated_at' => date('Y-m-d h:i:s'),
                 );
             }
@@ -1799,7 +1799,7 @@ class AdminController extends Controller
                 'email' => $post['email'],
                 'mobile_no' => $post['mobile_no'],
                 'alt_mobile_no' => $post['alt_mobile_no'],
-                'group_id' => $post['user_group'],
+                // 'group_id' => $post['user_group'],
                 'updated_at' => date('Y-m-d h:i:s'),
             );
         }
@@ -1836,7 +1836,7 @@ class AdminController extends Controller
                         'email' => $post['email'],
                         'mobile_no' => $post['mobile_no'],
                         'alt_mobile_no' => $post['alt_mobile_no'],
-                        'group_id' => $post['user_group'],
+                        // 'group_id' => $post['user_group'],
                         'updated_at' => date('Y-m-d h:i:s'),
                     );
                 } elseif (!empty($post['dealer_id']) && !empty($post['authority']) && $post['authority'] != $post['dealer_authid']) {
@@ -1849,7 +1849,7 @@ class AdminController extends Controller
                         'email' => $post['email'],
                         'mobile_no' => $post['mobile_no'],
                         'alt_mobile_no' => $post['alt_mobile_no'],
-                        'group_id' => $post['user_group'],
+                        // 'group_id' => $post['user_group'],
                         'updated_at' => date('Y-m-d h:i:s'),
                     );
                 } else {
@@ -1862,7 +1862,7 @@ class AdminController extends Controller
                         'email' => $post['email'],
                         'mobile_no' => $post['mobile_no'],
                         'alt_mobile_no' => $post['alt_mobile_no'],
-                        'group_id' => $post['user_group'],
+                        // 'group_id' => $post['user_group'],
                         'updated_at' => date('Y-m-d h:i:s'),
                     );
                 }
@@ -1890,7 +1890,7 @@ class AdminController extends Controller
                     'email' => $post['email'],
                     'mobile_no' => $post['mobile_no'],
                     'alt_mobile_no' => $post['alt_mobile_no'],
-                    'group_id' => $post['user_group'],
+                    // 'group_id' => $post['user_group'],
                     'updated_at' => date('Y-m-d h:i:s'),
                 );
             } else {
@@ -1903,7 +1903,7 @@ class AdminController extends Controller
                     'email' => $post['email'],
                     'mobile_no' => $post['mobile_no'],
                     'alt_mobile_no' => $post['alt_mobile_no'],
-                    'group_id' => $post['user_group'],
+                    // 'group_id' => $post['user_group'],
                     'updated_at' => date('Y-m-d h:i:s'),
                 );
             }
@@ -2208,10 +2208,42 @@ class AdminController extends Controller
             })
             ->where('advisors.dealer_id', $id)
             ->orderBy('advisors.status', 'DESC')->paginate(20);
+            // dd($result[0]->id);
         return view('admin.advisors', [
             'result' => $result->appends(Input::except('page')),
             'dealer_id' => $id,
+            'advisor_id' => @$result[0]->id,
         ]);
+    }
+
+    public function addAdvisorIncentive(Request $request, $dealer_id)
+    {
+        $request->validate([
+            'incentive' => 'required'
+        ]);
+
+        $advisors_id = DB::table('advisors')->where('dealer_id', $dealer_id)->get();
+        foreach ($advisors_id as $key => $value) {
+            $check = DB::table('advisor_shares')->where('dealer_id', $dealer_id)->where('advisor_id', $value->id)->first();
+            if (!empty($check)) {
+                DB::table('advisor_shares')->where('dealer_id', $dealer_id)->where('advisor_id', $value->id)->update([
+                    'dealer_id' => $dealer_id,
+                    'advisor_id' => $value->id,
+                    'advisor_share' => $request->incentive,
+                    'created_at' => getCurrentTimestamp(),
+                ]);
+            } else {
+                DB::table('advisor_shares')->insert([
+                    'dealer_id' => $dealer_id,
+                    'advisor_id' => $value->id,
+                    'advisor_share' => $request->incentive,
+                    'created_at' => getCurrentTimestamp(),
+                ]);
+            }       
+        }
+
+        Session::flash('success', 'Incentive added successfully!');
+        return redirect('/admin/advisors/' . $dealer_id);
     }
     // view add new advisor page
     public function addAdvisor($dealer_id)
@@ -2251,9 +2283,9 @@ class AdminController extends Controller
             'department' => $post['department'],
         );
         $advisor_id = DB::table('advisors')->insertGetId($data);
-        if (!empty($post['advisor_share'])) {
-            DB::table('advisor_shares')->insert(['dealer_id' => $post['dealer_id'], 'advisor_id' => $advisor_id, 'advisor_share' => $post['advisor_share'], 'created_at' => getCurrentTimestamp()]);
-        }
+        // if (!empty($post['advisor_share'])) {
+        //     DB::table('advisor_shares')->insert(['dealer_id' => $post['dealer_id'], 'advisor_id' => $advisor_id, 'created_at' => getCurrentTimestamp()]);
+        // }
         Session::flash('success', 'Advisor added successfully!');
         return redirect('/admin/advisors/' . $post['dealer_id']);
     }
@@ -7005,6 +7037,7 @@ class AdminController extends Controller
     public function insertJob(Request $request)
     {
         $post = $request->all();
+        dd($post);
         $actual_price = 0;
         // $discount_price = 0;
         $difference_price = 0;
@@ -7022,6 +7055,7 @@ class AdminController extends Controller
                 'job_card_no' => 'required',
                 'bill_no' => 'required',
                 'regn_no' => 'required',
+                'dealer_price' => 'required',
             ],
             [
                 'model_id.required' => 'Please select model',
@@ -7032,6 +7066,7 @@ class AdminController extends Controller
                 'job_card_no.required' => 'Please enter job card no',
                 'bill_no.required' => 'Please enter bill no',
                 'regn_no.required' => 'Please enter registration no',
+                'dealer_price.required' => 'Please enter dealer price no',
             ]
         );
         $treatment_id = array();
@@ -7043,6 +7078,7 @@ class AdminController extends Controller
             $data1->actualPrice = $post['actualPrice'][$key];
             // $data1->discountPrice = $post['discountPrice'][$key];
             $data1->difference = $post['difference'][$key];
+            $data1->dealer_price = $post['dealer_price'][$key];
             $treatment_data[] = $data1;
             if ($data1->job_type == '5') {
                 $actual_price = $actual_price + $data1->actualPrice;
@@ -7054,7 +7090,7 @@ class AdminController extends Controller
                 $difference_price = 0;
             }
             $customer_price = $customer_price + $data1->customer_price;
-            // $dealer_price = $dealer_price + $data1->dealer_price;
+            $dealer_price = $dealer_price + $data1->dealer_price;
             // $incentive = $incentive + $data1->incentive;
             if ($data1->treatment_type == 1) {
                 $i++;
@@ -7128,7 +7164,7 @@ class AdminController extends Controller
             'actual_price' => $actual_price,
             // 'discount_price' => $discount_price,
             'difference_price' => $difference_price,
-            // 'dealer_price' => $dealer_price,
+            'dealer_price' => $dealer_price,
             // 'incentive' => $incentive,
             'date_added' => getCurrentTimestamp(),
             // 'foc_options' => $request->option,
@@ -7161,7 +7197,7 @@ class AdminController extends Controller
             $select['id'] = $value->id;
             $select['treatment'] = $value->treatment;
             $select['customer_price'] = $value->customer_price;
-            // $select['dealer_price'] = $value->dealer_price;
+            $select['dealer_price'] = $value->dealer_price;
             // $select['incentive'] = $value->incentive;
             $select['job_type'] = @$value->job_type;
             $select['actualPrice'] = @$value->actualPrice;
@@ -7274,7 +7310,7 @@ class AdminController extends Controller
         $selectedTreatments = array();
         for ($i = 0; $i < count($post['treatment_id']); $i++) {
             $data['id'] = $post['treatment_id'][$i];
-            // $data['dealer_price'] = $post['dealer'][$i];
+            $data['dealer_price'] = $post['dealer_price'][$i];
             $data['customer_price'] = $post['customer'][$i];
             // $data['incentive'] = $post['incentive'][$i];
             $data['job_type'] = $post['job_type'][$i];
@@ -7299,7 +7335,7 @@ class AdminController extends Controller
                 $difference_price = $difference_price + 0;
             }
             $customer_price = $customer_price + $value['customer_price'];
-            // $dealer_price = $dealer_price + $value['dealer_price'];
+            $dealer_price = $dealer_price + $value['dealer_price'];
             // $incentive = $incentive + $value['incentive'];
             if ($data1->treatment_type == 1) {
                 $i++;
@@ -7314,7 +7350,7 @@ class AdminController extends Controller
             $treat_id['treatment'] = $data1->treatment;
             $treat_id['treatment_type'] = $data1->treatment_type;
             $treat_id['customer_price'] = $value['customer_price'];
-            // $treat_id['dealer_price'] = $value['dealer_price'];
+            $treat_id['dealer_price'] = $value['dealer_price'];
             // $treat_id['incentive'] = $value['incentive'];
             $treat_id['job_type'] = $value['job_type'];
             $treat_id['actualPrice'] = $value['actualPrice'];
@@ -7377,7 +7413,7 @@ class AdminController extends Controller
             'actual_price' => $actual_price,
             // 'discount_price' => $discount_price,
             'difference_price' => $difference_price,
-            // 'dealer_price' => $dealer_price,
+            'dealer_price' => $dealer_price,
             // 'incentive' => $incentive,
             'last_updated' => getCurrentTimestamp(),
             // 'foc_options' => $request->option,
