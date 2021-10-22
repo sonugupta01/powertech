@@ -179,9 +179,10 @@ if (@$advisor_id) {
                       <td>Treatment</td>
                       <td>Job Type</td>
                       <td>Customer Price</td>
-                      <td>Discount</td>
+                      <td>Discount Amount</td>
                       <!-- <td>Difference (+/-)</td> -->
                       <td>Actual Price</td>
+                      <td>Dealer Price</td>
                       {{-- <td>Dealer Price</td>
                           <td>Incentive</td> --}}
                     </tr>
@@ -189,7 +190,7 @@ if (@$advisor_id) {
                   <tbody>
                     @foreach($selectTreatment as $key => $value)
                     <tr id="selectData">
-                      <td class="col-sm-4">
+                      <td class="col-sm-3">
                         <select class="form-control" id="treatment_id{{$key}}" name="treatment_id[]" onchange="getAllPrice(this)" required>
                           <option value="">Select Treatment</option>
                           @foreach($treatments as $treatment)
@@ -209,12 +210,15 @@ if (@$advisor_id) {
                       <td class="col-sm-2">
                         <input type="text" value="{{$value['customer_price']}}" class="form-control customer{{$key}}" name="customer[]" id="customer{{$key}}" readonly />
                       </td>
-                      <td class="col-sm-1">
-                        <input type="text" value="{{$value['difference']}}" class="form-control difference{{$key}}" name="difference[]" maxlength="2" OnKeypress="return isNumber(event)" onkeyup="getdifference({{$key}})" required />
+                      <td class="col-sm-2">
+                        <input type="text" value="{{$value['difference']}}" class="form-control difference{{$key}}" name="difference[]" maxlength="" OnKeypress="return isNumber(event)" onkeyup="getdifference({{$key}})" required />
                         {{-- <input type="text" name="discountPrice[]" value="{{$value['discountPrice']}}" OnKeypress="return isNumber(event)" onkeyup="getdifference({{$key}})" class="form-control discountPrice{{$key}}" required/> --}}
                       </td>
                       <td class="col-sm-2">
-                        <input type="text" value="{{$value['actualPrice']}}" class="form-control actualPrice{{$key}}" name="actualPrice[]" readonly />
+                        <input type="text" value="{{round($value['actualPrice'])}}" class="actualP form-control actualPrice{{$key}}" name="actualPrice[]" readonly />
+                      </td>
+                      <td class="col-sm-1">
+                        <input type="text" value="{{round($value['dealer_price'])}}" class="form-control dealerP dealerPercent{{$key}}" id="dealerPercent" name="dealer_price[]" readonly />
                       </td>
                       {{-- <input type="hidden" name="dealer[]" value="{{$value['dealer_price']}}" class="form-control" required/>
                       <input type="hidden" name="incentive[]" value="{{$value['incentive']}}" class="form-control" required /> --}}
@@ -356,8 +360,12 @@ if (@$advisor_id) {
       cols += "<td><select class='form-control' id='job_type" + counter + "' onchange='disable_func(" + counter + ")' name='job_type[]'><option value='5' selected>Paid</option><option value='1'>Free of Cost</option><option value='2'>Demo</option><option value='3'>Recheck</option><option value='4'>Repeat Work</option></select></td>";
       cols += '<td><input type="text" value="" class="form-control customer' + counter + '" name="customer[]" id="customer' + counter + '" readonly/></td>';
       // cols += '<td><input type="text" value="" class="form-control discountPrice'+counter+'" name="discountPrice[]"  /></td>';
-      cols += '<td><input type="text" value="" class="form-control difference' + counter + '" name="difference[]" OnKeypress="return isNumber(event)" onkeyup="getdifference(' + counter + ')" required/></td>';
+      cols += '<td><input type="text" value="0" class="form-control difference' + counter + '" name="difference[]" OnKeypress="return isNumber(event)" onkeyup="getdifference(' + counter + ')" required/></td>';
       cols += '<td><input type="text" value="" class="form-control actualPrice' + counter + '" id="actualPrice' + counter + '" name="actualPrice[]" readonly/></td>';
+      cols += '<td><input type="text" value="" class="form-control dealerP dealerPercent' + counter + '" id="dealerPercent' + counter + '" name="dealer_price[]" readonly/></td>';
+
+      
+
       // cols += '<input type="hidden" value="" class="form-control" name="dealer[]" required/>';
       // cols += '<input type="hidden" value="" class="form-control" name="incentive[]" required/>';
       cols += '<td><input type="button" class="ibtnDel btn btn-md btn-danger" id="delete-btn"  value="Delete"></td>';
@@ -383,10 +391,35 @@ if (@$advisor_id) {
     var ids = $(e).val();
     var price = getObjects(complex, 'id', ids);
     var c = $(e).attr('name').replace('name', '');
-    console.log(price);
+    // console.log(price);
     // $(e).parents('tr').find('input[name^="dealer"]').val(price[0].dealer_price);
     $(e).parents('tr').find('input[name^="customer"]').val(price[0].customer_price);
+    $(e).parents('tr').find('input[name^="actualPrice"]').val(price[0].customer_price);
+    // $(e).parents('tr').find('input[name^="dealer_price"]').val(price[0].dealer_price);
     // $(e).parents('tr').find('input[name^="incentive"]').val(price[0].incentive);
+
+    var dealer_id = $('#dealer_id option:selected').val();
+    token = $('input[name=_token]').val();
+            url = '<?php echo url("/"); ?>/getTreatmentPrice';
+            data = {
+              treatment_id: ids,
+              dealer_id: dealer_id,
+            };
+            
+            $.ajax({
+              url: url,
+              headers: {
+                'X-CSRF-TOKEN': token
+              },
+              data: data,
+              type: 'POST',
+              datatype: 'JSON',
+              success: function(resp) {
+                $(e).parents('tr').find('input[name^="dealer_price"]').val(resp.gdp);
+                return false;
+              }
+            });
+            return false;
   }
 
   function getObjects(obj, key, val) {
@@ -526,18 +559,47 @@ if (@$advisor_id) {
   // });
 
   function getdifference(a) {
-    var customer = ".customer" + a;
+    var dealer_id = $('#dealer_id option:selected').val();
+              token = $('input[name=_token]').val();
+              url = '<?php echo url("/"); ?>/getDealerPrice';
+              data = {
+                dealer_id: dealer_id,
+              };
+              
+              $.ajax({
+                url: url,
+                async: false,
+                headers: {
+                  'X-CSRF-TOKEN': token
+                },
+                data: data,
+                type: 'POST',
+                datatype: 'JSON',
+                success: function(resp) {
+                  var customer = ".customer" + a;
     var actualclass = ".actualPrice" + a;
+    var dealerPercent = ".dealerPercent" + a;
     // var discountclass = ".discountPrice"+a;
     var diff = ".difference" + a;
-    // var actualPrice = $(actualclass).val();
+    var actualPrice = $(actualclass).val();
     var diffPrice = $(diff).val();
     // var discountPrice = $(discountclass).val();
     var customerPrice = $(customer).val();
     // var difference = parseInt(actualPrice,10) - parseFloat(customerPrice);
-    var difference = parseFloat(customerPrice) - (parseFloat(customerPrice) * parseInt(diffPrice, 10) / 100);
+    // var difference = parseFloat(customerPrice) - (parseFloat(customerPrice) * parseInt(diffPrice, 10) / 100);
+    var difference = parseFloat(customerPrice) - parseFloat(diffPrice);
     // $(diff).val(isNaN(difference)? 0 : difference.toFixed(2));
-    $(actualclass).val(isNaN(difference) ? 0 : difference.toFixed(2));
+
+    var dealerP = difference * resp/100;
+              var deals = difference - dealerP;
+              var deal = parseFloat(deals);
+
+    $(actualclass).val(isNaN(difference) ? 0 : difference.toFixed());
+    $(dealerPercent).val(isNaN(deal) ? 0 : deal.toFixed());
+                }
+              });
+
+    
   }
 
   function validateForm() {
