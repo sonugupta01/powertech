@@ -335,11 +335,27 @@ class HomeController extends Controller
     public function getTreatmentPrice(Request $request)
     {
         $post = $request->all();
-        $treatment_id = $request->treatment_id;
-        $res = DB::table('treatments')->select('customer_price')
-            ->where('id', $treatment_id)->where('status', 1)
-            ->first()->customer_price;
-        return $res;
+                    $treatment_id = $request->treatment_id;
+
+                    if (!empty($treatment_id)) {
+                        $res['gtp'] = DB::table('treatments')
+                    ->select('customer_price')
+                    ->where('id', $treatment_id)
+                    ->where('status', 1)
+                    ->first()->customer_price;
+
+                    $dealer_id = $request->dealer_id;
+                    $res['share'] = DB::table('dealer_shares')->select('share_percentage')->where('dealer_id', $dealer_id)->orderBy('id', 'DESC')->first()->share_percentage;
+
+                    $res['calc'] = $res['gtp'] * $res['share']/100;
+                    $res['gdp'] = round($res['gtp'] - $res['calc']);
+
+                    } else {
+                        $res['gtp'] = '';
+                        $res['gdp'] = '';
+                    }
+ 
+                    return $res;
     }
 
     // Cron job for sending emails to dealers
