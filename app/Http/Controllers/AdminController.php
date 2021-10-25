@@ -7064,7 +7064,6 @@ class AdminController extends Controller
     public function insertJob(Request $request)
     {
         $post = $request->all();
-        dd($post);
         $actual_price = 0;
         // $discount_price = 0;
         $difference_price = 0;
