@@ -320,6 +320,7 @@ class HomeController extends Controller
                 $treatment = $treat['treatment'];
                 $id = $treat['id'];
                 $res .= "<option value='$id'>$treatment</option>";
+                
             }
         }
         else
