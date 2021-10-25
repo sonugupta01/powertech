@@ -298,35 +298,37 @@ class HomeController extends Controller
     public function getTreatments(Request $request)
     {
         $post = $request->all();
-        $dealer = $request->dealer;
-        $model = $request->model;
-        $dealer_templates = DB::table('dealer_templates')->where('dealer_id', $dealer)->get(['template_id']);
-        $templates = array();
-        foreach ($dealer_templates as $key => $value)
-        {
-            $templates[] = $value->template_id;
-        }
-        $treatments = DB::table('treatments')->select('id', 'treatment', 'treatment_type', 'dealer_price', 'incentive', 'customer_price', 'labour_code')
-        //->where('dealer_id',$dealer)
-        
-            ->whereIn('temp_id', $templates)->where('model_id', $model)->where('status', 1)
-            ->get();
-        $treatments = json_decode(json_encode($treatments) , true);
-        if (@$treatments)
-        {
-            $res = '<option value="">Select Treatment</option>';
-            foreach ($treatments as $treat)
-            {
-                $treatment = $treat['treatment'];
-                $id = $treat['id'];
-                $res .= "<option value='$id'>$treatment</option>";
-            }
-        }
-        else
-        {
-            $res = "<option value=''>No Treatment found</option>";
-        }
-        return $res;
+                    $dealer = $request->dealer;
+                    $model = $request->model;
+                    $dealer_templates = DB::table('dealer_templates')->where('dealer_id', $dealer)->get(['template_id']);
+                    $templates = array();
+                    foreach ($dealer_templates as $key => $value) {
+                        $templates[] = $value->template_id;
+                    }
+                    $treatments = DB::table('treatments')
+                    ->select('id', 'treatment', 'treatment_type', 'dealer_price', 'incentive', 'customer_price', 'labour_code')
+                    //->where('dealer_id',$dealer)
+                    ->whereIn('temp_id', $templates)
+                    ->where('model_id', $model)
+                    ->where('status', 1)
+                    ->get();
+                    $treatments = json_decode(json_encode($treatments), true);
+                    $res = array();
+                    if (@$treatments) {
+                        $res['treat_m'] = '<option value="">Select Treatment</option>';       
+                        foreach ($treatments as $treat) {
+                            $treatment = $treat['treatment'];
+                            $id =  $treat['id'];
+                            $res['treat_m'] = $res['treat_m']."<option value='$id'>$treatment</option>";
+                        }
+                    } else {
+                        $res['treat_m'] = "<option value=''>No Treatment found</option>";
+                        $res['gtp'] = '';
+                        $res['gdp'] = '';
+                        $res['discount'] = '';
+                        $res['actualP'] = '';
+                    }
+                    return $res;
     }
 
     // Get Treatments through dealer id in Ajax
