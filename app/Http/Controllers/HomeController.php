@@ -154,7 +154,10 @@ class HomeController extends Controller
             }
             else
             {
-                $res = "<option value=''>No district found</option>";
+                $treatment = $treat['treatment'];
+                $id = $treat['id'];
+                $res .= "<option value='$id'>$treatment</option>";
+                
             }
             return $res;
         }

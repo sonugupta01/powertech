@@ -30,7 +30,7 @@ build:
     - cp -R /home/devzr01s/public_html/powertech/staging/public /home/devzr01s/public_html/powertech/backup/public
     - cd ..
     - rm -rf /home/devzr01s/public_html/powertech/staging
-    - cp -R powertech /home/devzr01s/public_html/powertech/staging
+    - cp -R power /home/devzr01s/public_html/powertech/staging
     - cp -R /home/devzr01s/public_html/powertech/backup/public /home/devzr01s/public_html/powertech/staging
     - cd /home/devzr01s/public_html/powertech/staging
     - pwd
