@@ -1544,7 +1544,7 @@ class AdminController extends Controller
                 'level' => 'required',
                 'designation' => 'required',
                 'name' => 'required',
-                'email' => 'unique:users,email',
+                'email' => 'nullable|unique:users,email',
                 // 'password' => 'required',
                 'salary' => 'required',
                 'mobile_no' => 'required|digits:10|unique:users,mobile_no',
@@ -1701,7 +1701,6 @@ class AdminController extends Controller
     public function updateStaff(Request $request)
     {
         $post = $request->all();
-        // dd($post);
         if ($post['designation'] == 3) {
             $role = 5;
         } else if (!empty($post['dealer_office'])) {
@@ -1718,7 +1717,7 @@ class AdminController extends Controller
                 'designation' => 'required',
                 'emp_code' => 'required',
                 'name' => 'required',
-                'email' => 'unique:users,email,' . $request->id,
+                'email' => 'nullable|unique:users,email,' . $request->id,
                 'salary' => 'required',
                 'mobile_no' => 'required|digits:10|unique:users,mobile_no,' . $request->id,
                 'doj' => 'required',
