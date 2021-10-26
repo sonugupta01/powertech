@@ -208,7 +208,7 @@ if (@$advisor_id) {
                             </select>
                           </td>
                           <td class="col-sm-2">
-                            <select class="form-control" id="job_type0" name="job_type[]">
+                            <select class="form-control job_type" id="job_type0" name="job_type[]">
                               <option value="5" selected>Paid</option>
                               <option value="1">Free of Cost</option>
                               <option value="2">Demo</option>
@@ -320,9 +320,9 @@ if (@$advisor_id) {
               var selected = $('#myTable').find('tbody select:first').clone();
               $(selected).find('option').removeAttr('selected');
               cols += '<td><select id="treatment_id' + counter + '" name="treatment_id[]" class="form-control treatments" onchange="getprice(' + counter + ')" required>' + $(selected).html() + '</select></td>';
-              cols += "<td><select class='form-control' id='job_type" + counter + "' onchange='disable_func(" + counter + ")' name='job_type[]'><option value='5' selected>Paid</option><option value='1'>Free of Cost</option><option value='2'>Demo</option><option value='3'>Recheck</option><option value='4'>Repeat Work</option></select></td>";
+              cols += "<td><select class='form-control job_type' id='job_type" + counter + "' onchange='disable_func(" + counter + ")' name='job_type[]'><option value='5' selected>Paid</option><option value='1'>Free of Cost</option><option value='2'>Demo</option><option value='3'>Recheck</option><option value='4'>Repeat Work</option></select></td>";
               cols += '<td><input type="text" value="" class="form-control customer_price customer' + counter + '" name="customer[]" id="customer' + counter + '" readonly/></td>';
-              cols += '<td><input type="text" value="0" class="form-control discount difference' + counter + '" name="difference[]" maxlength="" OnKeypress="return isNumber(event)" onkeyup="getdifference(' + counter + ')"  required/></td>';
+              cols += '<td><input type="text" value="" class="form-control discount difference' + counter + '" name="difference[]" maxlength="" OnKeypress="return isNumber(event)" onkeyup="getdifference(' + counter + ')"  required/></td>';
               cols += '<td><input type="text" value="" class="form-control actualP actualPrice' + counter + '" id="actualPrice' + counter + '" name="actualPrice[]"readonly/></td>';
               cols += '<td><input type="text" value="" class="form-control dealerP dealerPercent' + counter + ' id="dealerPercent" name="dealer_price[]" readonly/></td>';
               
@@ -341,31 +341,116 @@ if (@$advisor_id) {
           });
           
           $('#job_type0').on("change", function(e) {
+            // $("#job_type0 option[value='3']").attr("disabled","disabled");
             var job_type = $(this).val();
-            if (this.value == 1) {
-              $(".difference0").val("0").attr("disabled", "disabled");
-              $(".actualPrice0").val("0");
-              // $(".discountPrice0").val("0").attr("disabled", "disabled");
-            } else if (this.value == 2) {
-              $(".difference0").val("0").attr("disabled", "disabled");
-              $(".actualPrice0").val("0");
-              // $(".discountPrice0").val("0").attr("disabled", "disabled");
-            } else if (this.value == 3) {
-              $(".difference0").val("0").attr("disabled", "disabled");
-              $(".actualPrice0").val("0");
-              // $(".discountPrice0").val("0").attr("disabled", "disabled");
-            } else if (this.value == 4) {
-              $(".difference0").val("0").attr("disabled", "disabled");
-              $(".actualPrice0").val("0");
-              // $(".discountPrice0").val("0").attr("disabled", "disabled");
-            } else {
-              $(".difference0").removeAttr("disabled");
-              $(".actualPrice0").val();
-              // $(".discountPrice0").removeAttr("disabled");
-            }
-          });
-          
+            var treatment_id = $('#treatment_id0 option:selected').val();
+            var regn_no = $('#regn_no').val();
+            var dealer_id = $('#dealer_id option:selected').val();
+            token = $('input[name=_token]').val();
+            url = '<?php echo url("/"); ?>/getJobId';
+            url1 = '<?php echo url("/"); ?>/getTreatmentPrice';
+            // url = '<?php echo url("/"); ?>/getModels';
+            data = {
+              treatment_id: treatment_id,
+              regn_no: regn_no,
+            };
+            data1 = {
+              treatment_id: treatment_id,
+              dealer_id: dealer_id,
+            };
+            
+            $.ajax({
+              url: url1,
+              headers: {
+                'X-CSRF-TOKEN': token
+              },
+              data: data1,
+              type: 'POST',
+              datatype: 'JSON',
+              success: function(resp) {
+                console.log(resp);
+                if (job_type == 1) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 2) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 3) {
+                  alert('You are not eligible for this selection.. Please choose another one.');
+                  $('#job_type0').val("5");
+                  // $(".difference0").val("0").attr("disabled", "disabled");
+                  // $(".actualPrice0").val("0");
+                  // $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 4) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else {
+                  $(".difference0").removeAttr("disabled");
+                  $('#customer0').val(resp.gtp);
+                $('.actualPrice0').val(resp.gtp);
+                $('.dealerPercent0').val(resp.gdp);
+                return false;
+                  // $(".discountPrice0").removeAttr("disabled");
+                }
+                return false;
+              }
+            });
+
+            $.ajax({
+              url: url,
+              headers: {
+                'X-CSRF-TOKEN': token
+              },
+              data: data,
+              type: 'POST',
+              datatype: 'JSON',
+              success: function(resp) {
+                if (job_type == 1) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 2) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 3) {
+                  if (resp.status == 0) {
+                    alert('You are not eligible for this selection.. Please choose another one.');
+                  $('#job_type0').val("5");
+                  } else {
+                    $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  } 
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 4) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else {
+                  $(".difference0").removeAttr("disabled");
+                  $('#customer0').val(resp.gtp);
+                $('.actualPrice0').val(resp.gtp);
+                $('.dealerPercent0').val(resp.gdp);
+                return false;
+                  // $(".discountPrice0").removeAttr("disabled");
+                }
+                return false;
+              }
+            });
+          });         
           $('#dealer_id').on("change", function(e) {
+            $('.job_type').val("5");
             var dealer = $("#dealer_id").val();
             token = $('input[name=_token]').val();
             url1 = '<?php echo url("/"); ?>/getModels';
@@ -453,6 +538,10 @@ if (@$advisor_id) {
               datatype: 'JSON',
               success: function(resp) {
                 $(".treatments").html(resp.treat_m);
+                $(".customer_price").val(resp.gtp);
+                $(".discount").val(resp.discount);
+                $(".dealerP").val(resp.gdp);
+                $(".actualP").val(resp.actualP);
                 return false;
               }
             });
@@ -461,6 +550,8 @@ if (@$advisor_id) {
           
           function getprice(i) {
             $('.difference' + i).val("0");
+            $('#job_type' + i).val("5");
+            $(".difference" + i).removeAttr("disabled");
             var dealer_id = $('#dealer_id option:selected').val();
             var id = "#treatment_id" + i;
             var treatment_id = $(id).val();
@@ -481,7 +572,6 @@ if (@$advisor_id) {
               type: 'POST',
               datatype: 'JSON',
               success: function(resp) {
-                console.log(resp.deal);
                 $('#customer' + i).val(resp.gtp);
                 $('.actualPrice' + i).val(resp.gtp);
                 $('.dealerPercent' + i).val(resp.gdp);
@@ -492,37 +582,62 @@ if (@$advisor_id) {
           }
           
           function disable_func(counter) {
-            // $('#job_type'+counter).on("change",function(e) {
               var job_type = $('#job_type' + counter).val();
-              if (job_type == 1) {
-                $(".difference" + counter).val("0").attr("disabled", "disabled");
-                $(".actualPrice" + counter).val("0");
-                // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
-              } else if (job_type == 2) {
-                $(".difference" + counter).val("0").attr("disabled", "disabled");
-                $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
-                // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
-              } else if (job_type == 3) {
-                $(".difference" + counter).val("0").attr("disabled", "disabled");
-                $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
-                // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
-              } else if (job_type == 4) {
-                $(".difference" + counter).val("0").attr("disabled", "disabled");
-                $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
-                // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
-              } else {
-                $(".difference" + counter).removeAttr("disabled");
-                $(".actualPrice" + counter).val();
-                // $(".discountPrice"+counter).removeAttr("disabled");
-              }
+              var id = "#treatment_id" + counter;
+              var treatment_id = $(id).val();
+              var dealer_id = $('#dealer_id option:selected').val();
+              token = $('input[name=_token]').val();
+              url = '<?php echo url("/"); ?>/getJobId';
+              url1 = '<?php echo url("/"); ?>/getTreatmentPrice';
+              data1 = {
+              treatment_id: treatment_id,
+              dealer_id: dealer_id,
+            };
+              
+              $.ajax({
+                url: url1,
+                headers: {
+                  'X-CSRF-TOKEN': token
+                },
+                data: data1,
+                type: 'POST',
+                datatype: 'JSON',
+                success: function(resp) {
+                  console.log(resp);
+                  if (job_type == 1) {
+                    $(".difference" + counter).val("0").attr("disabled", "disabled");
+                    $(".actualPrice" + counter).val("0");
+                    $(".dealerPercent" + counter).val("0");
+                    // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
+                  } else if (job_type == 2) {
+                    $(".difference" + counter).val("0").attr("disabled", "disabled");
+                    $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
+                    $(".dealerPercent" + counter).val("0");
+                    // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
+                  } else if (job_type == 3) {
+                    $(".difference" + counter).val("0").attr("disabled", "disabled");
+                    $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
+                    $(".dealerPercent" + counter).val("0");
+                    // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
+                  } else if (job_type == 4) {
+                    $(".difference" + counter).val("0").attr("disabled", "disabled");
+                    $(".actualPrice" + counter).val("0").attr("disabled", "disabled");
+                    $(".dealerPercent" + counter).val("0");
+                    // $(".discountPrice"+counter).val("0").attr("disabled", "disabled");
+                  } else {
+                    $(".difference" + counter).removeAttr("disabled");
+                  $('#customer' + counter).val(resp.gtp);
+                $('.actualPrice' + counter).val(resp.gtp);
+                $('.dealerPercent' + counter).val(resp.gdp);
+                    // $(".discountPrice"+counter).removeAttr("disabled");
+                  }
+                  return false;
+                }
+              });
               // });
             }
             
-
-            
-            
             function getdifference(a) {
-             
               
               var dealer_id = $('#dealer_id option:selected').val();
               token = $('input[name=_token]').val();
@@ -542,56 +657,56 @@ if (@$advisor_id) {
                 datatype: 'JSON',
                 success: function(resp) {
                   
-               percentage = resp;
-              var customer = ".customer" + a;
-              var actualclass = ".actualPrice" + a;
-              var dealerPercent = ".dealerPercent" + a;
-              var diff = ".difference" + a;
-              var diffPrice = $(diff).val();
-              
-              var customerPrice = $(customer).val();
-              // var difference = parseFloat(customerPrice) - (parseFloat(customerPrice) * parseInt(diffPrice, 10) / 100);
-              var difference = parseFloat(customerPrice) - parseFloat(diffPrice);
-              
-              var dealerP = difference * percentage/100;
-              var deals = difference - dealerP;
-              var deal = parseFloat(deals);
-              // $(diff).val(isNaN(difference)? 0 : difference.toFixed(2));
-              $(actualclass).val(isNaN(difference) ? 0 : difference.toFixed());
-              $(dealerPercent).val(isNaN(deal) ? 0 : deal.toFixed());
+                  percentage = resp;
+                  var customer = ".customer" + a;
+                  var actualclass = ".actualPrice" + a;
+                  var dealerPercent = ".dealerPercent" + a;
+                  var diff = ".difference" + a;
+                  var diffPrice = $(diff).val();
+                  
+                  var customerPrice = $(customer).val();
+                  // var difference = parseFloat(customerPrice) - (parseFloat(customerPrice) * parseInt(diffPrice, 10) / 100);
+                  var difference = parseFloat(customerPrice) - parseFloat(diffPrice);
+                  
+                  var dealerP = difference * percentage/100;
+                  var deals = difference - dealerP;
+                  var deal = parseFloat(deals);
+                  // $(diff).val(isNaN(difference)? 0 : difference.toFixed(2));
+                  $(actualclass).val(isNaN(difference) ? 0 : difference.toFixed());
+                  $(dealerPercent).val(isNaN(deal) ? 0 : deal.toFixed());
                 }
               });
               
               
             }
             // $('.difference' + i).keyup(function (e){
-            //     alert(e.keyCode);
-            //   })
-            
-            // var $tblrows = $("#myTable tbody tr");
-            // $tblrows.each(function (index) {
-              //     var $tblrow = $(this);
-              //     $tblrow.find(".actualPrice").on("keyup", function () {
-                //         var actualPrice = $tblrow.find("[name*=actualPrice]").val();
-                //         var customerPrice = $tblrow.find("[name*=customer]").val();
-                //         var sum = 0;
-                //         $(".actualPrice").each(function() {
-                  //             var value = $(this).val();
-                  //             if(!isNaN(value) && value.length != 0) {
-                    //                 sum += parseFloat(value);
-                    //             }
-                    //         });
-                    //         var difference = parseInt(actualPrice,10) - parseFloat(customerPrice);
-                    //         if (!isNaN(actualPrice)) {
-                      //             $tblrow.find(".difference").val(isNaN(difference)? 0 : difference);
-                      //         } 
-                      //     });
-                      // });
-                      function validateForm() {
-                        if ($('#user_id').val() == '') {
-                          alert("Please Select User");
-                          return false;
+              //     alert(e.keyCode);
+              //   })
+              
+              // var $tblrows = $("#myTable tbody tr");
+              // $tblrows.each(function (index) {
+                //     var $tblrow = $(this);
+                //     $tblrow.find(".actualPrice").on("keyup", function () {
+                  //         var actualPrice = $tblrow.find("[name*=actualPrice]").val();
+                  //         var customerPrice = $tblrow.find("[name*=customer]").val();
+                  //         var sum = 0;
+                  //         $(".actualPrice").each(function() {
+                    //             var value = $(this).val();
+                    //             if(!isNaN(value) && value.length != 0) {
+                      //                 sum += parseFloat(value);
+                      //             }
+                      //         });
+                      //         var difference = parseInt(actualPrice,10) - parseFloat(customerPrice);
+                      //         if (!isNaN(actualPrice)) {
+                        //             $tblrow.find(".difference").val(isNaN(difference)? 0 : difference);
+                        //         } 
+                        //     });
+                        // });
+                        function validateForm() {
+                          if ($('#user_id').val() == '') {
+                            alert("Please Select User");
+                            return false;
+                          }
                         }
-                      }
-                    </script>
-                    @endsection
+                      </script>
+                      @endsection

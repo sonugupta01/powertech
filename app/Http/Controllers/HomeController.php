@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\atten_report;
 use Excel;
 use Illuminate\Support\Facades\Log;
+use DateTime;
 
 class HomeController extends Controller
 {
@@ -219,6 +220,45 @@ class HomeController extends Controller
                     {
                         $res = "<option value=''>No Model found</option>";
                     }
+                    return $res;
+                }
+                
+                public function getJobId(Request $request)
+                {
+                    $current_date = getCurrentDate();
+                    $res = array();
+                    $res['status'] = 0;
+                    $valid = DB::table('treatments')->where('id', $request->treatment_id)->first();
+                    $time_period = $valid->time_period;
+                    $time_unit = $valid->time_unit;
+                    
+                    if ($time_unit == 1) {
+                        $res['total_days'] = $time_period * 365; 
+                    } elseif ($time_unit == 2) {
+                        $res['total_days'] = $time_period * 30;
+                    } elseif ($time_unit == 3) {
+                        $res['total_days'] = $time_period;
+                    }
+                    
+                    $job_id = DB::table('jobs_treatment')->where('treatment_id', $request->treatment_id)->first();
+                    if (!empty($job_id)) {
+                        $data = DB::table('jobs')->where('id', $job_id->job_id)->first();
+                        $regn_no = $data->regn_no;
+                        $date_added = $data->date_added;
+                        if ($regn_no == $request->regn_no) {
+                            $diff = strtotime($current_date) - strtotime($date_added);
+                            $days_spent = ceil(abs($diff / 86400));
+                            if ($days_spent < $res['total_days']) {
+                                $res['status'] == 1;
+                            } else {
+                                $res['status'] == 0;
+                            }                 
+                        } else {
+                            $res['status'] == 0;
+                        }
+                    } else {
+                        $res['status'] == 0;
+                    }   
                     return $res;
                 }
                 

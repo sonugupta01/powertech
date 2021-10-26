@@ -288,7 +288,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="row">
+                  {{-- <div class="row">
                     <div class="col-md-12">
                       <div class="form-group{{ $errors->has('user_group') ? ' has-error' : '' }}" id="user_group">
                         <label for="user_group">User Group<span class="required-title">*</span></label>
@@ -305,7 +305,7 @@
                         @endif
                       </div>
                     </div>
-                  </div>
+                  </div> --}}
                   <div class="row">
                     <div class="col-md-6">
                       <div class="form-group{{ $errors->has('doj') ? ' has-error' : '' }}">

@@ -33,6 +33,7 @@ Route::post('/getAdvisors', 'HomeController@getAdvisors'); //get advisors throug
 Route::post('/getTreatments', 'HomeController@getTreatments'); //get treatments through ajax
 Route::post('/getTreatmentPrice', 'HomeController@getTreatmentPrice'); //get treatment price through ajax
 Route::post('/getDealerPrice', 'HomeController@getDealerPrice'); //get Dealer price through ajax
+Route::post('/getJobId', 'HomeController@getJobId'); //get Job id through ajax
 Auth::routes();
 /* Admin Panel */
 Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','admin']], function(){
