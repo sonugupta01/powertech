@@ -4844,10 +4844,25 @@ class AdminController extends Controller
                 $array4['difference_price'] = @$v2->difference;
                 $array4['dealer_price'] = @$v2->dealer_price;
                 $array4['incentive'] = @$v2->incentive;
+                $array4['treatment_id'] = @$v2->id;
+
+                // find all brands by treatment id 
+                $treatment_products = DB::table("products_treatments")
+                    ->where('products_treatments.tre_id', @$v2->id)
+                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                    ->select('products.brand_id')
+                    ->groupBy('products.brand_id')->get();
+
+
+                $brands = [];
+                foreach ($treatment_products as $key => $value) {
+                    $brands[] = $value->brand_id;
+                }
+                $array4['brands'] = $brands;
                 $result4[] = $array4;
             }
         }
-
+        // dd($result4);
         /************************************ Firm Wise Report End *************************/
         /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
@@ -4934,6 +4949,22 @@ class AdminController extends Controller
                 $array3['difference_price'] = @$v1->difference;
                 $array3['dealer_price'] = @$v1->dealer_price;
                 $array3['incentive'] = @$v1->incentive;
+
+                $array3['treatment_id'] = @$v1->id;
+
+                // find all brands by treatment id 
+                $treatment_products = DB::table("products_treatments")
+                    ->where('products_treatments.tre_id', @$v1->id)
+                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                    ->select('products.brand_id')
+                    ->groupBy('products.brand_id')->get();
+
+
+                $brands = [];
+                foreach ($treatment_products as $key => $value) {
+                    $brands[] = $value->brand_id;
+                }
+                $array3['brands'] = $brands;
                 $result3[] = $array3;
             }
         }
@@ -5021,6 +5052,22 @@ class AdminController extends Controller
                 $array['difference_price'] = @$val->difference;
                 $array['dealer_price'] = @$val->dealer_price;
                 $array['incentive'] = @$val->incentive;
+
+                $array['treatment_id'] = @$val->id;
+
+                // find all brands by treatment id 
+                $treatment_products = DB::table("products_treatments")
+                    ->where('products_treatments.tre_id', @$val->id)
+                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                    ->select('products.brand_id')
+                    ->groupBy('products.brand_id')->get();
+
+
+                $brands = [];
+                foreach ($treatment_products as $key => $value) {
+                    $brands[] = $value->brand_id;
+                }
+                $array['brands'] = $brands;
                 $result1[] = $array;
             }
         }
@@ -5223,10 +5270,29 @@ class AdminController extends Controller
 
         Session::put('oldReport', $type);
 
+        // brand list start
+        $brands = DB::table("product_brands")->where('status', 1)->get();
+        // brand list end
+        // dd($result4);
+        if (!empty(request()->brand)) {
+
+
+            // filter by brand id 
+            $a =  array_filter($result1, fn ($value) => in_array(request()->brand, $value['brands']));
+            $b =  array_filter($result3, fn ($value) => in_array(request()->brand, $value['brands']));
+            $c =  array_filter($result4, fn ($value) => in_array(request()->brand, $value['brands']));
+
+            $result1 = $a;
+            $result3 = $b;
+            $result4 = $c;
+        }
+
+        // dd($result4);
         return view('admin.dailyReport', [
             'result' => $result1,
             'result3' => $result3,
             'result4' => $result4,
+            'brands' => $brands,
             'total_incentive' => $total_incentive,
             'advisors' => $advisors,
             'allAdvisors' => $allAdvisors,

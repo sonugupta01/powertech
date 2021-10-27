@@ -118,6 +118,21 @@
                         @endforeach
                       </select>
                     </div> --}}
+
+
+                    {{-- brand dropdown start filter --}}
+                    <div class="form-group report-field col-md-12 col-sm-12 col-xs-12">
+                      <label>Brands</label>
+                      <select class="form-control" id="brand" name="brand">
+                        <option value="">Select Brand</option>
+                        @foreach($brands as $value)
+                        <option {{(@request()->brand==$value->id)?'selected':''}} value="{{$value->id}}">{{$value->brand_name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    {{-- brand dropdown end filter --}}
+
+
                     <div class="form-group report-field col-md-12 col-sm-12 col-xs-12">
                       <label>Report Type</label>
                       <div class="form-control required">

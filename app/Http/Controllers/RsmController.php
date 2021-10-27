@@ -1832,6 +1832,22 @@ class RsmController extends Controller
                 $array['difference_price'] = @$val->difference;
                 $array['dealer_price'] = @$val->dealer_price;
                 $array['incentive'] = $val->incentive;
+
+
+                // find all brands by treatment id 
+                $treatment_products = DB::table("products_treatments")
+                    ->where('products_treatments.tre_id', @$val->id)
+                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                    ->select('products.brand_id')
+                    ->groupBy('products.brand_id')->get();
+
+
+                $brands = [];
+                foreach ($treatment_products as $key => $value) {
+                    $brands[] = $value->brand_id;
+                }
+                $array['brands'] = $brands;
+
                 $result1[] = $array;
             }
         }
@@ -2024,9 +2040,24 @@ class RsmController extends Controller
 
         /************************************ Advisor Wise Report End *************************/
 
+        // brand list start
+        $brands = DB::table("product_brands")->where('status', 1)->get();
+        // brand list end
+        // dd($result4);
+        if (!empty(request()->brand)) {
+
+
+            // filter by brand id 
+            $a =  array_filter($result1, fn ($value) => in_array(request()->brand, $value['brands']));
+
+            $result1 = $a;
+        }
+
+
         Session::put('oldReport', $type);
         return view('rsm.dailyReport', [
             'result' => $result1,
+            'brands' => $brands,
             'total_incentive' => $total_incentive,
             'advisors' => $advisors,
             'allAdvisors' => $allAdvisors,
