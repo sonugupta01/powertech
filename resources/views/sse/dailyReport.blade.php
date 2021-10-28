@@ -133,7 +133,7 @@
                         <thead>
                          <?php 
                             $i=1;  
-                            $total_cp=$total_ap=$total_diff=$total_dp=$total_int=0;
+                            $total_cp=$total_ap=$total_diff==$total_pt_share$total_dp=$total_int=0;
                           foreach($result as $value1) {
                               if (@$value1['job_type'] == '5') {
                                 $customer_price = $value1['customer_price'];
@@ -141,18 +141,21 @@
                                 $difference_price = @$value1['difference_price'];
                                 $dealer_price = $value1['dealer_price'];
                                 $incentive = $value1['incentive'];
+                                $powertech_share = @$value1['powertechPrice'];
                               } else {
                                 $customer_price = 0;
                                 $actual_price = 0;
                                 $difference_price = 0;
                                 $dealer_price = 0;
                                 $incentive = 0;
+                                $powertech_share = 0;
                               }
                               $total_cp= $total_cp+$customer_price;
                               $total_ap= $total_ap+$actual_price;
                               $total_diff= $total_diff+$difference_price;
                               $total_dp= $total_dp+$dealer_price;
                               $total_int= $total_int+$incentive;
+                              $total_pt_share= $total_pt_share+$powertech_share;
                             
                             }  ?>
                           <tr>
@@ -182,6 +185,7 @@
                             <th style="background-color: #FFFF00;">Actual Price</th>
                             <th style="background-color: #FFFF00;">Difference</th>
                             <th style="background-color: #FFFF00;">Dealer Price</th>
+                            <th style="background-color: #FFFF00;">PT Share</th>
                             <th style="background-color: #FFFF00;">Incentive</th>
                             <th>Remark</th>
                           </tr>
@@ -205,6 +209,7 @@
                                 <td>{{round(@$value['actual_price'])}}</td>
                                 <td>{{round(@$value['difference_price'])}}</td>
                                 <td>{{round($value['dealer_price'])}}</td>
+                                <td>{{round(@$value['powertechPrice'])}}</td>
                                 <td>{{round($value['incentive'])}}</td>
                                 <td>{{$value['remarks']}}</td>
                               </tr>                            

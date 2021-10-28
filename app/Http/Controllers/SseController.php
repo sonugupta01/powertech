@@ -2338,6 +2338,7 @@ class SseController extends Controller
                 $array['difference_price'] = @$val->difference;
                 $array['dealer_price'] = @$val->dealer_price;
                 $array['incentive'] = $val->incentive;
+                $array['powertechPrice'] = @$val->powertechPrice;
 
 
                 // find all brands by treatment id 
@@ -2644,9 +2645,9 @@ class SseController extends Controller
 
             $array = array();
             $result1 = array();
-            $customer_price = $actual_price = $difference_price = $dealer_price = $incentive = 0;
-            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($result, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
-                $excel->sheet('sheet', function ($sheet) use ($result, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+            $customer_price = $actual_price = $total_pt_share = $difference_price = $dealer_price = $incentive = 0;
+            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($result, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+                $excel->sheet('sheet', function ($sheet) use ($result, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
                     foreach ($result as $key => $value) {
                         $decoded = json_decode($value->treatments);
                         foreach ($decoded as $val) {
@@ -2656,10 +2657,11 @@ class SseController extends Controller
                                 $incentive = $incentive + round($val->incentive);
                                 $actual_price = $actual_price + round(@$val->actualPrice);
                                 $difference_price = $difference_price + round(@$val->difference);
+                                $total_pt_share = $total_pt_share +  @$val->powertechPrice;
                             }
                         }
                     }
-                    $sheet->setBorder('P1:T2');
+                    $sheet->setBorder('P1:U2');
                     $sheet->cells('P1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
@@ -2675,6 +2677,9 @@ class SseController extends Controller
                     $sheet->cells('T1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
+                    $sheet->cells('U1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
 
                     $sheet->setCellValue('P1', 'Customer_Price');
                     $sheet->setCellValue('P2', $customer_price);
@@ -2686,6 +2691,8 @@ class SseController extends Controller
                     $sheet->setCellValue('S2', $actual_price);
                     $sheet->setCellValue('T1', 'Difference');
                     $sheet->setCellValue('T2', $difference_price);
+                    $sheet->setCellValue('U1', 'Total PT Share');
+                    $sheet->setCellValue('U2', (string)$total_pt_share);
                     foreach ($result as $key => $value) {
                         $array['Job_Date'] = date("d-M-Y", strtotime($value->job_date));
                         $array['Job_Card_No'] = $value->job_card_no;
@@ -2699,6 +2706,7 @@ class SseController extends Controller
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
                             $array['Dealer_Price'] = round($val->dealer_price);
+                            $array['powertechPrice'] = round(@$val->powertechPrice);
                             $array['Incentive'] = round($val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);

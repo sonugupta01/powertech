@@ -161,7 +161,7 @@
                         $customer_price = $value4['customer_price'];
                         $actual_price = $value4['actual_price'];
                         $difference_price = $value4['difference_price'];
-                        $powertech_share = 0;
+                        $powertech_share = @$value4['powertechPrice'];
                         $dealer_price = $value4['dealer_price'];
                         $incentive = $value4['incentive'];
                       } else {
@@ -232,7 +232,7 @@
                           <td>{{round(@$val4['actual_price'])}}</td>
                           <td>{{round(@$val4['difference_price'])}}</td>
                           <td>{{round($val4['dealer_price'])}}</td>
-                          <td>{{round($powertech_share)}}</td>
+                          <td>{{round(@$val4['powertechPrice'])}}</td>
                           <td>{{round($val4['incentive'])}}</td>
                           <td>{{$val4['remarks']}}</td>
                         </tr>                            
@@ -261,7 +261,7 @@
                           $actual_price = @$value3['actual_price'];
                           $difference_price = @$value3['difference_price'];
                           $dealer_price = $value3['dealer_price'];
-                          $powertech_share = 0;
+                          $powertech_share = @$value3['powertechPrice'];
                           $incentive = $value3['incentive'];
                         } else {
                           $customer_price = 0;
@@ -331,7 +331,7 @@
                           <td>{{round(@$val3['actual_price'])}}</td>
                           <td>{{round(@$val3['difference_price'])}}</td>
                           <td>{{round($val3['dealer_price'])}}</td>
-                          <td>{{round($powertech_share)}}</td>
+                          <td>{{round(@$val3['powertechPrice'])}}</td>
                           <td>{{round($val3['incentive'])}}</td>
                           <td>{{$val3['remarks']}}</td>
                         </tr>                            
@@ -361,7 +361,7 @@
                           $actual_price = @$value1['actual_price'];
                           $difference_price = @$value1['difference_price'];
                           $dealer_price = $value1['dealer_price'];
-                          $powertech_share = 0;
+                          $powertech_share = @$value1['powertechPrice'];
                           $incentive = $value1['incentive'];
                         } else {
                           $customer_price = 0;
@@ -371,13 +371,14 @@
                           $powertech_share = 0;
                           $incentive = 0;
                         }
+                        
                         $total_cp= $total_cp+$customer_price;
                         $total_ap= $total_ap+$actual_price;
                         $total_diff= $total_diff+$difference_price;
                         $total_dp= $total_dp+$dealer_price;
                         $total_pt_share= $total_pt_share+$powertech_share;
                         $total_int= $total_int+$incentive;
-                      
+
                       }
                       ?>
                     <tr>
@@ -431,7 +432,7 @@
                           <td>{{round(@$value['actual_price'])}}</td>
                           <td>{{round(@$value['difference_price'])}}</td>
                           <td>{{round($value['dealer_price'])}}</td>
-                          <td>{{round($powertech_share)}}</td>
+                          <td>{{round(@$value['powertechPrice'])}}</td>
                           <td>{{round($value['incentive'])}}</td>
                           <td>{{$value['remarks']}}</td>
                         </tr>                            

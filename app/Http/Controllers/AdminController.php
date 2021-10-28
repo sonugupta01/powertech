@@ -4843,6 +4843,7 @@ class AdminController extends Controller
                 $array4['actual_price'] = @$v2->actualPrice;
                 $array4['difference_price'] = @$v2->difference;
                 $array4['dealer_price'] = @$v2->dealer_price;
+                $array4['powertechPrice'] = @$v2->powertechPrice;
                 $array4['incentive'] = @$v2->incentive;
                 $array4['treatment_id'] = @$v2->id;
 
@@ -4949,6 +4950,7 @@ class AdminController extends Controller
                 $array3['difference_price'] = @$v1->difference;
                 $array3['dealer_price'] = @$v1->dealer_price;
                 $array3['incentive'] = @$v1->incentive;
+                $array3['powertechPrice'] = @$v1->powertechPrice;
 
                 $array3['treatment_id'] = @$v1->id;
 
@@ -5052,6 +5054,7 @@ class AdminController extends Controller
                 $array['difference_price'] = @$val->difference;
                 $array['dealer_price'] = @$val->dealer_price;
                 $array['incentive'] = @$val->incentive;
+                $array['powertechPrice'] = @$val->powertechPrice;
 
                 $array['treatment_id'] = @$val->id;
 
@@ -5665,60 +5668,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ ASM Wise Report Start *************************/
+        /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
-        ->select('j.*')
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['asm'])) {
-                    if (!empty(trim($search['asm']))) {
-                        $query->whereIn('j.dealer_id', $d_ids);
+            ->select('j.*')
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['asm'])) {
+                        if (!empty(trim($search['asm']))) {
+                            $query->whereIn('j.dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('j.dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('j.dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('j.advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('j.department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('j.advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('j.department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                        $query->whereDate('j.job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('j.job_date', $exp[1]);
-                        $query->whereYear('j.job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                            $query->whereDate('j.job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('j.job_date', $exp[1]);
+                            $query->whereYear('j.job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('j.job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('j.job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('j.job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->orderBy('j.job_date', 'ASC')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->orderBy('j.job_date', 'ASC')
+            ->get();
 
         /************************************ Dealer Wise Report Start *************************/
         $result = DB::table('jobs as j')
@@ -5775,60 +5778,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ Advisor Wise Report Start *************************/
+        /************************************ Advisor Wise Report Start *************************/
         $data = DB::table('jobs')
-        ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['firm'])) {
-                    if (!empty(trim($search['firm']))) {
-                        $query->whereIn('dealer_id', $d_ids);
+            ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('job_date', $exp[1]);
-                        $query->whereYear('job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('job_date', $exp[1]);
+                            $query->whereYear('job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->groupBy('advisor_id')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->groupBy('advisor_id')
+            ->get();
 
         Session::put('oldReport', $type);
 
@@ -5851,7 +5854,7 @@ class AdminController extends Controller
             'oldReport' => @$type,
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
-        ]);   
+        ]);
     }
     public function percentageBusinessReport(Request $request)
     {
@@ -5992,60 +5995,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ ASM Wise Report Start *************************/
+        /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
-        ->select('j.*')
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['asm'])) {
-                    if (!empty(trim($search['asm']))) {
-                        $query->whereIn('j.dealer_id', $d_ids);
+            ->select('j.*')
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['asm'])) {
+                        if (!empty(trim($search['asm']))) {
+                            $query->whereIn('j.dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('j.dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('j.dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('j.advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('j.department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('j.advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('j.department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                        $query->whereDate('j.job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('j.job_date', $exp[1]);
-                        $query->whereYear('j.job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                            $query->whereDate('j.job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('j.job_date', $exp[1]);
+                            $query->whereYear('j.job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('j.job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('j.job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('j.job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->orderBy('j.job_date', 'ASC')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->orderBy('j.job_date', 'ASC')
+            ->get();
 
         /************************************ Dealer Wise Report Start *************************/
         $result = DB::table('jobs as j')
@@ -6102,60 +6105,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ Advisor Wise Report Start *************************/
+        /************************************ Advisor Wise Report Start *************************/
         $data = DB::table('jobs')
-        ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['firm'])) {
-                    if (!empty(trim($search['firm']))) {
-                        $query->whereIn('dealer_id', $d_ids);
+            ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('job_date', $exp[1]);
-                        $query->whereYear('job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('job_date', $exp[1]);
+                            $query->whereYear('job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->groupBy('advisor_id')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->groupBy('advisor_id')
+            ->get();
 
         Session::put('oldReport', $type);
 
@@ -6178,7 +6181,7 @@ class AdminController extends Controller
             'oldReport' => @$type,
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
-        ]);   
+        ]);
     }
 
     public function undoneTreatmentsReport(Request $request)
@@ -6320,60 +6323,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ ASM Wise Report Start *************************/
+        /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
-        ->select('j.*')
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['asm'])) {
-                    if (!empty(trim($search['asm']))) {
-                        $query->whereIn('j.dealer_id', $d_ids);
+            ->select('j.*')
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['asm'])) {
+                        if (!empty(trim($search['asm']))) {
+                            $query->whereIn('j.dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('j.dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('j.dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('j.advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('j.department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('j.advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('j.department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                        $query->whereDate('j.job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('j.job_date', $exp[1]);
-                        $query->whereYear('j.job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                            $query->whereDate('j.job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('j.job_date', $exp[1]);
+                            $query->whereYear('j.job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('j.job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('j.job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('j.job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->orderBy('j.job_date', 'ASC')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->orderBy('j.job_date', 'ASC')
+            ->get();
 
         /************************************ Dealer Wise Report Start *************************/
         $result = DB::table('jobs as j')
@@ -6430,60 +6433,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ Advisor Wise Report Start *************************/
+        /************************************ Advisor Wise Report Start *************************/
         $data = DB::table('jobs')
-        ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['firm'])) {
-                    if (!empty(trim($search['firm']))) {
-                        $query->whereIn('dealer_id', $d_ids);
+            ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('job_date', $exp[1]);
-                        $query->whereYear('job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('job_date', $exp[1]);
+                            $query->whereYear('job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->groupBy('advisor_id')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->groupBy('advisor_id')
+            ->get();
 
         Session::put('oldReport', $type);
 
@@ -6506,7 +6509,7 @@ class AdminController extends Controller
             'oldReport' => @$type,
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
-        ]);   
+        ]);
     }
 
     public function jobTypesReport(Request $request)
@@ -6648,60 +6651,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ ASM Wise Report Start *************************/
+        /************************************ ASM Wise Report Start *************************/
         $AsmResult = DB::table('jobs as j')
-        ->select('j.*')
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['asm'])) {
-                    if (!empty(trim($search['asm']))) {
-                        $query->whereIn('j.dealer_id', $d_ids);
+            ->select('j.*')
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['asm'])) {
+                        if (!empty(trim($search['asm']))) {
+                            $query->whereIn('j.dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('j.dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('j.dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('j.advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('j.department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('j.advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('j.department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                        $query->whereDate('j.job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('j.job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('j.job_date', $exp[1]);
-                        $query->whereYear('j.job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                            $query->whereDate('j.job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('j.job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('j.job_date', $exp[1]);
+                            $query->whereYear('j.job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('j.job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('j.job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('j.job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->orderBy('j.job_date', 'ASC')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->orderBy('j.job_date', 'ASC')
+            ->get();
 
         /************************************ Dealer Wise Report Start *************************/
         $result = DB::table('jobs as j')
@@ -6758,60 +6761,60 @@ class AdminController extends Controller
             ->orderBy('j.job_date', 'ASC')
             ->get();
 
-            /************************************ Advisor Wise Report Start *************************/
+        /************************************ Advisor Wise Report Start *************************/
         $data = DB::table('jobs')
-        ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
-        ->where(function ($query) use ($search, $d_ids) {
-            if (!empty($search)) {
-                if (isset($search['firm'])) {
-                    if (!empty(trim($search['firm']))) {
-                        $query->whereIn('dealer_id', $d_ids);
+            ->select(DB::raw('group_concat(id) as job_id, SUM(customer_price) as vas_customer_price, SUM(actual_price) as vas_actual_price, SUM(difference_price) as vas_difference, SUM(hvt_value) as hvt_customer_price,SUM(hvt_value) as hvt_actual_price,  SUM(incentive) as vas_incentive, advisor_id, job_date'))
+            ->where(function ($query) use ($search, $d_ids) {
+                if (!empty($search)) {
+                    if (isset($search['firm'])) {
+                        if (!empty(trim($search['firm']))) {
+                            $query->whereIn('dealer_id', $d_ids);
+                        }
                     }
-                }
-                if (isset($search['dealer'])) {
-                    if (!empty(trim($search['dealer']))) {
-                        $query->where('dealer_id', '=', $search['dealer']);
+                    if (isset($search['dealer'])) {
+                        if (!empty(trim($search['dealer']))) {
+                            $query->where('dealer_id', '=', $search['dealer']);
+                        }
                     }
-                }
-                // if(isset($search['advisor'])){
-                //     if(!empty(trim($search['advisor']))){
-                //         $query->where('advisor_id','=',$search['advisor']);
-                //     }
-                // }
-                if (isset($search['department'])) {
-                    if (!empty(trim($search['department']))) {
-                        $query->where('department_id', '=', $search['department']);
+                    // if(isset($search['advisor'])){
+                    //     if(!empty(trim($search['advisor']))){
+                    //         $query->where('advisor_id','=',$search['advisor']);
+                    //     }
+                    // }
+                    if (isset($search['department'])) {
+                        if (!empty(trim($search['department']))) {
+                            $query->where('department_id', '=', $search['department']);
+                        }
                     }
-                }
-                if (isset($search['from']) && isset($search['to'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['to'])) {
-                    if (!empty(trim($search['to']))) {
-                        $query->whereDate('job_date', '<=', $search['to']);
-                    }
-                } elseif (isset($search['from'])) {
-                    if (!empty(trim($search['from']))) {
-                        $query->whereDate('job_date', '>=', $search['from']);
-                    }
-                } elseif (isset($search['month1'])) {
-                    if (!empty(trim($search['month1']))) {
-                        $exp = explode('-', $search['month1']);
-                        $query->whereMonth('job_date', $exp[1]);
-                        $query->whereYear('job_date', $exp[0]);
+                    if (isset($search['from']) && isset($search['to'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['to'])) {
+                        if (!empty(trim($search['to']))) {
+                            $query->whereDate('job_date', '<=', $search['to']);
+                        }
+                    } elseif (isset($search['from'])) {
+                        if (!empty(trim($search['from']))) {
+                            $query->whereDate('job_date', '>=', $search['from']);
+                        }
+                    } elseif (isset($search['month1'])) {
+                        if (!empty(trim($search['month1']))) {
+                            $exp = explode('-', $search['month1']);
+                            $query->whereMonth('job_date', $exp[1]);
+                            $query->whereYear('job_date', $exp[0]);
+                        }
+                    } else {
+                        $query->whereDate('job_date', '=', date("Y-m-d"));
                     }
                 } else {
                     $query->whereDate('job_date', '=', date("Y-m-d"));
                 }
-            } else {
-                $query->whereDate('job_date', '=', date("Y-m-d"));
-            }
-        })
-        ->where('delete_job', 1)
-        ->groupBy('advisor_id')
-        ->get();
+            })
+            ->where('delete_job', 1)
+            ->groupBy('advisor_id')
+            ->get();
 
         Session::put('oldReport', $type);
 
@@ -6834,7 +6837,7 @@ class AdminController extends Controller
             'oldReport' => @$type,
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
-        ]);   
+        ]);
     }
 
     // View DCF report
@@ -7102,9 +7105,9 @@ class AdminController extends Controller
 
             $array = array();
             $result1 = array();
-            $customer_price = $actual_price = $difference_price = $dealer_price = $incentive = 0;
-            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($result, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
-                $excel->sheet('sheet', function ($sheet) use ($result, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+            $customer_price = $actual_price = $total_pt_share = $difference_price = $dealer_price = $incentive = 0;
+            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($result, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+                $excel->sheet('sheet', function ($sheet) use ($result, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price, $total_pt_share) {
                     foreach ($result as $key => $value) {
                         $decoded = json_decode($value->treatments);
                         foreach ($decoded as $val) {
@@ -7114,10 +7117,11 @@ class AdminController extends Controller
                                 $incentive = $incentive + round(@$val->incentive);
                                 $actual_price = $actual_price + round(@$val->actualPrice);
                                 $difference_price = $difference_price + round(@$val->difference);
+                                $total_pt_share = $total_pt_share +  @$val->powertechPrice;
                             }
                         }
                     }
-                    $sheet->setBorder('P1:T2');
+                    $sheet->setBorder('P1:U2');
                     $sheet->cells('P1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
@@ -7143,6 +7147,8 @@ class AdminController extends Controller
                     $sheet->setCellValue('S2', (string)$actual_price);
                     $sheet->setCellValue('T1', 'Difference');
                     $sheet->setCellValue('T2', (string)$difference_price);
+                    $sheet->setCellValue('U1', 'Total PT Share');
+                    $sheet->setCellValue('U2', (string)$total_pt_share);
                     foreach ($result as $key => $value) {
                         $array['Job_Date'] = date("d-M-Y", strtotime($value->job_date));
                         $array['Job_Card_No'] = $value->job_card_no;
@@ -7156,6 +7162,7 @@ class AdminController extends Controller
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
                             $array['Dealer_Price'] = round(@$val->dealer_price);
+                            $array['powertechPrice'] = round(@$val->powertechPrice);
                             $array['Incentive'] = round(@$val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
@@ -7278,9 +7285,9 @@ class AdminController extends Controller
 
             $array = array();
             $result2 = array();
-            $customer_price = $actual_price = $difference_price = $dealer_price = $incentive = 0;
-            return Excel::create('Firm_' . date("d-M-Y"), function ($excel) use ($FirmResult, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
-                $excel->sheet('sheet', function ($sheet) use ($FirmResult, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+            $customer_price = $actual_price = $total_pt_share = $difference_price = $dealer_price = $incentive = 0;
+            return Excel::create('Firm_' . date("d-M-Y"), function ($excel) use ($FirmResult, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+                $excel->sheet('sheet', function ($sheet) use ($FirmResult, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
                     foreach ($FirmResult as $key => $value) {
                         $decoded = json_decode($value->treatments);
                         foreach ($decoded as $val) {
@@ -7290,10 +7297,11 @@ class AdminController extends Controller
                                 $incentive = $incentive + round($val->incentive);
                                 $actual_price = $actual_price + round(@$val->actualPrice);
                                 $difference_price = $difference_price + round(@$val->difference);
+                                $total_pt_share = $total_pt_share +  @$val->powertechPrice;
                             }
                         }
                     }
-                    $sheet->setBorder('P1:T2');
+                    $sheet->setBorder('P1:U2');
                     $sheet->cells('P1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
@@ -7309,6 +7317,9 @@ class AdminController extends Controller
                     $sheet->cells('T1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
+                    $sheet->cells('U1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
                     $sheet->setCellValue('P1', 'Customer_Price');
                     $sheet->setCellValue('P2', (string)$customer_price);
                     $sheet->setCellValue('Q1', 'Dealer_Price');
@@ -7319,6 +7330,8 @@ class AdminController extends Controller
                     $sheet->setCellValue('S2', (string)$actual_price);
                     $sheet->setCellValue('T1', 'Difference');
                     $sheet->setCellValue('T2', (string)$difference_price);
+                    $sheet->setCellValue('U1', 'Total PT Share');
+                    $sheet->setCellValue('U2', (string)$total_pt_share);
                     foreach ($FirmResult as $key => $value) {
                         $array['Job_Date'] = date("d-M-Y", strtotime($value->job_date));
                         $array['Dealer_Name'] = get_dealer_name($value->dealer_id);
@@ -7333,6 +7346,7 @@ class AdminController extends Controller
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
                             $array['Dealer_Price'] = round($val->dealer_price);
+                            $array['powertechPrice'] = round(@$val->powertechPrice);
                             $array['Incentive'] = round($val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
@@ -7448,9 +7462,9 @@ class AdminController extends Controller
                 ->get();
             $array = array();
             $result3 = array();
-            $customer_price = $actual_price = $difference_price = $dealer_price = $incentive = 0;
-            return Excel::create('ASM_' . date("d-M-Y"), function ($excel) use ($AsmResult, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
-                $excel->sheet('sheet', function ($sheet) use ($AsmResult, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+            $customer_price = $actual_price = $total_pt_share = $difference_price = $dealer_price = $incentive = 0;
+            return Excel::create('ASM_' . date("d-M-Y"), function ($excel) use ($AsmResult, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
+                $excel->sheet('sheet', function ($sheet) use ($AsmResult, $total_pt_share, $customer_price, $dealer_price, $incentive, $actual_price, $difference_price) {
                     foreach ($AsmResult as $key => $value) {
                         $decoded = json_decode($value->treatments);
                         foreach ($decoded as $val) {
@@ -7460,11 +7474,12 @@ class AdminController extends Controller
                                 $incentive = @$incentive + round(@$val->incentive);
                                 $actual_price = @$actual_price + round(@$val->actualPrice);
                                 $difference_price = @$difference_price + round(@$val->difference);
+                                $total_pt_share = $total_pt_share +  @$val->powertechPrice;
                             }
                         }
                     }
 
-                    $sheet->setBorder('P1:T2');
+                    $sheet->setBorder('P1:U2');
                     $sheet->cells('P1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
@@ -7480,6 +7495,9 @@ class AdminController extends Controller
                     $sheet->cells('T1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
+                    $sheet->cells('U1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
                     $sheet->setCellValue('P1', 'Customer_Price');
                     $sheet->setCellValue('P2', (string)$customer_price);
                     $sheet->setCellValue('Q1', 'Dealer_Price');
@@ -7490,6 +7508,8 @@ class AdminController extends Controller
                     $sheet->setCellValue('S2', (string)$actual_price);
                     $sheet->setCellValue('T1', 'Difference');
                     $sheet->setCellValue('T2', (string)$difference_price);
+                    $sheet->setCellValue('U1', 'Total PT Share');
+                    $sheet->setCellValue('U2', (string)$total_pt_share);
                     foreach ($AsmResult as $key => $value) {
                         $array['Job_Date'] = date("d-M-Y", strtotime($value->job_date));
                         $array['Dealer_Name'] = get_dealer_name($value->dealer_id);
@@ -7504,6 +7524,7 @@ class AdminController extends Controller
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
                             $array['Dealer_Price'] = round(@$val->dealer_price);
+                            $array['powertechPrice'] = round(@$val->powertechPrice);
                             $array['Incentive'] = round(@$val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
