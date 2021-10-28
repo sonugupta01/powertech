@@ -7091,7 +7091,7 @@ class AdminController extends Controller
                 'job_card_no.required' => 'Please enter job card no',
                 'bill_no.required' => 'Please enter bill no',
                 'regn_no.required' => 'Please enter registration no',
-                'dealer_price.required' => 'Please enter dealer price no',
+                'dealer_price.required' => 'Please enter dealer price',
             ]
         );
         $treatment_id = array();

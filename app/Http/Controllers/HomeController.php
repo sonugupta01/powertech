@@ -242,10 +242,11 @@ class HomeController extends Controller
                     
                     $job_id = DB::table('jobs_treatment')->where('treatment_id', $request->treatment_id)->first();
                     if (!empty($job_id)) {
-                        $data = DB::table('jobs')->where('id', $job_id->job_id)->first();
-                        $regn_no = $data->regn_no;
-                        $date_added = $data->date_added;
-                        if ($regn_no == $request->regn_no) {
+                        $data = DB::table('jobs')->where('id', $job_id->job_id)->get();
+                        foreach ($data as $key => $value) {
+                        //     $regn_no = $data->regn_no;
+                        // $date_added = $data->date_added;
+                        if ($value->regn_no == $request->regn_no) {
                             $diff = strtotime($current_date) - strtotime($date_added);
                             $days_spent = ceil(abs($diff / 86400));
                             if ($days_spent < $res['total_days']) {
@@ -255,6 +256,7 @@ class HomeController extends Controller
                             }                 
                         } else {
                             $res['status'] == 0;
+                        }
                         }
                     } else {
                         $res['status'] == 0;
