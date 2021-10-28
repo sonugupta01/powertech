@@ -331,6 +331,7 @@
         <input type="hidden" name="month3" value="{{@$oldSelectMonth}}">
         <input type="hidden" name="report" value="dealer">
         <input type="hidden" name="download" value="dealer_wise">
+        <input type="hidden" name="brand" value="{{request()->brand}}">
       </form> 
       <form method="get" id="form22" action="{{url('/sse/downloadReport')}}">
         <input type="hidden" name="from2" value="{{@$oldFromDate}}">
@@ -340,6 +341,7 @@
         <input type="hidden" name="report" value="advisor">
         <input type="hidden" name="month4" value="{{@$oldSelectMonth}}">
         <input type="hidden" name="download" value="advisor_wise">
+        <input type="hidden" name="brand" value="{{request()->brand}}">
       </form>  
       <!-- <form method="get" id="form32" action="{{url('/asm/downloadMIS')}}">
         <input type="hidden" name="from12" value="{{@$oldFromDate1}}">
@@ -349,6 +351,7 @@
       <form method="get" id="foralldealers" action="{{url('/asm/downloadAllDealerReport')}}">
         <input type="hidden" name="getMonth" value="">
         <input type="hidden" name="getReportType" value="">
+        <input type="hidden" name="brand" value="{{request()->brand}}">
       </form> 
 <script type="text/javascript">
 

@@ -5854,27 +5854,31 @@ class AdminController extends Controller
                             $array['treatment_id'] = @$val->id;
 
                             // find all brands by treatment id 
-                            $treatment_products = DB::table("products_treatments")
-                                ->where('products_treatments.tre_id', @$val->id)
-                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
-                                ->select('products.brand_id')
-                                ->groupBy('products.brand_id')->get();
+                            if (!empty(request()->brand)) {
+                                $treatment_products = DB::table("products_treatments")
+                                    ->where('products_treatments.tre_id', @$val->id)
+                                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                    ->select('products.brand_id')
+                                    ->groupBy('products.brand_id')->get();
 
 
-                            $brands = [];
-                            foreach ($treatment_products as $key => $t_value) {
-                                $brands[] = $t_value->brand_id;
+                                $brands = [];
+                                foreach ($treatment_products as $key => $t_value) {
+                                    $brands[] = $t_value->brand_id;
+                                }
+                                $array['brands'] = $brands;
                             }
-                            $array['brands'] = $brands;
                             $result1[] = $array;
                             // dd($val);
                         }
                     }
-                    $a =  array_filter($result1, function ($value_af) {
-                        return in_array(request()->brand, $value_af['brands']);
-                    });
+                    if (!empty(request()->brand)) {
+                        $a =  array_filter($result1, function ($value_af) {
+                            return in_array(request()->brand, $value_af['brands']);
+                        });
 
-                    $result1 = $a;
+                        $result1 = $a;
+                    }
                     $sheet->fromArray(@$result1);
                 });
             })->export('xlsx');
@@ -6022,28 +6026,31 @@ class AdminController extends Controller
                             $array['treatment_id'] = @$val->id;
 
                             // find all brands by treatment id 
-                            $treatment_products = DB::table("products_treatments")
-                                ->where('products_treatments.tre_id', @$val->id)
-                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
-                                ->select('products.brand_id')
-                                ->groupBy('products.brand_id')->get();
+                            if (!empty(request()->brand)) {
+                                $treatment_products = DB::table("products_treatments")
+                                    ->where('products_treatments.tre_id', @$val->id)
+                                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                    ->select('products.brand_id')
+                                    ->groupBy('products.brand_id')->get();
 
 
-                            $brands = [];
-                            foreach ($treatment_products as $key => $t_value) {
-                                $brands[] = $t_value->brand_id;
+                                $brands = [];
+                                foreach ($treatment_products as $key => $t_value) {
+                                    $brands[] = $t_value->brand_id;
+                                }
+                                $array['brands'] = $brands;
                             }
-                            $array['brands'] = $brands;
 
                             $result2[] = $array;
                         }
                     }
+                    if (!empty(request()->brand)) {
+                        $b =  array_filter($result2, function ($value_af) {
+                            return in_array(request()->brand, $value_af['brands']);
+                        });
 
-                    $b =  array_filter($result2, function ($value_af) {
-                        return in_array(request()->brand, $value_af['brands']);
-                    });
-
-                    $result2 = $b;
+                        $result2 = $b;
+                    }
                     $sheet->fromArray(@$result2);
                 });
             })->export('xlsx');
@@ -6183,27 +6190,31 @@ class AdminController extends Controller
                             $array['treatment_id'] = @$val->id;
 
                             // find all brands by treatment id 
-                            $treatment_products = DB::table("products_treatments")
-                                ->where('products_treatments.tre_id', @$val->id)
-                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
-                                ->select('products.brand_id')
-                                ->groupBy('products.brand_id')->get();
+                            if (!empty(request()->brand)) {
+                                $treatment_products = DB::table("products_treatments")
+                                    ->where('products_treatments.tre_id', @$val->id)
+                                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                    ->select('products.brand_id')
+                                    ->groupBy('products.brand_id')->get();
 
 
-                            $brands = [];
-                            foreach ($treatment_products as $key => $t_value) {
-                                $brands[] = $t_value->brand_id;
+                                $brands = [];
+                                foreach ($treatment_products as $key => $t_value) {
+                                    $brands[] = $t_value->brand_id;
+                                }
+                                $array['brands'] = $brands;
                             }
-                            $array['brands'] = $brands;
 
                             $result3[] = $array;
                         }
                     }
-                    $b =  array_filter($result3, function ($value_af) {
-                        return in_array(request()->brand, $value_af['brands']);
-                    });
+                    if (!empty(request()->brand)) {
+                        $b =  array_filter($result3, function ($value_af) {
+                            return in_array(request()->brand, $value_af['brands']);
+                        });
 
-                    $result3 = $b;
+                        $result3 = $b;
+                    }
                     $sheet->fromArray(@$result3);
                 });
             })->export('xlsx');

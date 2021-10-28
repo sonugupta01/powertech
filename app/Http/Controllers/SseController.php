@@ -2703,8 +2703,32 @@ class SseController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
+                            if (!empty(request()->brand)) {
+                                $array['treatment_id'] = @$val->id;
+
+                                // find all brands by treatment id 
+                                $treatment_products = DB::table("products_treatments")
+                                    ->where('products_treatments.tre_id', @$val->id)
+                                    ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                    ->select('products.brand_id')
+                                    ->groupBy('products.brand_id')->get();
+
+
+                                $brands = [];
+                                foreach ($treatment_products as $key => $t_value) {
+                                    $brands[] = $t_value->brand_id;
+                                }
+                                $array['brands'] = $brands;
+                            }
                             $result1[] = $array;
                         }
+                    }
+                    if (!empty(request()->brand)) {
+                        $b =  array_filter($result1, function ($value_af) {
+                            return in_array(request()->brand, $value_af['brands']);
+                        });
+
+                        $result1 = $b;
                     }
                     $sheet->fromArray(@$result1);
                 });
