@@ -12,13 +12,13 @@
 Route::get('/', 'HomeController@index'); //home page
 Route::get('/cronJob', 'HomeController@cronJob'); //home page
 Route::get('/sendmail', 'HomeController@sendmail'); //testing function
-Route::get('/admin/login','HomeController@login'); //admin login
+Route::get('/admin/login', 'HomeController@login'); //admin login
 Route::get('/send_mail_of_late_commer/{id}', 'HomeController@send_mail_of_late_commer');
-Route::get('/login',function(){
+Route::get('/login', function () {
   return redirect('admin/login'); //redirect to admin login url
 });
-Route::get('/treatment/{id}','HomeController@treatment');
-Route::get('/privacy_policy',function(){
+Route::get('/treatment/{id}', 'HomeController@treatment');
+Route::get('/privacy_policy', function () {
   return view('auto-solution-privacy-policy'); //redirect to admin login url
 });
 Route::post('/checklogin', 'HomeController@checklogin'); //check user authentication
@@ -36,11 +36,11 @@ Route::post('/getDealerPrice', 'HomeController@getDealerPrice'); //get Dealer pr
 Route::post('/getJobId', 'HomeController@getJobId'); //get Job id through ajax
 Auth::routes();
 /* Admin Panel */
-Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','admin']], function(){
+Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web', 'admin']], function () {
   //Route::get('/','AdminController@index');
   Route::get('/', 'AdminController@dashboard');
-  Route::get('/downloadDashboard','AdminController@downloadDashboard');
-  Route::post('/addServiceLoad','AdminController@addServiceLoad');
+  Route::get('/downloadDashboard', 'AdminController@downloadDashboard');
+  Route::post('/addServiceLoad', 'AdminController@addServiceLoad');
   // Dealer Module
   Route::get('/dealer_management', 'AdminController@dealer_management');
   Route::get('/addDealer', 'AdminController@addDealer');
@@ -52,8 +52,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusDealer/{status}/{id}', 'AdminController@statusDealer');
   Route::get('/dealers_SalesExecutivesListing/{dealer_id}', 'AdminController@dealers_SalesExecutivesListing');
   Route::get('/dealers_ASM/{dealer_id}', 'AdminController@dealers_ASM');
-  Route::get('/downloadDealers','AdminController@downloadDealers');
-  Route::get('/downloadDealerInfo/{dealer_id}','AdminController@downloadDealerInfo');
+  Route::get('/downloadDealers', 'AdminController@downloadDealers');
+  Route::get('/downloadDealerInfo/{dealer_id}', 'AdminController@downloadDealerInfo');
 
   // Contact module
   Route::get('/contacts/{id}', 'AdminController@contacts');
@@ -64,8 +64,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusContact/{status}/{dealer_id}/{id}', 'AdminController@statusContact');
 
   // Advisor module
-  Route::get('/advisors/{id}','AdminController@advisors');
-  Route::post('/addAdvisorIncentive/{dealer_id}','AdminController@addAdvisorIncentive');
+  Route::get('/advisors/{id}', 'AdminController@advisors');
+  Route::post('/addAdvisorIncentive/{dealer_id}', 'AdminController@addAdvisorIncentive');
   Route::get('/addAdvisor/{dealer_id}', 'AdminController@addAdvisor');
   Route::post('/insertAdvisor', 'AdminController@insertAdvisor');
   Route::get('/editAdvisor/{dealer_id}/{id}', 'AdminController@editAdvisor');
@@ -73,17 +73,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusAdvisor/{status}/{dealer_id}/{id}', 'AdminController@statusAdvisor');
 
   // Dealer share module
-  Route::get('/dealer_percentage_history/{dealer_id}','AdminController@dealerPercentageHistory');
+  Route::get('/dealer_percentage_history/{dealer_id}', 'AdminController@dealerPercentageHistory');
   Route::get('/addDealerPercentage/{dealer_id}', 'AdminController@addDealerPercentage');
   Route::post('/insertDealerPercentage', 'AdminController@insertDealerPercentage');
 
   // Dealer advisor share module
-  Route::get('/advisor_percentage_history/{dealer_id}/{advisor_id}','AdminController@advisorPercentageHistory');
+  Route::get('/advisor_percentage_history/{dealer_id}/{advisor_id}', 'AdminController@advisorPercentageHistory');
   Route::get('/addAdvisorPercentage/{dealer_id}/{advisor_id}', 'AdminController@addAdvisorPercentage');
   Route::post('/insertAdvisorPercentage', 'AdminController@insertAdvisorPercentage');
 
   // Template module
-  Route::get('/dealerTemplates/{id}','AdminController@dealerTemplates');
+  Route::get('/dealerTemplates/{id}', 'AdminController@dealerTemplates');
   Route::get('/addDealerTemplate/{dealer_id}', 'AdminController@addDealerTemplate');
   Route::post('/insertDealerTemplate', 'AdminController@insertDealerTemplate');
   Route::get('/editDealerTemplate/{dealer_id}/{id}', 'AdminController@editDealerTemplate');
@@ -91,7 +91,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusDealerTemplate/{status}/{dealer_id}/{id}', 'AdminController@statusDealerTemplate');
   Route::get('/dealerProducts/{dealer_id}', 'AdminController@dealerProducts');
   Route::get('/dealerProductInventory/{dealer_id}/{product_id}', 'AdminController@dealerProductInventory');
-  Route::get('/downloadProductInventory/{dealer_id}','AdminController@downloadProductInventory');
+  Route::get('/downloadProductInventory/{dealer_id}', 'AdminController@downloadProductInventory');
   Route::post('/updateDealerProductInventory', 'AdminController@updateDealerProductInventory');
   Route::get('/dealerTemplatesProducts/{dealer_id}/{id}', 'AdminController@dealerTemplatesProducts');
   Route::get('/set_min_level/{dealer_id}/{temp_id}/{pro_id}', 'AdminController@set_min_level');
@@ -106,7 +106,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   // Route::post('/updateModel', 'AdminController@updateModel');
   // Route::get('/statusModel/{status}/{dealer_id}/{id}', 'AdminController@statusModel');
   // Staff Module
-  Route::get('/staff_management','AdminController@staff_management');
+  Route::get('/staff_management', 'AdminController@staff_management');
   Route::get('/addStaffMember', 'AdminController@addStaff');
   Route::post('getdepartmentbylevel', 'AdminController@getdepartmentbylevel');
   Route::post('getdesbylevel', 'AdminController@getdesbylevel');
@@ -122,39 +122,39 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/getreportingpermission/{user_id}/{dealer_id}/{del_authid}', 'AdminController@getreportingpermission');
   Route::post('/updateStaff', 'AdminController@updateStaff');
   Route::get('/statusStaff/{status}/{id}', 'AdminController@statusStaff');
-  Route::get('/downloadStaff','AdminController@downloadStaff');
+  Route::get('/downloadStaff', 'AdminController@downloadStaff');
   Route::post('/ajax_office_user', 'AdminController@ajax_office_user');
 
   // Department Module
-  Route::get('/department','AdminController@department');
+  Route::get('/department', 'AdminController@department');
   Route::get('/addDepartment', 'AdminController@addDepartment');
   Route::post('/insertDepartment', 'AdminController@insertDepartment');
   Route::get('/editDepartment/{id}', 'AdminController@editDepartment');
   Route::post('/updateDepartment', 'AdminController@updateDepartment');
 
   // Dealer Department Module
-  Route::get('/dealer_departments','AdminController@dealerDepartments');
+  Route::get('/dealer_departments', 'AdminController@dealerDepartments');
   Route::get('/addDealerDepartment', 'AdminController@addDealerDepartment');
   Route::post('/insertDealerDepartment', 'AdminController@insertDealerDepartment');
   Route::get('/editDealerDepartment/{id}', 'AdminController@editDealerDepartment');
   Route::post('/updateDealerDepartment', 'AdminController@updateDealerDepartment');
 
   //Designation Module
-  Route::get('/designation','AdminController@designation');
+  Route::get('/designation', 'AdminController@designation');
   Route::get('/addDesignation', 'AdminController@addDesignation');
   Route::post('/insertDesignation', 'AdminController@insertDesignation');
   Route::get('/editDesignation/{id}', 'AdminController@editDesignation');
   Route::post('/updateDesignation', 'AdminController@updateDesignation');
 
-    //Designation Level Module
-  Route::get('/level','AdminController@level');
+  //Designation Level Module
+  Route::get('/level', 'AdminController@level');
   Route::get('/addLevel', 'AdminController@addLevel');
   Route::post('/insertLevel', 'AdminController@insertLevel');
   Route::get('/editLevel/{id}', 'AdminController@editLevel');
   Route::post('/updateLevel', 'AdminController@updateLevel');
 
   //Groups Module
-  Route::get('/groups','AdminController@groups');
+  Route::get('/groups', 'AdminController@groups');
   Route::get('/addGroup', 'AdminController@addGroup');
   Route::post('/insertGroup', 'AdminController@insertGroup');
   Route::get('/editGroup/{id}', 'AdminController@editGroup');
@@ -162,7 +162,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusGroup/{status}/{id}', 'AdminController@statusGroup');
 
   //OEM Module
-  Route::get('/oems','AdminController@oems');
+  Route::get('/oems', 'AdminController@oems');
   Route::get('/addOEM', 'AdminController@addOEM');
   Route::post('/insertOEM', 'AdminController@insertOEM');
   Route::get('/editOEM/{id}', 'AdminController@editOEM');
@@ -170,7 +170,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusOEM/{status}/{id}', 'AdminController@statusOEM');
 
   // Model module
-  Route::get('/models/','AdminController@models');
+  Route::get('/models/', 'AdminController@models');
   Route::get('/addModel/', 'AdminController@addModel');
   Route::post('/insertModel', 'AdminController@insertModel');
   Route::get('/editModel/{id}', 'AdminController@editModel');
@@ -178,7 +178,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusModel/{status}/{id}', 'AdminController@statusModel');
 
   // Treatment Module
-  Route::get('/treatments','AdminController@treatments');
+  Route::get('/treatments', 'AdminController@treatments');
   // Route::get('/getTreatments/{id}','AdminController@getTreatments');
   Route::get('/addTreatment', 'AdminController@addTreatment');
   Route::post('/insertTreatment', 'AdminController@insertTreatment');
@@ -216,19 +216,19 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/getTreatmentList/{id}', 'AdminController@getTreatmentsList');
 
   // History Jobs
-  Route::get('/history_jobs','AdminController@history_jobs');
-  Route::get('/uploadJobHistory','AdminController@uploadJobHistory');
-  Route::post('/importJobsHistory','AdminController@importJobsHistory');
+  Route::get('/history_jobs', 'AdminController@history_jobs');
+  Route::get('/uploadJobHistory', 'AdminController@uploadJobHistory');
+  Route::post('/importJobsHistory', 'AdminController@importJobsHistory');
 
   // Gallery Module
-  Route::get('/gallery','AdminController@gallery');
-  Route::get('/images','AdminController@images');
+  Route::get('/gallery', 'AdminController@gallery');
+  Route::get('/images', 'AdminController@images');
   Route::get('/addImage', 'AdminController@addImage');
   Route::post('/insertImage', 'AdminController@insertImage');
   Route::get('/editImage/{id}', 'AdminController@editImage');
   Route::post('/updateImage', 'AdminController@updateImage');
   Route::get('/statusImage/{status}/{id}', 'AdminController@statusImage');
-  Route::get('/videos','AdminController@videos');
+  Route::get('/videos', 'AdminController@videos');
   Route::get('/addVideo', 'AdminController@addVideo');
   Route::post('/insertVideo', 'AdminController@insertVideo');
   Route::get('/editVideo/{id}', 'AdminController@editVideo');
@@ -236,22 +236,22 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusVideo/{status}/{id}', 'AdminController@statusVideo');
 
   // Report Module
-  Route::get('/reports','AdminController@reports');
-  Route::get('/daily_report','AdminController@dailyReport');
-  Route::get('/mis_report','AdminController@misReport');
+  Route::get('/reports', 'AdminController@reports');
+  Route::get('/daily_report', 'AdminController@dailyReport');
+  Route::get('/mis_report', 'AdminController@misReport');
   Route::post('/getByfirm', 'AdminController@getByfirm');
   Route::get('getDealersByfirm/{id}', 'AdminController@getDealersByfirm');
   Route::get('getAsmByfirm/{firm_id}', 'AdminController@getAsmByfirm');
-  Route::get('/dcf_report','AdminController@dcfReport');
-  Route::get('/downloadReport','AdminController@downloadReport');
-  Route::get('/downloadMIS','AdminController@downloadMIS');
-  Route::get('/performance_reports','AdminController@performance_reports');
-  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}','AdminController@downloadAdvisor');
-  Route::get('/downloadPerformanceSheet','AdminController@downloadPerformanceSheet');
-  Route::get('/downloadAllAdvisor','AdminController@downloadAllAdvisor');
-  Route::get('/downloadAllDealerReport','AdminController@downloadAllDealerReport');
+  Route::get('/dcf_report', 'AdminController@dcfReport');
+  Route::get('/downloadReport', 'AdminController@downloadReport');
+  Route::get('/downloadMIS', 'AdminController@downloadMIS');
+  Route::get('/performance_reports', 'AdminController@performance_reports');
+  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}', 'AdminController@downloadAdvisor');
+  Route::get('/downloadPerformanceSheet', 'AdminController@downloadPerformanceSheet');
+  Route::get('/downloadAllAdvisor', 'AdminController@downloadAllAdvisor');
+  Route::get('/downloadAllDealerReport', 'AdminController@downloadAllDealerReport');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
-  
+
   // Job Module
   Route::get('/jobs', 'AdminController@jobs');
   Route::get('/addJob', 'AdminController@addJob');
@@ -263,10 +263,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/deleteJobs', 'AdminController@deleteJobs');
 
   // Jobs Treatment Module
-  Route::get('/jobs_treatment_list','AdminController@jobsTreatmentList');
+  Route::get('/jobs_treatment_list', 'AdminController@jobsTreatmentList');
 
   // Product Module
-  Route::get('/products','AdminController@products');
+  Route::get('/products', 'AdminController@products');
   Route::get('/addProduct', 'AdminController@addProduct');
   Route::post('/insertProduct', 'AdminController@insertProduct');
   Route::get('/editProduct/{id}', 'AdminController@editProduct');
@@ -295,8 +295,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
 
   // // Employee Hierarchy Module
   // Route::get('/emp_hierarchy','AdminController@emp_hierarchy');
-  Route::get('/editEmpHierarchy/{id}','AdminController@editEmpHierarchy');
-  Route::post('/updateEmpHierarchy','AdminController@updateEmpHierarchy');
+  Route::get('/editEmpHierarchy/{id}', 'AdminController@editEmpHierarchy');
+  Route::post('/updateEmpHierarchy', 'AdminController@updateEmpHierarchy');
   Route::get('/statusEmpHierarchy/{status}/{id}', 'AdminController@statusEmpHierarchy');
 
   // Target Module
@@ -311,7 +311,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::post('updateTempTarget', 'AdminController@updateTempTarget');
   // Route::get('getModelTreatments', 'AdminController@getModelTreatments');
   // Route::post('updateTarget', 'AdminController@updateTarget');
-  Route::get('/consumption_report','AdminController@consumptionReport');
+  Route::get('/consumption_report', 'AdminController@consumptionReport');
 
   // Product Brand module
   Route::get('/product_brands', 'AdminController@productBrands');
@@ -322,9 +322,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web','ad
   Route::get('/statusProductBrand/{status}/{id}', 'AdminController@statusProductBrand');
 });
 
-Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web','asm']], function(){
+Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']], function () {
   Route::get('/', 'AsmController@dashboard');
-  Route::get('/downloadDashboard','AsmController@downloadDashboard');
+  Route::get('/downloadDashboard', 'AsmController@downloadDashboard');
   // Dealer Module
   Route::get('/addDealer', 'AsmController@addDealer');
   Route::post('/insertDealer', 'AsmController@insertDealer');
@@ -334,7 +334,7 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web','asm']]
   Route::post('/updateDealer', 'AsmController@updateDealer');
 
   // Staff Module
-  Route::get('/staff_management','AsmController@staff_management');
+  Route::get('/staff_management', 'AsmController@staff_management');
   // Route::get('/addStaffMember', 'AsmController@addStaff');
   // Route::get('getBydesignation/{id}/{auth_id?}', 'AsmController@getBydesignation');
   // Route::post('/insertStaff', 'AsmController@insertStaff');
@@ -344,11 +344,11 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web','asm']]
   Route::get('/getreportingpermission/{user_id}/{dealer_id}/{del_authid}', 'AsmController@getreportingpermission');
   // Route::post('/updateStaff', 'AsmController@updateStaff');
   Route::get('/statusStaff/{status}/{id}', 'AsmController@statusStaff');
-  Route::get('/downloadStaff','AsmController@downloadStaff');
-  Route::get('/editEmpHierarchy/{id}','AsmController@editEmpHierarchy')->middleware('authenticate');
+  Route::get('/downloadStaff', 'AsmController@downloadStaff');
+  Route::get('/editEmpHierarchy/{id}', 'AsmController@editEmpHierarchy')->middleware('authenticate');
   Route::get('/getauthority/{user_id}/{authority_id}/', 'AsmController@getauthority');
   Route::post('/getreportingauthority', 'AsmController@getreportingauthority');
-  Route::post('/updateEmpHierarchy','AsmController@updateEmpHierarchy');
+  Route::post('/updateEmpHierarchy', 'AsmController@updateEmpHierarchy');
   Route::get('/statusEmpHierarchy/{status}/{id}', 'AsmController@statusEmpHierarchy');
   // Target Module
   Route::get('targets', 'AsmController@targets');
@@ -362,8 +362,8 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web','asm']]
   Route::post('/updateJob', 'AsmController@updateJob');
   Route::get('/statusJob/{status}/{job_id}', 'AsmController@statusJob');
   Route::get('/deleteJobs', 'AsmController@deleteJobs');
-  Route::post('/addServiceLoad','AsmController@addServiceLoad');
-  
+  Route::post('/addServiceLoad', 'AsmController@addServiceLoad');
+
   // Jobs Treatment Module
   Route::get('/jobs_treatment_list', 'AsmController@jobsTreatmentList');
 
@@ -376,23 +376,23 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web','asm']]
 
 
   // Report Module
-  Route::get('/reports','AsmController@reports');
-  Route::get('/daily_report','AsmController@dailyReport');
-  Route::get('/mis_report','AsmController@misReport');
-  Route::get('/dcf_report','AsmController@dcfReport');
-  Route::get('/downloadReport','AsmController@downloadReport');
-  Route::get('/downloadMIS','AsmController@downloadMIS');
-  Route::get('/performance_reports','AsmController@performance_reports');
-  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}','AsmController@downloadAdvisor');
-  Route::get('/downloadPerformanceSheet','AsmController@downloadPerformanceSheet');
-  Route::get('/downloadAllAdvisor','AsmController@downloadAllAdvisor');
-  Route::get('/downloadAllDealerReport','AsmController@downloadAllDealerReport');
-  Route::get('/consumption_report','AsmController@consumptionReport');  
+  Route::get('/reports', 'AsmController@reports');
+  Route::get('/daily_report', 'AsmController@dailyReport');
+  Route::get('/mis_report', 'AsmController@misReport');
+  Route::get('/dcf_report', 'AsmController@dcfReport');
+  Route::get('/downloadReport', 'AsmController@downloadReport');
+  Route::get('/downloadMIS', 'AsmController@downloadMIS');
+  Route::get('/performance_reports', 'AsmController@performance_reports');
+  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}', 'AsmController@downloadAdvisor');
+  Route::get('/downloadPerformanceSheet', 'AsmController@downloadPerformanceSheet');
+  Route::get('/downloadAllAdvisor', 'AsmController@downloadAllAdvisor');
+  Route::get('/downloadAllDealerReport', 'AsmController@downloadAllDealerReport');
+  Route::get('/consumption_report', 'AsmController@consumptionReport');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
-Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web','rsm']], function(){
+Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web', 'rsm']], function () {
   Route::get('/', 'RsmController@dashboard');
-  Route::get('/downloadDashboard','RsmController@downloadDashboard');
+  Route::get('/downloadDashboard', 'RsmController@downloadDashboard');
   // Dealer Module
   Route::get('/addDealer', 'RsmController@addDealer');
   Route::post('/insertDealer', 'RsmController@insertDealer');
@@ -401,7 +401,7 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web','rsm']]
   Route::get('/editDealer/{id}', 'RsmController@editDealer');
   Route::post('/updateDealer', 'RsmController@updateDealer');
   // Staff Module
-  Route::get('/staff_management','RsmController@staff_management');
+  Route::get('/staff_management', 'RsmController@staff_management');
   // Route::get('/addStaffMember', 'RsmController@addStaff');
   // Route::get('getBydesignation/{id}/{auth_id?}', 'RsmController@getBydesignation');
   // Route::post('/insertStaff', 'RsmController@insertStaff');
@@ -411,11 +411,11 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web','rsm']]
   Route::get('/getreportingpermission/{user_id}/{dealer_id}/{del_authid}', 'RsmController@getreportingpermission');
   // Route::post('/updateStaff', 'RsmController@updateStaff');
   Route::get('/statusStaff/{status}/{id}', 'RsmController@statusStaff');
-  Route::get('/downloadStaff','RsmController@downloadStaff');
-  Route::get('/editEmpHierarchy/{id}','RsmController@editEmpHierarchy')->middleware('authenticate');
+  Route::get('/downloadStaff', 'RsmController@downloadStaff');
+  Route::get('/editEmpHierarchy/{id}', 'RsmController@editEmpHierarchy')->middleware('authenticate');
   Route::get('/getauthority/{user_id}/{authority_id}/', 'RsmController@getauthority');
   Route::post('/getreportingauthority/', 'RsmController@getreportingauthority');
-  Route::post('/updateEmpHierarchy','RsmController@updateEmpHierarchy');
+  Route::post('/updateEmpHierarchy', 'RsmController@updateEmpHierarchy');
   Route::get('/statusEmpHierarchy/{status}/{id}', 'RsmController@statusEmpHierarchy');
   // Target Module
   Route::get('targets', 'RsmController@targets');
@@ -428,7 +428,7 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web','rsm']]
   Route::post('/updateJob', 'RsmController@updateJob');
   Route::get('/statusJob/{status}/{job_id}', 'RsmController@statusJob');
   Route::get('/deleteJobs', 'RsmController@deleteJobs');
-  Route::post('/addServiceLoad','RsmController@addServiceLoad');
+  Route::post('/addServiceLoad', 'RsmController@addServiceLoad');
 
   // Jobs Treatment Module
   Route::get('/jobs_treatment_list', 'RsmController@jobsTreatmentList');
@@ -441,23 +441,23 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web','rsm']]
   Route::post('/markattendance/', 'Rsm@mark_attendance_post');
 
   // Report Module
-  Route::get('/reports','RsmController@reports');
-  Route::get('/daily_report','RsmController@dailyReport');
-  Route::get('/mis_report','RsmController@misReport');
-  Route::get('/dcf_report','RsmController@dcfReport');
-  Route::get('/downloadReport','RsmController@downloadReport');
-  Route::get('/downloadMIS','RsmController@downloadMIS');
-  Route::get('/performance_reports','RsmController@performance_reports');
-  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}','RsmController@downloadAdvisor');
-  Route::get('/downloadPerformanceSheet','RsmController@downloadPerformanceSheet');
-  Route::get('/downloadAllAdvisor','RsmController@downloadAllAdvisor');
-  Route::get('/downloadAllDealerReport','RsmController@downloadAllDealerReport');
-  Route::get('/consumption_report','RsmController@consumptionReport');
+  Route::get('/reports', 'RsmController@reports');
+  Route::get('/daily_report', 'RsmController@dailyReport');
+  Route::get('/mis_report', 'RsmController@misReport');
+  Route::get('/dcf_report', 'RsmController@dcfReport');
+  Route::get('/downloadReport', 'RsmController@downloadReport');
+  Route::get('/downloadMIS', 'RsmController@downloadMIS');
+  Route::get('/performance_reports', 'RsmController@performance_reports');
+  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}', 'RsmController@downloadAdvisor');
+  Route::get('/downloadPerformanceSheet', 'RsmController@downloadPerformanceSheet');
+  Route::get('/downloadAllAdvisor', 'RsmController@downloadAllAdvisor');
+  Route::get('/downloadAllDealerReport', 'RsmController@downloadAllDealerReport');
+  Route::get('/consumption_report', 'RsmController@consumptionReport');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
-Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web','sse']], function(){
+Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web', 'sse']], function () {
   Route::get('/', 'SseController@dashboard');
-  Route::get('/downloadDashboard','SseController@downloadDashboard');
+  Route::get('/downloadDashboard', 'SseController@downloadDashboard');
   // Dealer Module
   Route::get('/addDealer', 'SseController@addDealer');
   Route::post('/insertDealer', 'SseController@insertDealer');
@@ -466,7 +466,7 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web','sse']]
   Route::get('/editDealer/{id}', 'SseController@editDealer');
   Route::post('/updateDealer', 'SseController@updateDealer');
   // Staff Module
-  Route::get('/staff_management','SseController@staff_management');
+  Route::get('/staff_management', 'SseController@staff_management');
   // Route::get('/addStaffMember', 'SseController@addStaff');
   // Route::get('getBydesignation/{id}/{auth_id?}', 'SseController@getBydesignation');
   // Route::post('/insertStaff', 'SseController@insertStaff');
@@ -476,11 +476,11 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web','sse']]
   Route::get('/getreportingpermission/{user_id}/{dealer_id}/{del_authid}', 'SseController@getreportingpermission');
   // Route::post('/updateStaff', 'SseController@updateStaff');
   Route::get('/statusStaff/{status}/{id}', 'SseController@statusStaff');
-  Route::get('/downloadStaff','SseController@downloadStaff');
-  Route::get('/editEmpHierarchy/{id}','SseController@editEmpHierarchy')->middleware('authenticate');
+  Route::get('/downloadStaff', 'SseController@downloadStaff');
+  Route::get('/editEmpHierarchy/{id}', 'SseController@editEmpHierarchy')->middleware('authenticate');
   Route::get('/getauthority/{user_id}/{authority_id}/', 'SseController@getauthority');
   Route::post('/getreportingauthority/', 'SseController@getreportingauthority');
-  Route::post('/updateEmpHierarchy','SseController@updateEmpHierarchy');
+  Route::post('/updateEmpHierarchy', 'SseController@updateEmpHierarchy');
   Route::get('/statusEmpHierarchy/{status}/{id}', 'SseController@statusEmpHierarchy');
   // Target Module
   Route::get('targets', 'SseController@targets');
@@ -493,7 +493,7 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web','sse']]
   Route::post('/updateJob', 'SseController@updateJob');
   Route::get('/statusJob/{status}/{job_id}', 'SseController@statusJob');
   Route::get('/deleteJobs', 'SseController@deleteJobs');
-  Route::post('/addServiceLoad','SseController@addServiceLoad');
+  Route::post('/addServiceLoad', 'SseController@addServiceLoad');
 
   // Jobs Treatment Module
   Route::get('/jobs_treatment_list', 'SseController@jobsTreatmentList');
@@ -503,18 +503,18 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web','sse']]
   Route::get('/view_attendance/{id}', 'SseController@view_attendance');
   Route::get('/daily_attendance/{dealer_id?}', 'SseController@daily_attendance');
 
-  // Report Module
-  Route::get('/reports','SseController@reports');
-  Route::get('/daily_report','SseController@dailyReport');
-  Route::get('/mis_report','SseController@misReport');
-  Route::get('/dcf_report','SseController@dcfReport');
-  Route::get('/downloadReport','SseController@downloadReport');
-  Route::get('/downloadMIS','SseController@downloadMIS');
-  Route::get('/performance_reports','SseController@performance_reports');
-  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}','SseController@downloadAdvisor');
-  Route::get('/downloadPerformanceSheet','SseController@downloadPerformanceSheet');
-  Route::get('/downloadAllAdvisor','SseController@downloadAllAdvisor');
-  Route::get('/downloadAllDealerReport','SseController@downloadAllDealerReport');
-  Route::get('/consumption_report','SseController@consumptionReport');
+  // Report Module 
+  Route::get('/reports', 'SseController@reports');
+  Route::get('/daily_report', 'SseController@dailyReport');
+  Route::get('/mis_report', 'SseController@misReport');
+  Route::get('/dcf_report', 'SseController@dcfReport');
+  Route::get('/downloadReport', 'SseController@downloadReport');
+  Route::get('/downloadMIS', 'SseController@downloadMIS');
+  Route::get('/performance_reports', 'SseController@performance_reports');
+  Route::get('/downloadAdvisor/{id}/{dealer_id}/{month}', 'SseController@downloadAdvisor');
+  Route::get('/downloadPerformanceSheet', 'SseController@downloadPerformanceSheet');
+  Route::get('/downloadAllAdvisor', 'SseController@downloadAllAdvisor');
+  Route::get('/downloadAllDealerReport', 'SseController@downloadAllDealerReport');
+  Route::get('/consumption_report', 'SseController@consumptionReport');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
