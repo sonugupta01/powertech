@@ -5878,6 +5878,11 @@ class AdminController extends Controller
                         });
 
                         $result1 = $a;
+                        $result1 = array_map(function ($value_rm) {
+                            unset($value_rm['brands']);
+                            unset($value_rm['treatment_id']);
+                            return $value_rm;
+                        }, $result1);
                     }
                     $sheet->fromArray(@$result1);
                 });
@@ -6050,7 +6055,13 @@ class AdminController extends Controller
                         });
 
                         $result2 = $b;
+                        $result2 = array_map(function ($value_rm) {
+                            unset($value_rm['brands']);
+                            unset($value_rm['treatment_id']);
+                            return $value_rm;
+                        }, $result2);
                     }
+
                     $sheet->fromArray(@$result2);
                 });
             })->export('xlsx');
@@ -6215,6 +6226,11 @@ class AdminController extends Controller
                         });
 
                         $result3 = $b;
+                        $result3 = array_map(function ($value_rm) {
+                            unset($value_rm['brands']);
+                            unset($value_rm['treatment_id']);
+                            return $value_rm;
+                        }, $result3);
                     }
 
                     $sheet->fromArray(@$result3);

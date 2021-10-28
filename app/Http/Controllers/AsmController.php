@@ -2753,6 +2753,11 @@ class AsmController extends Controller
                         });
 
                         $result1 = $b;
+                        $result1 = array_map(function ($value_rm) {
+                            unset($value_rm['brands']);
+                            unset($value_rm['treatment_id']);
+                            return $value_rm;
+                        }, $result1);
                     }
                     $sheet->fromArray(@$result1);
                 });
