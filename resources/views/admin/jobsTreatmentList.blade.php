@@ -74,6 +74,7 @@
                     <th>Actual Price</th>
                     <!-- <th>Difference (+/-)</th> -->
                     <th>Discount</th>
+                    <th>PT Share</th>
                     <th>Job Type</th>
                   </tr>
                 </thead>
@@ -93,6 +94,7 @@
                     <td>{{round($value->customer_price)}}</td>
                     <td>{{round(@$value->actualPrice)}}</td>
                     <td>{{round(@$value->difference)}}</td>
+                    <td>{{round(@$value->actualPrice - @$value->dealer_price)}}</td>
                     <td>
                       @if(@$value->job_type == 1){{'FOC'}} @elseif(@$value->job_type == 2){{'Demo'}} @elseif(@$value->job_type == 3) {{'Recheck'}} @elseif(@$value->job_type == 4){{'Repeat Work'}} 
                       @else{{'Paid'}}

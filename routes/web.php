@@ -239,6 +239,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web', 'a
   Route::get('/reports', 'AdminController@reports');
   Route::get('/daily_report', 'AdminController@dailyReport');
   Route::get('/mis_report', 'AdminController@misReport');
+  Route::get('/mom_report', 'AdminController@momReport');
+  Route::get('/percentage_business_report', 'AdminController@percentageBusinessReport');
+  Route::get('/undone_treatments_report', 'AdminController@undoneTreatmentsReport');
+  Route::get('/job_types_report', 'AdminController@jobTypesReport');
   Route::post('/getByfirm', 'AdminController@getByfirm');
   Route::get('getDealersByfirm/{id}', 'AdminController@getDealersByfirm');
   Route::get('getAsmByfirm/{firm_id}', 'AdminController@getAsmByfirm');

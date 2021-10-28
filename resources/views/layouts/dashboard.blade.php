@@ -344,9 +344,13 @@
 			<ul class="treeview-menu">
 				<li><a href="{{url('/admin/daily_report')}}"><i class="fa fa-file"></i> Daily Report</a></li>
 				<li><a href="{{url('/admin/mis_report')}}"><i class="fa fa-file"></i> MIS Report</a></li>
+				<li><a href="{{url('/admin/mom_report')}}"><i class="fa fa-file"></i> MOM Report</a></li>
 				<li><a href="{{url('/admin/dcf_report')}}"><i class="fa fa-file"></i> DCF Report</a></li>
 				<li><a href="{{url('/admin/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/admin/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
+				<li><a href="{{url('/admin/percentage_business_report')}}"><i class="fa fa-file"></i> Percentage Business Report</a></li>
+				<li><a href="{{url('/admin/undone_treatments_report')}}"><i class="fa fa-file"></i> Undone Treatments Report</a></li>
+				<li><a href="{{url('/admin/job_types_report')}}"><i class="fa fa-file"></i> Job Types Report</a></li>
 				
 			</ul>
 		</li>
