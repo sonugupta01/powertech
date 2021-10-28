@@ -570,6 +570,7 @@
   <input type="hidden" name="report" value="advisor">
   <input type="hidden" name="month4" value="{{@$oldSelectMonth}}">
   <input type="hidden" name="download" value="advisor_wise">
+  <input type="hidden" name="brand" value="{{request()->brand}}">
 </form>
 <form method="get" id="asmform" action="{{url('/admin/downloadReport')}}">
   <input type="hidden" name="asm_id" value="{{@$oldAsm}}">
@@ -581,6 +582,7 @@
   <input type="hidden" name="asm_month" value="{{@$oldSelectMonth}}">
   <input type="hidden" name="report" value="asm">
   <input type="hidden" name="download" value="asm_wise">
+  <input type="hidden" name="brand" value="{{request()->brand}}">
 </form>
 <form method="get" id="firmform" action="{{url('/admin/downloadReport')}}">
   <input type="hidden" name="firm_id" value="{{@$oldFirm}}">
@@ -593,6 +595,7 @@
   <input type="hidden" name="firm_month" value="{{@$oldSelectMonth}}">
   <input type="hidden" name="report" value="firm">
   <input type="hidden" name="download" value="firm_wise">
+  <input type="hidden" name="brand" value="{{request()->brand}}">
 </form>
 {{-- <form method="get" id="form32" action="{{url('/admin/downloadMIS')}}">
   <input type="hidden" name="from12" value="{{@$oldFromDate1}}">
@@ -602,6 +605,7 @@
 <form method="get" id="foralldealers" action="{{url('/admin/downloadAllDealerReport')}}">
   <input type="hidden" name="getMonth" value="">
   <input type="hidden" name="getReportType" value="">
+  <input type="hidden" name="brand" value="{{request()->brand}}">
 </form> 
 <script type="text/javascript">
 
