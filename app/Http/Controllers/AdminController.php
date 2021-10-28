@@ -5850,11 +5850,11 @@ class AdminController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
-
-                            $array['treatment_id'] = @$val->id;
-
-                            // find all brands by treatment id 
                             if (!empty(request()->brand)) {
+                                $array['treatment_id'] = @$val->id;
+
+                                // find all brands by treatment id 
+
                                 $treatment_products = DB::table("products_treatments")
                                     ->where('products_treatments.tre_id', @$val->id)
                                     ->join('products', 'products.id', '=', 'products_treatments.pro_id')
@@ -6022,11 +6022,11 @@ class AdminController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
-
-                            $array['treatment_id'] = @$val->id;
-
-                            // find all brands by treatment id 
                             if (!empty(request()->brand)) {
+                                $array['treatment_id'] = @$val->id;
+
+                                // find all brands by treatment id 
+
                                 $treatment_products = DB::table("products_treatments")
                                     ->where('products_treatments.tre_id', @$val->id)
                                     ->join('products', 'products.id', '=', 'products_treatments.pro_id')
@@ -6142,6 +6142,7 @@ class AdminController extends Controller
                             }
                         }
                     }
+
                     $sheet->setBorder('P1:T2');
                     $sheet->cells('P1', function ($cells) {
                         $cells->setBackground('#FFFF00');
@@ -6186,11 +6187,11 @@ class AdminController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
-
-                            $array['treatment_id'] = @$val->id;
-
-                            // find all brands by treatment id 
                             if (!empty(request()->brand)) {
+                                $array['treatment_id'] = @$val->id;
+
+                                // find all brands by treatment id 
+
                                 $treatment_products = DB::table("products_treatments")
                                     ->where('products_treatments.tre_id', @$val->id)
                                     ->join('products', 'products.id', '=', 'products_treatments.pro_id')
@@ -6215,6 +6216,7 @@ class AdminController extends Controller
 
                         $result3 = $b;
                     }
+
                     $sheet->fromArray(@$result3);
                 });
             })->export('xlsx');
