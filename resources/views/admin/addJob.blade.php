@@ -341,14 +341,20 @@ if (@$advisor_id) {
           });
           
           $('#job_type0').on("change", function(e) {
+            // $("#job_type0 option[value='3']").attr("disabled","disabled");
             var job_type = $(this).val();
             var treatment_id = $('#treatment_id0 option:selected').val();
+            var regn_no = $('#regn_no').val();
             var dealer_id = $('#dealer_id option:selected').val();
             token = $('input[name=_token]').val();
-            // url = '<?php echo url("/"); ?>/getJobId';
+            url = '<?php echo url("/"); ?>/getJobId';
             url1 = '<?php echo url("/"); ?>/getTreatmentPrice';
             // url = '<?php echo url("/"); ?>/getModels';
             data = {
+              treatment_id: treatment_id,
+              regn_no: regn_no,
+            };
+            data1 = {
               treatment_id: treatment_id,
               dealer_id: dealer_id,
             };
@@ -358,7 +364,7 @@ if (@$advisor_id) {
               headers: {
                 'X-CSRF-TOKEN': token
               },
-              data: data,
+              data: data1,
               type: 'POST',
               datatype: 'JSON',
               success: function(resp) {
@@ -394,7 +400,54 @@ if (@$advisor_id) {
                 return false;
               }
             });
-          });    
+
+            $.ajax({
+              url: url,
+              headers: {
+                'X-CSRF-TOKEN': token
+              },
+              data: data,
+              type: 'POST',
+              datatype: 'JSON',
+              success: function(resp) {
+                console.log(resp);
+                if (job_type == 1) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 2) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 3) {
+                  if (resp.status == 0) {
+                    alert('You are not eligible for this selection.. Please choose another one.');
+                  $('#job_type0').val("5");
+                  } else {
+                    $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  } 
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else if (job_type == 4) {
+                  $(".difference0").val("0").attr("disabled", "disabled");
+                  $(".actualPrice0").val("0");
+                  $(".dealerPercent0").val("0");
+                  // $(".discountPrice0").val("0").attr("disabled", "disabled");
+                } else {
+                  $(".difference0").removeAttr("disabled");
+                  $('#customer0').val(resp.gtp);
+                $('.actualPrice0').val(resp.gtp);
+                $('.dealerPercent0').val(resp.gdp);
+                return false;
+                  // $(".discountPrice0").removeAttr("disabled");
+                }
+                return false;
+              }
+            });
+          });         
           $('#dealer_id').on("change", function(e) {
             $('.job_type').val("5");
             var dealer = $("#dealer_id").val();
@@ -602,7 +655,6 @@ if (@$advisor_id) {
                 type: 'POST',
                 datatype: 'JSON',
                 success: function(resp) {
-                  
                   percentage = resp;
                   var customer = ".customer" + a;
                   var actualclass = ".actualPrice" + a;
