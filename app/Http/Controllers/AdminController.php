@@ -5278,9 +5278,15 @@ class AdminController extends Controller
 
 
             // filter by brand id 
-            $a =  array_filter($result1, fn ($value) => in_array(request()->brand, $value['brands']));
-            $b =  array_filter($result3, fn ($value) => in_array(request()->brand, $value['brands']));
-            $c =  array_filter($result4, fn ($value) => in_array(request()->brand, $value['brands']));
+            $a =  array_filter($result1, function ($value) {
+                return in_array(request()->brand, $value['brands']);
+            });
+            $b =  array_filter($result3, function ($value) {
+                return in_array(request()->brand, $value['brands']);
+            });
+            $c =  array_filter($result4, function ($value) {
+                return in_array(request()->brand, $value['brands']);
+            });
 
             $result1 = $a;
             $result3 = $b;
@@ -5316,6 +5322,12 @@ class AdminController extends Controller
             'oldDepartment' => @$search['department'],
         ]);
     }
+
+    // array filter barand daily repot 
+    // public function brandFilter()
+    // {
+    //     return in_array(request()->brand, $value['brands']);
+    // }
 
     // View Mis report
     public function misReport(Request $request)
