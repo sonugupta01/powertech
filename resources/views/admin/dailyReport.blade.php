@@ -559,6 +559,7 @@
   <input type="hidden" name="month3" value="{{@$oldSelectMonth}}">
   <input type="hidden" name="report" value="dealer">
   <input type="hidden" name="download" value="dealer_wise">
+  <input type="hidden" name="brand" value="{{request()->brand}}">
 </form> 
 <form method="get" id="form22" action="{{url('/admin/downloadReport')}}">
   <input type="hidden" name="from2" value="{{@$oldFromDate}}">

@@ -5850,9 +5850,31 @@ class AdminController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
+
+                            $array['treatment_id'] = @$val->id;
+
+                            // find all brands by treatment id 
+                            $treatment_products = DB::table("products_treatments")
+                                ->where('products_treatments.tre_id', @$val->id)
+                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                ->select('products.brand_id')
+                                ->groupBy('products.brand_id')->get();
+
+
+                            $brands = [];
+                            foreach ($treatment_products as $key => $t_value) {
+                                $brands[] = $t_value->brand_id;
+                            }
+                            $array['brands'] = $brands;
                             $result1[] = $array;
+                            // dd($val);
                         }
                     }
+                    $a =  array_filter($result1, function ($value_af) {
+                        return in_array(request()->brand, $value_af['brands']);
+                    });
+
+                    $result1 = $a;
                     $sheet->fromArray(@$result1);
                 });
             })->export('xlsx');
@@ -5996,9 +6018,32 @@ class AdminController extends Controller
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
+
+                            $array['treatment_id'] = @$val->id;
+
+                            // find all brands by treatment id 
+                            $treatment_products = DB::table("products_treatments")
+                                ->where('products_treatments.tre_id', @$val->id)
+                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                ->select('products.brand_id')
+                                ->groupBy('products.brand_id')->get();
+
+
+                            $brands = [];
+                            foreach ($treatment_products as $key => $t_value) {
+                                $brands[] = $t_value->brand_id;
+                            }
+                            $array['brands'] = $brands;
+
                             $result2[] = $array;
                         }
                     }
+
+                    $b =  array_filter($result2, function ($value_af) {
+                        return in_array(request()->brand, $value_af['brands']);
+                    });
+
+                    $result2 = $b;
                     $sheet->fromArray(@$result2);
                 });
             })->export('xlsx');
@@ -6082,11 +6127,11 @@ class AdminController extends Controller
                         $decoded = json_decode($value->treatments);
                         foreach ($decoded as $val) {
                             if ($val->job_type == 5) {
-                                $customer_price = $customer_price + round($val->customer_price);
-                                $dealer_price = $dealer_price + round($val->dealer_price);
-                                $incentive = $incentive + round($val->incentive);
-                                $actual_price = $actual_price + round(@$val->actualPrice);
-                                $difference_price = $difference_price + round(@$val->difference);
+                                $customer_price = @$customer_price + round($val->customer_price);
+                                $dealer_price = @$dealer_price + round(@$val->dealer_price);
+                                $incentive = @$incentive + round(@$val->incentive);
+                                $actual_price = @$actual_price + round(@$val->actualPrice);
+                                $difference_price = @$difference_price + round(@$val->difference);
                             }
                         }
                     }
@@ -6107,15 +6152,15 @@ class AdminController extends Controller
                         $cells->setBackground('#FFFF00');
                     });
                     $sheet->setCellValue('P1', 'Customer_Price');
-                    $sheet->setCellValue('P2', $customer_price);
+                    $sheet->setCellValue('P2', (string)$customer_price);
                     $sheet->setCellValue('Q1', 'Dealer_Price');
-                    $sheet->setCellValue('Q2', $dealer_price);
+                    $sheet->setCellValue('Q2', (string)$dealer_price);
                     $sheet->setCellValue('R1', 'Incentive');
-                    $sheet->setCellValue('R2', $incentive);
+                    $sheet->setCellValue('R2', (string)$incentive);
                     $sheet->setCellValue('S1', 'Actual_Price');
-                    $sheet->setCellValue('S2', $actual_price);
+                    $sheet->setCellValue('S2', (string)$actual_price);
                     $sheet->setCellValue('T1', 'Difference');
-                    $sheet->setCellValue('T2', $difference_price);
+                    $sheet->setCellValue('T2', (string)$difference_price);
                     foreach ($AsmResult as $key => $value) {
                         $array['Job_Date'] = date("d-M-Y", strtotime($value->job_date));
                         $array['Dealer_Name'] = get_dealer_name($value->dealer_id);
@@ -6129,14 +6174,36 @@ class AdminController extends Controller
                             $array['Labour_Code'] = $val->labour_code;
                             $array['Treatment'] = $val->treatment;
                             $array['Customer_Price'] = round($val->customer_price);
-                            $array['Dealer_Price'] = round($val->dealer_price);
-                            $array['Incentive'] = round($val->incentive);
+                            $array['Dealer_Price'] = round(@$val->dealer_price);
+                            $array['Incentive'] = round(@$val->incentive);
                             $array['Actual_Price'] = round(@$val->actualPrice);
                             $array['Difference_Price'] = round(@$val->difference);
                             $array['Remark'] = $value->remarks;
+
+                            $array['treatment_id'] = @$val->id;
+
+                            // find all brands by treatment id 
+                            $treatment_products = DB::table("products_treatments")
+                                ->where('products_treatments.tre_id', @$val->id)
+                                ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                                ->select('products.brand_id')
+                                ->groupBy('products.brand_id')->get();
+
+
+                            $brands = [];
+                            foreach ($treatment_products as $key => $t_value) {
+                                $brands[] = $t_value->brand_id;
+                            }
+                            $array['brands'] = $brands;
+
                             $result3[] = $array;
                         }
                     }
+                    $b =  array_filter($result3, function ($value_af) {
+                        return in_array(request()->brand, $value_af['brands']);
+                    });
+
+                    $result3 = $b;
                     $sheet->fromArray(@$result3);
                 });
             })->export('xlsx');
