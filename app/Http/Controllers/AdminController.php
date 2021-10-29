@@ -6953,7 +6953,40 @@ class AdminController extends Controller
             $year = $monthYear[0];
             $month =  $monthYear[1];
             $model = array();
-            $dealers = DB::table('users')->where('role', 2)->where('id', '!=', 58)->orderBy('name', 'ASC')->get();
+            $dealers = DB::table('users')->where('role', 2)
+            ->where('id', '!=', 58)
+            ->where('status',1);
+
+            if (!empty(request()->firm)) {
+                $dealers = $dealers->where('firm_id',request()->firm);
+            }
+            
+            if (!empty(request()->brand)) {
+                $brandFilterDealer = DB::table('dealer_templates')
+                // ->select('template_id')
+                ->join('treatments','dealer_templates.template_id','treatments.temp_id')
+                ->join('products_treatments','treatments.id','products_treatments.tre_id')
+                ->join('products','products_treatments.pro_id','products.id')
+                // ->select('treatments.id as treatment_id')
+
+                // ->limit(10)
+                ->where('products.brand_id', request()->brand)
+                ->groupBy('dealer_templates.dealer_id')
+
+                 ->select('dealer_templates.dealer_id')
+                ->get()->toArray();
+
+               $brandFilterDealerArray= array_map(function($value){
+                    // dd($value->dealer_id);
+                    return $value->dealer_id;
+                },$brandFilterDealer);
+
+                // dd($brandFilterDealerArray);
+                $dealers = $dealers->whereIn('id',$brandFilterDealerArray);
+            }
+            
+            $dealers =$dealers->orderBy('name', 'ASC')->get();
+            // dd($dealers);
             if (!empty($dealers) && @count($dealers) > 0) {
                 return Excel::create('DCF_' . date("d-M-Y"), function ($excel) use ($dealers, $search, $month, $year) {
                     foreach ($dealers as $dealerValue) {
@@ -7119,6 +7152,10 @@ class AdminController extends Controller
         /************************************ DCF Report End *******************************/
 
 
+        $firmsList = DB::table('firms')->get();
+        $brandList = DB::table('product_brands')->get();
+
+
         Session::put('oldReport', $type);
         return view('admin.dcf_report', [
             //'result' => $result1,
@@ -7137,6 +7174,8 @@ class AdminController extends Controller
             'oldSelectMonth' => @$search['month1'],
             'oldReport' => @$type,
             'tabName' => @$search['tabName'],
+            'firmsList' => @$firmsList,
+            'brandList' => @$brandList,
         ]);
     }
 
