@@ -36,7 +36,6 @@
                 </div><!-- /.box-header -->
               <div class="tab-contents" id="tab02">
                 <div class="box-body ">
-                  
                   <form action="" class="" method="GET" id="misreportform"> 
                     <div class="row">
                       <div class="col-xs-12 col-md-offset-2 col-md-8">
@@ -58,16 +57,16 @@
                             @endforeach
                           </select>
                         </div>
-                        {{-- <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                        <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                           <label>OEM</label>
-                          <select name="oem" class="form-control">
+                          <select name="oem" class="form-control" id="oem">
                             <option value="">Select OEM</option>
                             @foreach($oems as $val)
-                              <option value="{{$val->id}}" @if(@$oldOem == $val->id) {{'selected'}} @endif>{{$val->oem}}</option>
+                              <option value="{{$val->oem_id}}" @if(@$oldOem == $val->oem_id) {{'selected'}} @endif>{{get_oem_name($val->oem_id)}}</option>
                             @endforeach
                           </select>
                         </div>
-                        <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                        {{-- <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                           <label>Group</label>
                           <select name="group" class="form-control">
                             <option value="">Select Group</option>
@@ -76,6 +75,33 @@
                             @endforeach
                           </select>
                         </div> --}}
+                        <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                          <label>Dealer</label>
+                          <select class="form-control" id="dealer" name="dealer">
+                            <option value="">Select Dealer</option>
+                            @foreach($dealers_list as $value)
+                            <option {{(@$oldDealer==$value->id)?'selected':''}} value="{{$value->id}}">{{$value->name}}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                        <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                          <label>Departments</label>
+                          <select class="form-control" id="department" name="department">
+                            <option value="">Select Department</option>
+                            @foreach($departments as $department)
+                            <option {{(@$oldDepartment==$department->id)?'selected':''}} value="{{$department->id}}">{{$department->name}}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                        <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                          <label>Brands</label>
+                          <select class="form-control" id="brand" name="brand">
+                            <option value="">Select Brand</option>
+                            @foreach($brands as $value)
+                            <option {{(@request()->brand==$value->id)?'selected':''}} value="{{$value->id}}">{{$value->brand_name}}</option>
+                            @endforeach
+                          </select>
+                        </div>
                       </div>
                       <hr style="clear: both;" />
                       <div class="col-xs-12 col-md-offset-2 col-md-8">
@@ -95,9 +121,9 @@
                             <input type="text"  id="selectMonth" name="month" value="{{@$oldMonth}}" placeholder="Select Month" value="" class="datePicker1 form-control" autocomplete="off" />
                           </div>
                           
-                            <div class="input-group form-group report-field col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
-                              <input class="btn btn-primary" type="submit" value="Submit">
-                            </div>
+                          <div class="input-group form-group report-field col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                            <input class="btn btn-primary" type="submit" value="Submit">
+                          </div>
                       </div>
                     </div>
                   </form>
@@ -193,36 +219,36 @@
   });
 
   $(document).on('change','.datePicker',function(){
-      $('.datePicker1').val('');
+    $('.datePicker1').val('');
   });
 
   $(document).on('change','.datePicker1',function(){
-      $('.datePicker').val('');
+    $('.datePicker').val('');
   });
 
   $(document).on('click', '.datePicker', function(){
-     $(this).datepicker({
-        autoclose: true,
-        format: 'yyyy-mm-dd'
-     }).focus();
-   });
+    $(this).datepicker({
+      autoclose: true,
+      format: 'yyyy-mm-dd'
+    }).focus();
+  });
   
   $(document).on('click', '.datePicker1', function(){
-     $(this).datepicker({
-        autoclose: true,
-        format: "yyyy-mm",
-        startView: "months", 
-        minViewMode: "months"
-     }).focus();
-   });
+    $(this).datepicker({
+      autoclose: true,
+      format: "yyyy-mm",
+      startView: "months", 
+      minViewMode: "months"
+    }).focus();
+  });
+
   $(function() {
   var $tabButtonItem = $('#tab-button li'),
-      $tabSelect = $('#tab-select'),
-      $tabContents = $('.tab-contents'),
-      activeClass = 'is-active';
-//  $tabButtonItem.first().addClass(activeClass);
+  $tabSelect = $('#tab-select'),
+  $tabContents = $('.tab-contents'),
+  activeClass = 'is-active';
+  // $tabButtonItem.first().addClass(activeClass);
   $tabContents.not(':first').hide();
-
 
   $tabSelect.on('change', function() {
     var target = $(this).val(),
@@ -233,20 +259,21 @@
     $(target).show();
   });
 });
-  $('#tab-button li a').on('click', function(e) {
-     e.preventDefault();
-     var $tabButtonItem = $('#tab-button li'),
-      $tabSelect = $('#tab-select'),
-      $tabContents = $('.tab-contents'),
-      activeClass = 'is-active';
-    var target = $(this).attr('href');   
-    $tabButtonItem.removeClass(activeClass);
-    $(this).parent().addClass(activeClass);
-    $tabSelect.val(target);
-    $tabContents.hide();
-    $(target).show();
-    
-  });
+
+$('#tab-button li a').on('click', function(e) {
+    e.preventDefault();
+    var $tabButtonItem = $('#tab-button li'),
+    $tabSelect = $('#tab-select'),
+    $tabContents = $('.tab-contents'),
+    activeClass = 'is-active';
+  var target = $(this).attr('href');   
+  $tabButtonItem.removeClass(activeClass);
+  $(this).parent().addClass(activeClass);
+  $tabSelect.val(target);
+  $tabContents.hide();
+  $(target).show();
+});
+
 $('#firm').on('change',function(argument) {
   $('#misreportform').submit();
 });
@@ -254,6 +281,15 @@ $('#firm').on('change',function(argument) {
 $('#asm').on('change',function(argument) {
   $('#misreportform').submit();
 });
+
+$('#oem').on('change',function(argument) {
+  $('#misreportform').submit();
+});
+
+$('#dealer').on('change',function(argument) {
+  $('#misreportform').submit();
+});
+
 $(document).ready(function(argument) {
   $('#firm').on('change',function(){
     var firm_id = $(this).val();

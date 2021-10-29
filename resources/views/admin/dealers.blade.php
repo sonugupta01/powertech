@@ -119,7 +119,7 @@
                   ?>
                       <tr>
                         <td>{{$value->center_code}}</td>
-                        <td>{{ucwords($value->name)}}</td>
+                        <td>{{ucwords(strtolower($value->name))}}</td>
                         {{-- <td class="email-id">{{get_emails($value->id)}}</td>
                         <td>{{$value->mobile_no}}</td> --}}
                         <td style="text-align: center;">{{get_advisors($value->id)}}</td>
