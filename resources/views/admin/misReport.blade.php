@@ -132,7 +132,7 @@
   	                  <thead>
   	                    <tr>
   	                      <th style="font-size: 12px;">Total Records: {{count($mis)}}</th>
-  	                      <th colspan="7" style="text-align:center;">MIS</th>
+  	                      <th colspan="8" style="text-align:center;">MIS</th>
   	                      <th style="text-align: center;">
   	                        <button id="download2" class="btn btn-success">Download</button>
   	                      </th>
@@ -141,18 +141,20 @@
   	                      <th>CDC</th>
   	                      <th>Cust Bill</th>
   	                      <th>Actual Bill</th>
-  	                      <th>Vendor</th>
+  	                      <th>Dealer Price</th>
+  	                      <th>PT Share</th>
   	                      <th>Incentive</th>
   	                      <th>MTD HVT</th>
                           <th>HVT Value</th>
   	                      <th>HVT %</th>
   	                      <th>RO</th>
   	                    </tr>
-  	                    <?php $cp=$ap=$dp=$in=$hvt=$mtd_hvt=$service=0;
+  	                    <?php $cp=$ap=$dp=$pts=$in=$hvt=$mtd_hvt=$service=0;
   	                     foreach ($mis as $val) {
                             $cp=$cp+round(@$val['customer_price']);
                             $ap=$ap+round(@$val['actual_price']);
                             $dp=$dp+round(@$val['dealer_price']);
+                            $pts=$pts+round(@$val['powertech_share_price']);
                             $in=$in+round(@$val['incentive']);
                             $hvt=$hvt+round(@$val['hvt_total']);
                             $mtd_hvt=$mtd_hvt+round(@$val['mtd_hvt_value']);
@@ -166,6 +168,7 @@
   	                      <th>{{$cp}}</th>
   	                      <th>{{$ap}}</th>
   	                      <th>{{$dp}}</th>
+  	                      <th>{{$pts}}</th>
   	                      <th>{{$in}}</th>
   	                      <th>{{$hvt}}</th>
   	                      <th>{{$mtd_hvt}}</th>
@@ -181,6 +184,7 @@
   	                      <td style="background-color:#B6DDE8;">{{round(@$val['customer_price'])}}</td>
   	                      <td style="background-color:#B6DDE8;">{{round(@$val['actual_price'])}}</td>
   	                      <td style="background-color:#F7FED0;">{{round(@$val['dealer_price'])}}</td>
+  	                      <td style="background-color:#F7FED0;">{{round(@$val['powertech_share_price'])}}</td>
   	                      <td style="background-color:#FFFF00;">{{round(@$val['incentive'])}}</td>
   	                      <td style="background-color:#F2DDDC;">{{round(@$val['hvt_total'])}}</td>
                           <td style="background-color:#F2DDDC;">{{round(@$val['mtd_hvt_value'])}}</td>
@@ -190,7 +194,7 @@
   	                    @endforeach
   	                  <?php }else{ ?>
   	                    <tr>
-  	                      <td colspan="9">No Record</td>                          
+  	                      <td colspan="10">No Record</td>                          
   	                    </tr>
   	                  <?php } ?>
   	                  </tbody>
@@ -207,6 +211,10 @@
       <form method="get" id="form32" action="{{url('/admin/downloadMIS')}}">
         <input type="hidden" name="firm" value="{{@$oldFirm}}">
         <input type="hidden" name="asm" value="{{@$oldAsm}}">
+        <input type="hidden" name="oem" value="{{@$oldOem}}">
+        <input type="hidden" name="dealer" value="{{@$oldDealer}}">
+        <input type="hidden" name="department" value="{{@$oldDepartment}}">
+        <input type="hidden" name="brand" value="{{@request()->brand}}">
         <input type="hidden" name="from12" value="{{@$oldFromDate1}}">
         <input type="hidden" name="to12" value="{{@$oldToDate1}}">
         <input type="hidden" name="selectMonth2" value="{{@$oldMonth}}">
@@ -252,7 +260,7 @@
 
   $tabSelect.on('change', function() {
     var target = $(this).val(),
-        targetSelectNum = $(this).prop('selectedIndex');
+    targetSelectNum = $(this).prop('selectedIndex');
     $tabButtonItem.removeClass(activeClass);
     $tabButtonItem.eq(targetSelectNum).addClass(activeClass);
     $tabContents.hide();
@@ -261,11 +269,11 @@
 });
 
 $('#tab-button li a').on('click', function(e) {
-    e.preventDefault();
-    var $tabButtonItem = $('#tab-button li'),
-    $tabSelect = $('#tab-select'),
-    $tabContents = $('.tab-contents'),
-    activeClass = 'is-active';
+  e.preventDefault();
+  var $tabButtonItem = $('#tab-button li'),
+  $tabSelect = $('#tab-select'),
+  $tabContents = $('.tab-contents'),
+  activeClass = 'is-active';
   var target = $(this).attr('href');   
   $tabButtonItem.removeClass(activeClass);
   $(this).parent().addClass(activeClass);
@@ -275,18 +283,29 @@ $('#tab-button li a').on('click', function(e) {
 });
 
 $('#firm').on('change',function(argument) {
+  $('#asm').val('');
+  $('#oem').val('');
+  $('#dealer').val('');
   $('#misreportform').submit();
 });
 
 $('#asm').on('change',function(argument) {
+  $('#oem').val('');
+  $('#dealer').val('');
   $('#misreportform').submit();
 });
 
 $('#oem').on('change',function(argument) {
+  $('#dealer').val('');
   $('#misreportform').submit();
 });
 
 $('#dealer').on('change',function(argument) {
+  $('#department').val('');
+  $('#misreportform').submit();
+});
+
+$('#department').on('change',function(argument) {
   $('#misreportform').submit();
 });
 
