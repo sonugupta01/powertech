@@ -7230,6 +7230,9 @@ class AdminController extends Controller
                     $sheet->cells('T1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
+                    $sheet->cells('U1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
                     $sheet->setCellValue('P1', 'Customer_Price');
                     $sheet->setCellValue('P2', (string)$customer_price);
                     $sheet->setCellValue('Q1', 'Dealer_Price');
