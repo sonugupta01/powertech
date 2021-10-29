@@ -3407,7 +3407,39 @@ class AsmController extends Controller
             $year = $monthYear[0];
             $month =  $monthYear[1];
             $model = array();
-            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+            $dealer_ids = DB::table('users')->select('id', 'name','firm_id', 'reporting_authority')->where(['role' => 2, 'status' => 1]);
+            
+            if (!empty(request()->firm)) {
+                $dealer_ids = $dealer_ids->where('firm_id',request()->firm);
+            }
+
+            if (!empty(request()->brand)) {
+                $brandFilterDealer = DB::table('dealer_templates')
+                // ->select('template_id')
+                ->join('treatments','dealer_templates.template_id','treatments.temp_id')
+                ->join('products_treatments','treatments.id','products_treatments.tre_id')
+                ->join('products','products_treatments.pro_id','products.id')
+                // ->select('treatments.id as treatment_id')
+
+                // ->limit(10)
+                ->where('products.brand_id', request()->brand)
+                ->groupBy('dealer_templates.dealer_id')
+
+                 ->select('dealer_templates.dealer_id')
+                ->get()->toArray();
+
+               $brandFilterDealerArray= array_map(function($value){
+                    // dd($value->dealer_id);
+                    return $value->dealer_id;
+                },$brandFilterDealer);
+
+                // dd($brandFilterDealerArray);
+                $dealer_ids = $dealer_ids->whereIn('id',$brandFilterDealerArray);
+            }
+            
+            $dealer_ids = $dealer_ids->orderBy('id', 'DESC')->get();
+
+            // dd($dealer_ids);
             $dealers = array();
             $d_ids = array();
             foreach ($dealer_ids as $i => $j) {
@@ -3417,6 +3449,7 @@ class AsmController extends Controller
                     // $d_ids[]=$dealer_ids[$i]->id;
                 }
             }
+
             if (!empty($dealers) && @count($dealers) > 0) {
                 return Excel::create('DCF_' . date("d-M-Y"), function ($excel) use ($dealers, $search, $month, $year) {
                     foreach ($dealers as $dealerValue) {
@@ -3580,6 +3613,8 @@ class AsmController extends Controller
         }
         /************************************ DCF Report End *******************************/
 
+        $firmsList = DB::table('firms')->get();
+        $brandList = DB::table('product_brands')->get();
 
         Session::put('oldReport', $type);
         return view('asm.dcf_report', [
@@ -3599,6 +3634,8 @@ class AsmController extends Controller
             'oldSelectMonth' => @$search['month1'],
             'oldReport' => @$type,
             'tabName' => @$search['tabName'],
+            'firmsList' => @$firmsList,
+            'brandList' => @$brandList,
         ]);
     }
 

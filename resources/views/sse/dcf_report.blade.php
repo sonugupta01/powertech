@@ -42,16 +42,36 @@
                   @endif
                 <form action="" class="" method="GET"> 
                   <div class="row">
-                    <div class="col-xs-12 col-md-offset-2 col-md-8">
-                        <div class="input-group form-group report-field col-md-6 col-sm-6 col-xs-12" style="float: left !important;">
+                        <div class="input-group form-group report-field col-md-4 col-sm-4 col-xs-12" style="float: left !important;">
                           <label>Select Month</label>
                           <input type="text"  id="selectMonth" name="selectMonth" placeholder="Select Month" value="" class="datePicker1 form-control" autocomplete="off" />
                         </div>
+
+                        
+                        
+                    <div class="form-group report-field col-md-4 col-sm-4 col-xs-12">
+                      <label>Firms</label>
+                      <select name="firm" class="form-control" id="firm">
+                        <option value="">Select Firms</option>
+                        @foreach($firmsList as $firm)
+                          <option value="{{$firm->id}}" @if(@$oldFirm == $firm->id) {{'selected'}} @endif>{{$firm->firm_name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
+
+                    <div class="form-group report-field col-md-4 col-sm-4 col-xs-12">
+                      <label>Brands</label>
+                      <select class="form-control" id="brand" name="brand">
+                        <option value="">Select Brand</option>
+                        @foreach($brandList as $value)
+                        <option {{(@request()->brand==$value->id)?'selected':''}} value="{{$value->id}}">{{$value->brand_name}}</option>
+                        @endforeach
+                      </select>
+                    </div>
                         
                           <div class="form-group report-field col-md-6 col-sm-6 col-xs-12" style="margin-top:25px;">
                             <input class="btn btn-success" type="submit" value="Download">
                           </div>
-                    </div>
                   </div>
                 </form>
               </div>
