@@ -351,6 +351,7 @@
 				<li><a href="{{url('/admin/percentage_business_report')}}"><i class="fa fa-file"></i> Percentage Business Report</a></li>
 				<li><a href="{{url('/admin/undone_treatments_report')}}"><i class="fa fa-file"></i> Undone Treatments Report</a></li>
 				<li><a href="{{url('/admin/job_types_report')}}"><i class="fa fa-file"></i> Job Types Report</a></li>
+				<li><a href="{{url('/admin/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				
 			</ul>
 		</li>
@@ -461,6 +462,7 @@
 				<li><a href="{{url('/asm/dcf_report')}}"><i class="fa fa-file"></i> DCF Report</a></li>
 				<li><a href="{{url('/asm/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/asm/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
+				<li><a href="{{url('/asm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				
 			</ul>
 		</li>
@@ -550,6 +552,7 @@
 				<li><a href="{{url('/rsm/dcf_report')}}"><i class="fa fa-file"></i> DCF Report</a></li>
 				<li><a href="{{url('/rsm/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/rsm/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
+				<li><a href="{{url('/rsm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				
 			</ul>
 		</li>
@@ -639,6 +642,7 @@
 				<li><a href="{{url('/sse/dcf_report')}}"><i class="fa fa-file"></i> DCF Report</a></li>
 				<li><a href="{{url('/sse/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/sse/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
+				<li><a href="{{url('/sse/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				
 			</ul>
 		</li>
