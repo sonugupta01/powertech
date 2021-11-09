@@ -352,6 +352,7 @@
 				<li><a href="{{url('/admin/undone_treatments_report')}}"><i class="fa fa-file"></i> Undone Treatments Report</a></li>
 				<li><a href="{{url('/admin/job_types_report')}}"><i class="fa fa-file"></i> Job Types Report</a></li>
 				<li><a href="{{url('/admin/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
+				<li><a href="{{url('/admin/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				
 			</ul>
 		</li>
@@ -463,6 +464,7 @@
 				<li><a href="{{url('/asm/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/asm/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
 				<li><a href="{{url('/asm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
+				<li><a href="{{url('/asm/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				
 			</ul>
 		</li>
@@ -553,6 +555,7 @@
 				<li><a href="{{url('/rsm/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/rsm/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
 				<li><a href="{{url('/rsm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
+				<li><a href="{{url('/rsm/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				
 			</ul>
 		</li>
@@ -643,6 +646,7 @@
 				<li><a href="{{url('/sse/consumption_report')}}"><i class="fa fa-file"></i> Consumption Report</a></li>
 				<li><a href="{{url('/sse/performance_reports')}}"><i class="fa fa-file"></i> Performance Report</a></li>
 				<li><a href="{{url('/sse/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
+				<li><a href="{{url('/sse/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				
 			</ul>
 		</li>

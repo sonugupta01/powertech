@@ -3383,36 +3383,36 @@ class SseController extends Controller
             $year = $monthYear[0];
             $month =  $monthYear[1];
             $model = array();
-            $dealer_ids = DB::table('users')->select('id', 'name','firm_id', 'reporting_authority')->where(['role' => 2, 'status' => 1]);
-            
+            $dealer_ids = DB::table('users')->select('id', 'name', 'firm_id', 'reporting_authority')->where(['role' => 2, 'status' => 1]);
+
             if (!empty(request()->firm)) {
-                $dealer_ids = $dealer_ids->where('firm_id',request()->firm);
+                $dealer_ids = $dealer_ids->where('firm_id', request()->firm);
             }
 
             if (!empty(request()->brand)) {
                 $brandFilterDealer = DB::table('dealer_templates')
-                // ->select('template_id')
-                ->join('treatments','dealer_templates.template_id','treatments.temp_id')
-                ->join('products_treatments','treatments.id','products_treatments.tre_id')
-                ->join('products','products_treatments.pro_id','products.id')
-                // ->select('treatments.id as treatment_id')
+                    // ->select('template_id')
+                    ->join('treatments', 'dealer_templates.template_id', 'treatments.temp_id')
+                    ->join('products_treatments', 'treatments.id', 'products_treatments.tre_id')
+                    ->join('products', 'products_treatments.pro_id', 'products.id')
+                    // ->select('treatments.id as treatment_id')
 
-                // ->limit(10)
-                ->where('products.brand_id', request()->brand)
-                ->groupBy('dealer_templates.dealer_id')
+                    // ->limit(10)
+                    ->where('products.brand_id', request()->brand)
+                    ->groupBy('dealer_templates.dealer_id')
 
-                 ->select('dealer_templates.dealer_id')
-                ->get()->toArray();
+                    ->select('dealer_templates.dealer_id')
+                    ->get()->toArray();
 
-               $brandFilterDealerArray= array_map(function($value){
+                $brandFilterDealerArray = array_map(function ($value) {
                     // dd($value->dealer_id);
                     return $value->dealer_id;
-                },$brandFilterDealer);
+                }, $brandFilterDealer);
 
                 // dd($brandFilterDealerArray);
-                $dealer_ids = $dealer_ids->whereIn('id',$brandFilterDealerArray);
+                $dealer_ids = $dealer_ids->whereIn('id', $brandFilterDealerArray);
             }
-            
+
             $dealer_ids = $dealer_ids->orderBy('id', 'DESC')->get();
 
 
@@ -4627,7 +4627,7 @@ class SseController extends Controller
                 $d_ids[] = $dealer_ids[$i]->id;
             }
         }
-        $data['dealers'] = User::where(['role' => 2, 'status' => 1,'id'=>$d_ids])->select('id', 'name')
+        $data['dealers'] = User::where(['role' => 2, 'status' => 1, 'id' => $d_ids])->select('id', 'name')
             ->orderBy('name', 'asc')->get();
 
         $month = $request->month;
@@ -4642,7 +4642,7 @@ class SseController extends Controller
         }
 
 
-        $dealers =  User::where(['role' => 2, 'status' => 1,'id'=>$d_ids]);
+        $dealers =  User::where(['role' => 2, 'status' => 1, 'id' => $d_ids]);
         if (!empty($request->dealer_id)) {
             $dealers =   $dealers->where(['id' => $request->dealer_id]);
         }
@@ -4804,6 +4804,232 @@ class SseController extends Controller
         } else {
             //   dd($data);
             return view('sse.material_ordering_report', [
+                'result' => @$data,
+            ]);
+        }
+    }
+
+
+    public function closing_stock_report(Request $request)
+    {
+
+        $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+        // $dealers = array();
+        $d_ids = array();
+        foreach ($dealer_ids as $i => $j) {
+            $report_ids = explode(",", $j->reporting_authority);
+            if (in_array(Auth::id(), $report_ids)) {
+                // $dealers[] = $dealer_ids[$i];
+                $d_ids[] = $dealer_ids[$i]->id;
+            }
+        }
+        $data['dealers'] = User::where(['role' => 2, 'status' => 1, 'id' => $d_ids])->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+
+
+        // $data['dealers'] = User::where(['role' => 2, 'status' => 1])->select('id', 'name')
+        //     ->orderBy('name', 'asc')->get();
+
+        $date = $request->date;
+        if (!empty($date)) {
+            $selectedMonth = explode('-', $date);
+            $day = $selectedMonth[2];
+            $month = $selectedMonth[1];
+            $year = $selectedMonth[0];
+        } else {
+            $currentMonthYear = explode('-', date('Y-m-d'));
+            $day = $currentMonthYear[2];
+            $month = $currentMonthYear[1];
+            $year = $currentMonthYear[0];
+            $date = getCurrentDate();
+        }
+
+        $dealers =  User::where(['role' => 2, 'status' => 1, 'id' => $d_ids]);
+        if (!empty($request->dealer_id)) {
+            $dealers =   $dealers->where(['id' => $request->dealer_id]);
+        }
+
+
+        $dealers = $dealers->select('id', 'name')->orderBy('name', 'asc')->get();
+
+        // dd($dealers);
+        if (count($dealers) == 0) {
+            $data['productDetail'][] = [];
+        }
+        foreach ($dealers as $key => $value) {
+            $dealer_detail = $value;
+            $dealer_id = $value->id;
+            // dd($dealer_id);
+
+            $products = DB::table('dealer_templates as dt');
+
+            if (!empty($dealer_id)) {
+                $products = $products->where(['dt.dealer_id' => $dealer_id]);
+            }
+
+            $products = $products
+                ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+                ->join('products_treatments as pt', 't.id', '=', 'pt.tre_id')
+                ->select('pt.pro_id')
+                ->groupBy('pt.pro_id')
+                ->get();
+
+            $treatmentConsumptionOfProduct = DB::table('jobs as j')
+                ->join('jobs_treatment as jt', 'jt.job_id', '=', 'j.id')
+                ->join('products_treatments as pt', 'pt.tre_id', '=', 'jt.treatment_id');
+
+
+            if (!empty($dealer_id)) {
+                $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+                    ->where(['j.dealer_id' => $dealer_id]);
+            }
+
+            // if (!empty($day)) {
+            //     $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+            //         ->whereDay('j.job_date', $day);
+            // }
+            if (!empty($month)) {
+                $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+                    ->whereMonth('j.job_date', $month);
+            }
+
+            // if (!empty($year)) {
+            //     $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+            //         ->whereYear('j.job_date', $year);
+            // }
+
+            if (!empty($date)) {
+                $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+                    ->whereDate('j.job_date', '<=', $date);
+            }
+            $treatmentConsumptionOfProduct = $treatmentConsumptionOfProduct
+                ->get(['pt.id', 'pt.tre_id', 'pt.pro_id', 'pt.quantity', 'pt.uom', 'pt.price', 'pt.status', 'pt.created_at']);
+
+            $result = array();
+            foreach ($treatmentConsumptionOfProduct as $k => $v) {
+                $id = $v->pro_id;
+                $result[$id]['quantity'][] = $v->quantity;
+                $result[$id]['price'][] = $v->price;
+                $result[$id]['uom'] = $v->uom;
+            }
+            $consumeData = array();
+            foreach ($result as $i => $j) {
+                $consumeData[] = array('id' => $i, 'quanity' => array_sum($j['quantity']), 'price' => array_sum($j['price']), 'uom' => $j['uom']);
+            }
+            $productDetail = array();
+            foreach ($products as $key => $value) {
+                $detail = new \stdClass();
+                $detail->id = $value->pro_id;
+                $detail->pro_name = get_product_name($value->pro_id);
+                $detail->pro_unit = get_product_unit($value->pro_id);
+                $getStock = DB::table('dealer_product_inventory');
+
+                if (!empty($dealer_id)) {
+                    $getStock = $getStock->where(['dealer_id' => $dealer_id]);
+                }
+                $getStock = $getStock
+                    ->where(['product_id' => $value->pro_id, 'uom' => get_product_unit($value->pro_id)])
+                    ->orderBy('updated_at', 'DESC');
+                // if (!empty($day)) {
+                //     $getStock = $getStock->whereDay('updated_at', $day);
+                // }
+                if (!empty($month)) {
+                    $getStock = $getStock->whereMonth('updated_at', $month);
+                }
+                // if (!empty($year)) {
+                //     $getStock = $getStock->whereYear('updated_at', $year);
+                // }
+                if (!empty($date)) {
+                    $getStock = $getStock->whereDate('updated_at', '<=', $date);
+                }
+                $getStock = $getStock
+                    ->first();
+                if (!empty($getStock)) {
+                    $detail->minimum_stock = $getStock->minimum_stock;
+                    $detail->stock_in_hand = $getStock->stock_in_hand;
+                    $detail->updated_at = $getStock->updated_at;
+                    $detail->updated_by = $getStock->updated_by;
+                } else {
+                    $detail->minimum_stock = '';
+                    $detail->stock_in_hand = '';
+                    $detail->updated_at = '';
+                    $detail->updated_by = '';
+                }
+                $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
+                foreach ($consumeData as $key1 => $value1) {
+                    if ($value1['id'] == $detail->id  && $value1['uom'] == $detail->pro_unit) {
+                        $detail->consumedQuantity = (string)$value1['quanity'];
+                        $detail->totalPrice = (string)$value1['price'];
+                    }
+                }
+                $productDetail[] = $detail;
+            }
+
+            foreach ($productDetail as $key3 => $value3) {
+                if (!isset($value3->consumedQuantity)) {
+                    $productDetail[$key3]->consumedQuantity = '';
+                    $productDetail[$key3]->totalPrice = '';
+                }
+            }
+            // dd($productDetail);
+            if ($request->excel == "1") {
+                $productDetail['dealer_detail'] =  $dealer_detail;
+            }
+            //    if (!empty($productDetail)) {
+            $data['productDetail'][] = $productDetail;
+            //    }
+
+        }
+
+
+        if ($request->excel == "1") {
+
+            $excelData = $data['productDetail'];
+            // dd($excelData);
+
+            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($excelData) {
+
+
+                foreach ($excelData as $key => $value) {
+                    // dd(count($value));
+                    if (count($value) < 2) {
+                        continue;
+                    }
+
+                    // $name = in_array(substr($value['dealer_detail']->name,25),$sheetName)?substr($value['dealer_detail']->name,25).rand(1,4):substr($value['dealer_detail']->name,25);
+                    $name = strlen(substr($value['dealer_detail']->name, 25) > 32) ? substr($value['dealer_detail']->name, 0, 31) . rand(1, 4) : $value['dealer_detail']->name;
+                    // $sheetName[] = $name;
+                    // dd($name);
+                    // $name = substr($value['dealer_detail']->name,0,31);
+                    $excel->sheet($name, function ($sheet) use ($value) {
+                        $result = array();
+                        $array = array();
+                        foreach ($value as $key2 => $value2) {
+                            // dd($value2)
+                            if ($key2 === array_key_last($value)) {
+                                continue;
+                            }
+                            $array['Sr.no'] = ++$key2;
+                            $array['Product Name'] = @$value2->pro_name;
+                            // $array['Minimum Stock'] = !empty($value2->minimum_stock) ? $value2->minimum_stock : "0" . " " . $value2->unit_name;
+                            $array['Closing Stock'] = !empty($value2->stock_in_hand) ? $value2->stock_in_hand : "0" . " " . $value2->unit_name;
+
+                            $array['LastUpdated At'] = $value2->updated_at ? $value2->updated_at : "-";
+                            $array['LastUpdated By'] = get_name($value2->updated_by) ? get_name($value2->updated_by) : "-";
+
+                            $result[] = $array;
+                        }
+                        // dd($result);
+                        $sheet->fromArray($result);
+                        // dd("sxa");
+                    });
+                }
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($data);
+            return view('sse.closing_stock_report', [
                 'result' => @$data,
             ]);
         }
