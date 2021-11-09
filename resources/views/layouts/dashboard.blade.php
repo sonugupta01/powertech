@@ -390,7 +390,7 @@
 			
 		</li>
 		
-		{{-- <li class="">
+		<li class="">
 			
 			<a href="{{url('/asm/dealer_management')}}">
 				
@@ -398,7 +398,7 @@
 				
 			</a>	              
 			
-		</li> --}}
+		</li>
 		
 		<li class="">
 			<a href="{{url('/asm/staff_management')}}">

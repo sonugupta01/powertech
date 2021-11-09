@@ -228,7 +228,13 @@ class AdminController extends Controller
             'total_jobs' => $post['total_jobs'],
             'job_added_date' => $post['service_date'],
         );
-        DB::table('jobs_by_date')->insert($data);
+        $check = DB::table('jobs_by_date')->where(['user_id'=> Auth::user()->id, 'dealer_id' => $post['dealer_id'], 'job_added_date' => $post['service_date']])->first();
+        if (!empty($check)) {
+            $total_jobs = $check->total_jobs + $post['total_jobs'];
+            DB::table('jobs_by_date')->where(['user_id'=> Auth::user()->id, 'dealer_id' => $post['dealer_id'], 'job_added_date' => $post['service_date']])->update(['total_jobs'=>$total_jobs]);
+        } else {
+            DB::table('jobs_by_date')->insert($data);
+        }
         Session::flash('success', 'RO added successfully!');
         return redirect('/admin/jobs');
     }
@@ -5367,7 +5373,7 @@ class AdminController extends Controller
             $dealers_list = $dealers;
                     
         } else if (!empty($search['firm']) && !empty($search['asm']) && !empty($search['oem']) &&  empty($search['dealer'])) {
-            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'oem_id' => $search['oem'], 'firm_id' => $search['firm'], 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'firm_id' => $search['firm'], 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
 
             $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'firm_id' => $search['firm'], 'status' => 1])->orderBy('id', 'DESC')->get();
             
@@ -5528,13 +5534,12 @@ class AdminController extends Controller
         $asms = DB::table('users')->where(["firm_id" => @$search['firm'], "role" => 5, 'status' => 1])->get();
         $brands = DB::table("product_brands")->where('status', 1)->get();
         $mist = array();
-        
+        // $exp = explode('-', @$search['month']);
         foreach ($dealers as $key => $value) {
-
             $mis = DB::table('jobs')
-                // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
+                // // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
                 ->where(function ($query) use ($search, $first_day, $today, $value) {
-                    if(!empty($search)){
+                    if(!empty($search['department']) || !empty($search['from1']) || !empty($search['to1']) || !empty($search['month']) || !empty($search['brand'])){
                         if (isset($search['department'])) {
                             if (!empty(trim($search['department']))) {
                                 $query->where('jobs.department_id', '=', $search['department']);
@@ -5552,17 +5557,23 @@ class AdminController extends Controller
                             if (!empty(trim($search['to1']))) {
                                 $query->whereDate('jobs.job_date', '<=', $search['to1']);
                             }
-                        } else{
-                           $query->whereDate('jobs.job_date', '<=', $today); 
                         } 
+                        // else{
+                        //     if (empty($search['month'])) {
+                        //         $query->whereDate('jobs.job_date', '<=', $today); 
+                        //     } 
+                        // } 
 
                         if (isset($search['from1'])) {
                             if (!empty(trim($search['from1']))) {
                                 $query->whereDate('jobs.job_date', '>=', $search['from1']);
                             }
-                        }else{
-                            $query->whereDate('jobs.job_date', '>=', $first_day);
                         }
+                        // else{
+                        //     if (empty($search['month'])) {
+                        //         $query->whereDate('jobs.job_date', '>=', $first_day);
+                        //     } 
+                        // }
 
                         if (!empty($search['month'])) {
                             $exp = explode('-', $search['month']);
@@ -5583,13 +5594,7 @@ class AdminController extends Controller
                                 return $value2->dealer_id;
                             },$brandFilterDealer);
                             $query->whereIn('jobs.dealer_id', $brandFilterDealerArray);
-                            $query->whereDate('jobs.job_date', '>=', $first_day);
-                           $query->whereDate('jobs.job_date', '<=', $today); 
                         }
-                        // else {
-                        //    $query->whereDate('jobs.job_date', '>=', $first_day);
-                        //    $query->whereDate('jobs.job_date', '<=', $today); 
-                        // }
                     } else {
                         $query->whereDate('jobs.job_date', '>=', $first_day);
                         $query->whereDate('jobs.job_date', '<=', $today);
@@ -5600,9 +5605,10 @@ class AdminController extends Controller
                 // ->where('jobs.foc_options',5)
                 // ->groupBy('jobs.dealer_id')
                 ->get();
-
-            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
+          
+            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $lvt_total = $lvt_value = $mvt_total = $mvt_value = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
+            $array['total_job_done'] = count($mis);
             if (count($mis) == 0) {
                 $data = new \stdClass();
                 $data->dealer_id = $value->id;
@@ -5613,6 +5619,12 @@ class AdminController extends Controller
                 $data->dealer_price = 0;
                 $data->powertech_share_price = 0;
                 $data->incentive = 0;
+                $data->lvt_total = 0;
+                $data->mtd_lvt = 0;
+                $data->lvt_value = 0;
+                $data->mvt_total = 0;
+                $data->mtd_mvt = 0;
+                $data->mvt_value = 0;
                 $data->hvt_total = 0;
                 $data->mtd_hvt = 0;
                 $data->hvt_value = 0;
@@ -5635,6 +5647,10 @@ class AdminController extends Controller
                 $incentive       += (int)$value1->incentive;
                 $actual_price    += (int)$value1->actual_price;
                 $powertech_share_price    += (int)$value1->powertech_share_price;
+                $lvt_total       += $value1->lvt_total;
+                $lvt_value       += $value1->lvt_value;
+                $mvt_total       += $value1->mvt_total;
+                $mvt_value       += $value1->mvt_value;
                 $hvt_total       += $value1->hvt_total;
                 $hvt_value       += $value1->hvt_value;
                 $vas_total       += $value1->vas_total;
@@ -5661,13 +5677,19 @@ class AdminController extends Controller
                             }
                         }
                     }
-                }
+                }                
                 $array['mtd_total'] = $treatment_total;
                 $array['customer_price'] = $customer_price;
                 $array['actual_price'] = $actual_price;
                 $array['dealer_price'] = $dealer_price;
                 $array['powertech_share_price'] = $powertech_share_price;
                 $array['incentive'] = $incentive;
+                $array['lvt_total'] = $lvt_total;
+                $array['mtd_lvt'] = $lvt_total;
+                $array['mtd_lvt_value'] = $lvt_value;
+                $array['mvt_total'] = $mvt_total;
+                $array['mtd_mvt'] = $mvt_total;
+                $array['mtd_mvt_value'] = $mvt_value;
                 $array['hvt_total'] = $hvt_total;
                 $array['mtd_hvt'] = $hvt_total;
                 $array['mtd_hvt_value'] = $hvt_value;
@@ -5678,6 +5700,7 @@ class AdminController extends Controller
             }
             $mist[] = $array;
         }
+        
         foreach ($mist as $key => $value2) {
             $total = DB::table('jobs_by_date')
                 ->select(DB::raw('SUM(total_jobs) as total_jobs,dealer_id'))
@@ -5713,6 +5736,7 @@ class AdminController extends Controller
                 $mist[$key]['service_load'] = 0;
             }
         }
+        
         /************************************ MIS Report End *************************/
         return view('admin.misReport', [
             'mis' => $mist,
@@ -5729,7 +5753,7 @@ class AdminController extends Controller
             'dealers' => @$dealer,
             'dealers_list' => @$dealers_list,
             'oldDealer' => @$search['dealer'],
-            'oldSelectMonth' => @$search['month1'],
+            'oldSelectMonth' => @$search['month'],
             'oldReport' => @$type,
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
@@ -8138,7 +8162,7 @@ class AdminController extends Controller
                     $d_ids[] = $oem_dealers[$i]->id;
                 }
             }
-            // dd($dealers_list);
+            
             $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
             $departments = DB::table('dealer_department')->where('status', 1)->get();
             $dealers_list = $dealers_list;
@@ -8227,44 +8251,45 @@ class AdminController extends Controller
         // ->where('users.role',2)
         // ->orderBy('users.name','ASC')
         // ->get();
-        
         $mist = array();
         foreach ($dealers as $key => $value) {
             $mis = DB::table('jobs')
                 // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
                 ->where(function ($query) use ($search, $first_day, $today, $value) {
-                    if(!empty($search)){
+                    if(!empty($search['department']) || !empty($search['from12']) || !empty($search['to12']) || !empty($search['selectMonth2']) || !empty($search['brand'])){
                         if (isset($search['department'])) {
                             if (!empty(trim($search['department']))) {
                                 $query->where('jobs.department_id', '=', $search['department']);
                             }
                         }
 
-                        if (isset($search['from1']) && isset($search['to1'])) {
-                            if (!empty(trim($search['from1']))) {
-                                $query->whereDate('jobs.job_date', '>=', $search['from1']);
-                                $query->whereDate('jobs.job_date', '<=', $search['to1']);
+                        if (isset($search['from12']) && isset($search['to12'])) {
+                            if (!empty(trim($search['from12']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from12']);
+                                $query->whereDate('jobs.job_date', '<=', $search['to12']);
                             }
                         } 
 
-                        if (isset($search['to1'])) {
-                            if (!empty(trim($search['to1']))) {
-                                $query->whereDate('jobs.job_date', '<=', $search['to1']);
+                        if (isset($search['to12'])) {
+                            if (!empty(trim($search['to12']))) {
+                                $query->whereDate('jobs.job_date', '<=', $search['to12']);
                             }
-                        } else{
-                           $query->whereDate('jobs.job_date', '<=', $today); 
                         } 
+                        // else{
+                        //    $query->whereDate('jobs.job_date', '<=', $today); 
+                        // } 
 
-                        if (isset($search['from1'])) {
-                            if (!empty(trim($search['from1']))) {
-                                $query->whereDate('jobs.job_date', '>=', $search['from1']);
+                        if (isset($search['from12'])) {
+                            if (!empty(trim($search['from12']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from12']);
                             }
-                        }else{
-                            $query->whereDate('jobs.job_date', '>=', $first_day);
-                        }
+                        } 
+                        // else{
+                        //     $query->whereDate('jobs.job_date', '>=', $first_day);
+                        // }
 
-                        if (!empty($search['month'])) {
-                            $exp = explode('-', $search['month']);
+                        if (!empty($search['selectMonth2'])) {
+                            $exp = explode('-', $search['selectMonth2']);
                             $query->whereMonth('jobs.job_date', $exp[1]);
                             $query->whereYear('jobs.job_date', $exp[0]);
                         }
@@ -8282,13 +8307,9 @@ class AdminController extends Controller
                                 return $value2->dealer_id;
                             },$brandFilterDealer);
                             $query->whereIn('jobs.dealer_id', $brandFilterDealerArray);
-                            $query->whereDate('jobs.job_date', '>=', $first_day);
-                           $query->whereDate('jobs.job_date', '<=', $today); 
+                            // $query->whereDate('jobs.job_date', '>=', $first_day);
+                            // $query->whereDate('jobs.job_date', '<=', $today); 
                         }
-                        // else {
-                        //    $query->whereDate('jobs.job_date', '>=', $first_day);
-                        //    $query->whereDate('jobs.job_date', '<=', $today); 
-                        // }
                     } else {
                         $query->whereDate('jobs.job_date', '>=', $first_day);
                         $query->whereDate('jobs.job_date', '<=', $today);
@@ -8299,9 +8320,10 @@ class AdminController extends Controller
                 // ->where('jobs.foc_options',5)
                 // ->groupBy('jobs.dealer_id')
                 ->get();
-                
-            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
+              
+            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $lvt_total = $lvt_value = $mvt_total = $mvt_value = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
+            $array['total_job_done'] = count($mis);
             if (count($mis) == 0) {
                 $data = new \stdClass();
                 $data->dealer_id = $value->id;
@@ -8312,6 +8334,12 @@ class AdminController extends Controller
                 $data->dealer_price = 0;
                 $data->powertech_share_price = 0;
                 $data->incentive = 0;
+                $data->lvt_total = 0;
+                $data->mtd_lvt = 0;
+                $data->lvt_value = 0;
+                $data->mvt_total = 0;
+                $data->mtd_mvt = 0;
+                $data->mvt_value = 0;
                 $data->hvt_total = 0;
                 $data->mtd_hvt = 0;
                 $data->hvt_value = 0;
@@ -8335,6 +8363,10 @@ class AdminController extends Controller
                 $actual_price             += (int)$value1->actual_price;
                 $dealer_price             += $value1->dealer_price;
                 $powertech_share_price    += (int)$value1->powertech_share_price;
+                $lvt_total                += $value1->lvt_total;
+                $lvt_value                += $value1->lvt_value;
+                $mvt_total                += $value1->mvt_total;
+                $mvt_value                += $value1->mvt_value;
                 $hvt_total                += $value1->hvt_total;
                 $hvt_value                += $value1->hvt_value;
                 $vas_total                += $value1->vas_total;
@@ -8368,6 +8400,12 @@ class AdminController extends Controller
                 $array['dealer_price'] = $dealer_price;
                 $array['powertech_share_price'] = @$powertech_share_price;
                 $array['incentive'] = $incentive;
+                $array['lvt_total'] = $lvt_total;
+                $array['mtd_lvt'] = $lvt_total;
+                $array['mtd_lvt_value'] = $lvt_value;
+                $array['mvt_total'] = $mvt_total;
+                $array['mtd_mvt'] = $mvt_total;
+                $array['mtd_mvt_value'] = $mvt_value;
                 $array['hvt_total'] = $hvt_total;
                 $array['mtd_hvt'] = $hvt_total;
                 $array['mtd_hvt_value'] = $hvt_value;
@@ -8418,45 +8456,78 @@ class AdminController extends Controller
         return Excel::create('MIS_' . date("d-M-Y"), function ($excel) use ($mist) {
             $excel->sheet('sheet', function ($sheet) use ($mist) {
                 $arr = array();
-                $cp = $ap = $dp = $pts = $in = $hvt = $mtd_hvt = $service = 0;
+                $cp = $ap = $dp = $pts = $in = $lvt = $mtd_lvt = $mvt = $mtd_mvt = $hvt = $mtd_hvt = $service = 0;
                 foreach ($mist as $val1) {
                     $cp = $cp + $val1['customer_price'];
                     $ap = $ap + $val1['actual_price'];
                     $dp = $dp + $val1['dealer_price'];
                     $pts = $pts + $val1['powertech_share_price'];
                     $in = $in + $val1['incentive'];
+                    $lvt=$lvt+round(@$val1['lvt_total']);
+                    $mtd_lvt=$mtd_lvt+round(@$val1['mtd_lvt_value']);
+                    $mvt=$mvt+round(@$val1['mvt_total']);
+                    $mtd_mvt=$mtd_mvt+round(@$val1['mtd_mvt_value']);
                     $hvt = $hvt + $val1['hvt_total'];
                     $mtd_hvt = $mtd_hvt + $val1['mtd_hvt_value'];
                     $service = $service + $val1['service_load'];
                 }
                 $array['CDC'] = 'Business Total';
-                $array['Cust_Bill'] = round($cp);
+                // $array['Cust_Bill'] = round($cp);
                 $array['Actual_Price'] = round($ap);
                 // $array['Vendor'] = round($dp);
                 $array['Dealer_Price'] = round($dp);
                 $array['Powertech_Share_Price'] = round($pts);
                 $array['Incentive'] = round($in);
+                $array['MTD_LVT'] = round($lvt);
+                $array['LVT_Value'] = round($mtd_lvt);
+                $array['LVT_%'] = hvt_in_percentage($mtd_lvt, $ap);
+                $array['MTD_MVT'] = round($mvt);
+                $array['MVT_Value'] = round($mtd_mvt);
+                $array['MVT_%'] = hvt_in_percentage($mtd_mvt, $ap);
                 $array['MTD_HVT'] = round($hvt);
                 $array['HVT_Value'] = round($mtd_hvt);
-                $array['HVT_%'] = hvt_in_percentage($mtd_hvt, $cp);
+                $array['HVT_%'] = hvt_in_percentage($mtd_hvt, $ap);
                 $array['RO'] = round($service);
+                $array['Business_per_RO'] = '';
+                $array['Business_per_Treatment'] = '';
+                $array['RO_Ratio'] = '';
                 $arr[] = $array;
+                // dd($array);
                 foreach ($mist as $val) {
+                    $business_per_ro = $business_per_treatment =  $ro_ratio = 0; 
+                    if(@$val['service_load']>0){
+                        $business_per_ro = round(@$val['actual_price'])/@$val['service_load'];
+                        $ro_ratio = @$val['total_job_done']/@$val['service_load']*100;
+                    }
+
+                    if(@$val['mtd_total']>0){
+                        $business_per_treatment = round(@$val['actual_price'])/@$val['mtd_total'];
+                    }
+
                     $array['CDC'] = get_name($val['dealer_id']);
-                    $array['Cust_Bill'] = round($val['customer_price']);
+                    // $array['Cust_Bill'] = round($val['customer_price']);
                     $array['Actual_Price'] = round($val['actual_price']);
                     // $array['Vendor'] = round($val['dealer_price']);
                     $array['Dealer_Price'] = round($val['dealer_price']);
                     $array['Powertech_Share_Price'] = round($val['powertech_share_price']);
                     $array['Incentive'] = round($val['incentive']);
+                    $array['MTD_LVT'] = round($val['lvt_total']);
+                    $array['LVT_Value'] = round($val['mtd_lvt_value']);
+                    $array['LVT_%'] = hvt_in_percentage($val['mtd_lvt_value'], $val['actual_price']);
+                    $array['MTD_MVT'] = round($val['mvt_total']);
+                    $array['MVT_Value'] = round($val['mtd_mvt_value']);
+                    $array['MVT_%'] = hvt_in_percentage($val['mtd_mvt_value'], $val['actual_price']);
                     $array['MTD_HVT'] = round($val['hvt_total']);
                     $array['HVT_Value'] = round($val['mtd_hvt_value']);
-                    $array['HVT_%'] = hvt_in_percentage($val['mtd_hvt_value'], $val['customer_price']);
+                    $array['HVT_%'] = hvt_in_percentage($val['mtd_hvt_value'], $val['actual_price']);
                     $array['RO'] = $val['service_load'];
+                    $array['Business_per_RO'] = number_format((float)$business_per_ro, 2, '.', '');
+                    $array['Business_per_Treatment'] = $business_per_treatment;
+                    $array['RO_Ratio'] = number_format((float)$ro_ratio, 2, '.', '');
                     $arr[] = $array;
                 }
                 $count = count($arr) + 1;
-                $sheet->setBorder('A3:H' . $count);
+                $sheet->setBorder('A3:R' . $count);
                 $sheet->cells('A3:A' . $count, function ($cells) {
                     $cells->setBackground('#FFFF00');
                 });
@@ -8482,7 +8553,34 @@ class AdminController extends Controller
                     $cells->setBackground('#FFFF00');
                 });
                 $sheet->cells('I3:I' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('J3:J' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('K3:K' . $count, function ($cells) {
+                    $cells->setBackground('#FFFF00');
+                });
+                $sheet->cells('L3:L' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('M3:M' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('N3:N' . $count, function ($cells) {
+                    $cells->setBackground('#FFFF00');
+                });
+                $sheet->cells('O3:O' . $count, function ($cells) {
                     $cells->setBackground('#B6DDE8');
+                });
+                $sheet->cells('P3:P' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
+                });
+                $sheet->cells('Q3:Q' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
+                });
+                $sheet->cells('R3:R' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
                 });
                 $sheet->fromArray(@$arr);
             });
@@ -8921,7 +9019,7 @@ class AdminController extends Controller
     public function jobs(Request $request)
     {
         $search = $request->search;
-        $dealers = User::where('role', 2)->select('id as dealer_id', 'name as dealer_name')->get();
+        $dealers = User::where(['role'=>2, 'status'=>1])->select('id as dealer_id', 'name as dealer_name')->get();
         $regn_no = $request->regn_no;
         if (@$request->job_type) {
             if ($request->job_type == 1) {
@@ -9072,7 +9170,7 @@ class AdminController extends Controller
         );
         $treatment_id = array();
         $treatment_data = array();
-        $i = $hvt_value = 0;
+        $i = $l = $m = $h = $hvt_value = $mvt_value = $lvt_value = 0;
         foreach ($post['treatment_id'] as $key => $value) {
             $data1 = DB::table('treatments')->where('id', $value)->first();
             $data1->job_type = $post['job_type'][$key];
@@ -9095,16 +9193,31 @@ class AdminController extends Controller
             $dealer_price = $dealer_price + $data1->dealer_price;
             $powertech_price = $powertech_price + $data1->powertechPrice;
             // $incentive = $incentive + $data1->incentive;
-            if ($data1->treatment_type == 1) {
-                $i++;
-                // $hvt_value = $hvt_value + $data1->customer_price;
-                if ($data1->job_type == '5') {
-                    $hvt_value = $hvt_value + $data1->actualPrice;
-                    // $hvt_value = $hvt_value + $data1->difference;
-                } else {
-                    $hvt_value = 0;
-                }
+
+            if($data1->actualPrice < 1000){
+                $l++;
+                $lvt_value = $lvt_value + $data1->actualPrice;
+            }elseif($data1->actualPrice > 1000 && $data1->actualPrice < 2000){
+                $m++;
+                $mvt_value = $mvt_value + $data1->actualPrice;
+            }elseif($data1->actualPrice > 2000) {
+                $h++;
+                $hvt_value = $hvt_value + $data1->actualPrice;
+            } else {
+                $lvt_value = 0;
+                $mvt_value = 0;
+                $hvt_value = 0;
             }
+            // if ($data1->treatment_type == 1) {
+            //     $i++;
+            //     // $hvt_value = $hvt_value + $data1->customer_price;
+            //     if ($data1->job_type == '5') {
+            //         $hvt_value = $hvt_value + $data1->actualPrice;
+            //         // $hvt_value = $hvt_value + $data1->difference;
+            //     } else {
+            //         $hvt_value = 0;
+            //     }
+            // }
             $treat_id['id'] = $data1->id;
             $treatment_id[] = $treat_id;
         }
@@ -9159,7 +9272,11 @@ class AdminController extends Controller
             'remarks' => $request->remark,
             'treatments' => json_encode($treatment_data),
             'treatment_total' => count($request->treatment_id),
-            'hvt_total' => $i,
+            'lvt_total' => $l,
+            'lvt_value' => $lvt_value,
+            'mvt_total' => $m,
+            'mvt_value' => $mvt_value,
+            'hvt_total' => $h,
             'hvt_value' => $hvt_value,
             'vas_total' => count($request->treatment_id),
             'vas_value' => $customer_price,
@@ -9329,7 +9446,7 @@ class AdminController extends Controller
 
         $treatment_id = array();
         $treatment_data = array();
-        $i = $hvt_value = 0;
+        $i = $l = $m = $h = $hvt_value = $mvt_value = $lvt_value = 0;
         foreach ($selectedTreatments as $value) {
             $data1 = DB::table('treatments')->where('id', $value['id'])->first();
             if ($value['job_type'] == 5) {
@@ -9345,15 +9462,31 @@ class AdminController extends Controller
             $dealer_price = $dealer_price + $value['dealer_price'];
             $powertech_price = $powertech_price + $value['powertechPrice'];
             // $incentive = $incentive + $value['incentive'];
-            if ($data1->treatment_type == 1) {
-                $i++;
-                // $hvt_value = $hvt_value + $value['customer_price'];
-                if ($value['job_type'] == 5) {
-                    $hvt_value = $hvt_value + $value['actualPrice'];
-                } else {
-                    $hvt_value = 0;
-                }
+
+            if($value['actualPrice'] < 1000){
+                $l++;
+                $lvt_value = $lvt_value + $value['actualPrice'];
+            }elseif($value['actualPrice'] > 1000 && $value['actualPrice'] < 2000){
+                $m++;
+                $mvt_value = $mvt_value + $value['actualPrice'];
+            }elseif($value['actualPrice'] > 2000) {
+                $h++;
+                $hvt_value = $hvt_value + $value['actualPrice'];
+            } else {
+                $lvt_value = 0;
+                $mvt_value = 0;
+                $hvt_value = 0;
             }
+
+            // if ($data1->treatment_type == 1) {
+            //     $i++;
+            //     // $hvt_value = $hvt_value + $value['customer_price'];
+            //     if ($value['job_type'] == 5) {
+            //         $hvt_value = $hvt_value + $value['actualPrice'];
+            //     } else {
+            //         $hvt_value = 0;
+            //     }
+            // }
             $treat_id['id'] = $value['id'];
             $treat_id['treatment'] = $data1->treatment;
             $treat_id['treatment_type'] = $data1->treatment_type;
@@ -9414,7 +9547,11 @@ class AdminController extends Controller
             'remarks' => $request->remark,
             'treatments' => json_encode($treatment_data),
             'treatment_total' => count($treatment_id),
-            'hvt_total' => $i,
+            'lvt_total' => $l,
+            'lvt_value' => $lvt_value,
+            'mvt_total' => $m,
+            'mvt_value' => $mvt_value,
+            'hvt_total' => $h,
             'hvt_value' => $hvt_value,
             'vas_total' => count($treatment_id),
             'vas_value' => $customer_price,
@@ -11407,6 +11544,7 @@ class AdminController extends Controller
             'minimum_stock' => $post['minimum_stock'],
             'stock_in_hand' => $post['stock_in_hand'],
             'uom' => $post['pro_unit'],
+            'updated_by' => Auth::id(),
             'updated_at' => getCurrentTimestamp()
         );
 
@@ -11484,10 +11622,12 @@ class AdminController extends Controller
             if (!empty($getStock)) {
                 $detail->minimum_stock = $getStock->minimum_stock;
                 $detail->stock_in_hand = $getStock->stock_in_hand;
+                $detail->updated_by = $getStock->updated_by;
                 $detail->updated_at = $getStock->updated_at;
             } else {
                 $detail->minimum_stock = '';
                 $detail->stock_in_hand = '';
+                $detail->updated_by = '';
                 $detail->updated_at = '';
             }
             $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
@@ -11515,6 +11655,7 @@ class AdminController extends Controller
                 $sheet->setCellValue('D1', 'Expected Stock');
                 $sheet->setCellValue('E1', 'Stock in Hand');
                 $sheet->setCellValue('F1', 'Last Updated');
+                $sheet->setCellValue('G1', 'Updated By');
                 $i = 2;
                 $loop = 1;
                 foreach ($productDetail as $key => $value) {
@@ -11536,18 +11677,25 @@ class AdminController extends Controller
                         $expectedStock = '';
                     }
 
-                    if (!empty($value->unit_name)) {
+                    if (!empty($value->stock_in_hand)) {
                         $stock_in_hand = (int)$value->stock_in_hand . ' ' . $value->unit_name;
                     } else {
                         $stock_in_hand = '';
+                    }
+
+                    if (!empty($value->updated_by)) {
+                        $updated_by = get_name($value->updated_by);
+                    } else {
+                        $updated_by = '';
                     }
 
                     $sheet->setCellValue('A' . $i, $value->pro_name);
                     $sheet->setCellValue('B' . $i, $minimum_stock);
                     $sheet->setCellValue('C' . $i, $consumedQuantity);
                     $sheet->setCellValue('D' . $i, $expectedStock);
-                    $sheet->setCellValue('E' . $i, $value->stock_in_hand);
+                    $sheet->setCellValue('E' . $i, $stock_in_hand);
                     $sheet->setCellValue('F' . $i, $value->updated_at);
+                    $sheet->setCellValue('G' . $i, $updated_by);
                     $i++;
                     $loop++;
                 }

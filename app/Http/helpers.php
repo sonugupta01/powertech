@@ -867,3 +867,16 @@ function getAdvisorPercentage($advisor_id)
 	$percentage = DB::table('advisor_shares')->where('advisor_id', $advisor_id)->orderBy('created_at', 'DESC')->first();
 	return @$percentage->advisor_share;
 }
+
+function get_dealer_ro($dealer_id)
+{
+	$date = explode('-', date('Y-m-d'));
+	$dealer_ro = DB::table('jobs_by_date')
+        		->select(DB::raw('SUM(total_jobs) as total_jobs,dealer_id'))
+                ->where('dealer_id', @$dealer_id)
+				->whereMonth('job_added_date', $date[1])
+				->whereYear('job_added_date', $date[0])
+				->groupBy('dealer_id')
+				->first();			
+	return $dealer_ro;	
+}
