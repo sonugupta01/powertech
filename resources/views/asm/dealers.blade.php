@@ -108,16 +108,15 @@
 
                         <tr>
 
+                          <th>Center Code</th>
                           <th>Name</th>
-
-                          <th>Email</th>
-
-                          <th>Mobile No.</th>
-
+                          {{-- <th>Email</th>
+                          <th>Mobile No.</th> --}}
+                          <th>Active Advisors</th>
                           <th>Status</th> 
-
+                          <th>Action</th>
+                          <!-- <th>View</th> -->
                           <!-- <th>Action</th> -->
-
                         </tr>
 
                       </thead>
@@ -125,55 +124,35 @@
                       <tbody>
 
                         <?php if(count($dealers)>=1){
-
                           $i=1;
-
-                          foreach($dealers as $value) { 
-
-
-
+                          foreach($dealers as $value) {
                         ?>
 
                             <tr>
-
-                              <td>{{ucwords($value->name)}}</td>
-
-                              <td class="email-id">{{$value->email}}</td>
-
-                              <td>{{$value->mobile_no}}</td>
-
+                              <td>{{$value->center_code}}</td>
+                              <td>{{ucwords(strtolower($value->name))}}</td>
+                              <!-- <td class="email-id">{{$value->email}}</td>
+                              <td>{{$value->mobile_no}}</td> -->
+                              <td style="text-align: center;">{{get_advisors($value->id)}}</td>
                               <td>@if($value->status == "1") Activate @else Deactivate @endif</td> 
-
                               <td>
-
                                   @if($value->status == "1")
-
-                                    <!-- <a href="{{ url('/asm/statusDealer/deactivate/')}}/{{$value->id}}"  onclick="return confirm('Are you sure want to deactivate?')" class="btn btn-danger">Deactivate</a> --> 
-
+                                    <!-- <a href="{{ url('/asm/statusDealer/deactivate/')}}/{{$value->id}}"  onclick="return confirm('Are you sure want to deactivate?')" class="btn btn-danger">Deactivate</a> -->
                                   @else 
-
                                     <!-- <a href="{{ url('/asm/statusDealer/activate/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to activate?')" class="btn btn-info" style="width: 92.15px">Activate</a> -->
+                                  @endif
+                                  <a href="{{ url('/asm/dealerProducts')}}/{{$value->id}}" class="btn btn-warning">MIL</a>
+                                  <!-- <a href="{{ url('/asm/editDealer/')}}/{{$value->id}}" class="btn btn-success">Edit</a> -->
 
-                                  @endif 
+                                  <!-- <a href="{{ asset('images')}}/{{ $value->qrcode}}" class="btn btn-primary" download="">QR Code</a> -->
 
-                                    <!-- <a href="{{ url('/asm/editDealer/')}}/{{$value->id}}" class="btn btn-success">Edit</a> -->
-
-                                    <!-- <a href="{{ asset('images')}}/{{ $value->qrcode}}" class="btn btn-primary" download="">QR Code</a> -->
-
-                                    <!--<a href="{{ url('/admin/statusDealer/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a>-->
-
+                                  <!--<a href="{{ url('/admin/statusDealer/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a>-->
                               </td>
-
                             </tr>   
-
                         <?php
-
                           $i++;
-
                           }
-
                          }else{?>
-
                           <tr>
 
                             <td colspan="6">No Record</td>                          
@@ -187,33 +166,19 @@
                       <tfoot>
 
                         <tr>
-
+                          <th>Center Code</th>
                           <th>Name</th>
-
-                          <th>Email</th>
-
-                          <th>Mobile No.</th>
-
-                          <!-- <th>Active Advisors</th> -->
-
+                          {{-- <th>Email</th>
+                          <th>Mobile No.</th> --}}
+                          <th>Active Advisors</th>
                           <th>Status</th> 
-
-                          <!-- <th>Action</th> -->
-
+                          <th>Action</th>
                           <!-- <th>View</th> -->
-
                         </tr>
-
                       </tfoot>
-
                     </table>
-
                   </div>
-
-
-
                   <?php echo $dealers->links(); ?>
-
                 </div><!-- /.box-body -->
 
               </div><!-- /.box -->

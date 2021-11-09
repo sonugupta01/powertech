@@ -390,8 +390,8 @@ class HomeController extends Controller
                         ->first()->customer_price;
                         
                         $dealer_id = $request->dealer_id;
-                        $res['share'] = DB::table('dealer_shares')->select('share_percentage')->where('dealer_id', $dealer_id)->orderBy('id', 'DESC')->first()->share_percentage;
-                        
+                        @$res['share'] = DB::table('dealer_shares')->select('share_percentage')->where('dealer_id', $dealer_id)->orderBy('id', 'DESC')->first()->share_percentage;
+                        $res['share'] = $res['share']!=''?$res['share']:0;
                         $res['calc'] = $res['gtp'] * $res['share']/100;
                         $res['gdp'] = round($res['gtp'] - $res['calc']);
                         
@@ -407,9 +407,8 @@ class HomeController extends Controller
                 {
                     $post = $request->all();
                     $dealer_id = $request->dealer_id;
-                    $res = DB::table('dealer_shares')->select('share_percentage')->where('dealer_id', $dealer_id)
-                    ->orderBy('id', 'DESC')->first()->share_percentage;
-                    
+                    @$res = DB::table('dealer_shares')->select('share_percentage')->where('dealer_id', $dealer_id)->orderBy('id', 'DESC')->first()->share_percentage;
+                    $res = $res!=''?$res:0;
                     return $res;
                 }
                 

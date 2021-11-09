@@ -331,6 +331,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web', 'a
 Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']], function () {
   Route::get('/', 'AsmController@dashboard');
   Route::get('/downloadDashboard', 'AsmController@downloadDashboard');
+
   // Dealer Module
   Route::get('/addDealer', 'AsmController@addDealer');
   Route::post('/insertDealer', 'AsmController@insertDealer');
@@ -338,6 +339,10 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']
   Route::get('/statusDealer/{status}/{id}', 'AsmController@statusDealer');
   Route::get('/editDealer/{id}', 'AsmController@editDealer');
   Route::post('/updateDealer', 'AsmController@updateDealer');
+  Route::get('/dealerProducts/{dealer_id}', 'AsmController@dealerProducts');
+  Route::get('/dealerProductInventory/{dealer_id}/{product_id}', 'AsmController@dealerProductInventory');
+  Route::get('/downloadProductInventory/{dealer_id}', 'AsmController@downloadProductInventory');
+  Route::post('/updateDealerProductInventory', 'AsmController@updateDealerProductInventory');
 
   // Staff Module
   Route::get('/staff_management', 'AsmController@staff_management');
@@ -356,9 +361,11 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']
   Route::post('/getreportingauthority', 'AsmController@getreportingauthority');
   Route::post('/updateEmpHierarchy', 'AsmController@updateEmpHierarchy');
   Route::get('/statusEmpHierarchy/{status}/{id}', 'AsmController@statusEmpHierarchy');
+
   // Target Module
   Route::get('targets', 'AsmController@targets');
   Route::get('targetListing/{dealer_id}/{temp_id}/{target_id}', 'AsmController@targetListing');
+
   // Job Module
   Route::get('/jobs', 'AsmController@jobs');
   Route::get('/addJob', 'AsmController@addJob');

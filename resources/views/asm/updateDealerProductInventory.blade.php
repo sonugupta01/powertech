@@ -9,8 +9,8 @@
       Update Minimum Inventory Level</>
     </h1>
     <ol class="breadcrumb">
-      <li><a href="{{url('/admin')}}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-      <li><a href="{{url('/admin/dealerProducts')}}/{{$dealer_id}}"><i class="fa fa-dashboard"></i> Dealer Products</a></li>
+      <li><a href="{{url('/asm')}}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+      <li><a href="{{url('/asm/dealerProducts')}}/{{$dealer_id}}"><i class="fa fa-dashboard"></i> Dealer Products</a></li>
       <!-- <li><a href="{{url(Session::get('prevUrl'))}}"><i class="fa fa-dashboard"></i> Treatment List</a></li> -->
       <li class="active">Update inventory</li>
     </ol>
@@ -23,7 +23,7 @@
         <div class="box">
           <div class="box-header">
             <h3 class="box-title"></h3>
-            <a href="{{url('/admin/dealerProducts')}}/{{$dealer_id}}" class="btn btn-info floatright" style="margin-right: 10px;">Back</a>
+            <a href="{{url('/asm/dealerProducts')}}/{{$dealer_id}}" class="btn btn-info floatright" style="margin-right: 10px;">Back</a>
           </div><!-- /.box-header -->
           <div class="box-body">
             @if(Session::has('error'))
@@ -32,7 +32,7 @@
             @if(Session::has('success'))
             <div class="alert alert-success">{{ Session::get('success') }}</div>
             @endif
-            <form role="form" id="inventoryForm" name="inventoryForm" method="POST" action="{{url('/admin/updateDealerProductInventory')}}">
+            <form role="form" id="inventoryForm" name="inventoryForm" method="POST" action="{{url('/asm/updateDealerProductInventory')}}">
               <input type="hidden" name="_token" value="<?= csrf_token(); ?>">
               <input type="hidden" name="inventory_id" value="{{@$minimum_stock->id}}">             
               <input type="hidden" name="dealer_id" value="{{$dealer_id}}">             
@@ -51,7 +51,10 @@
                     <tbody>
                       <tr>
                         <td class="col-sm-3"><input type="hidden" name="product_id" value="{{$product_id}}">{{get_product_name($product_id)}}</td>
-                        <td class="col-sm-3"><input type="text" name="minimum_stock" id="minimum_stock" class="minimum_stock" value="{{@$minimum_stock->minimum_stock!=''?@$minimum_stock->minimum_stock:''}}" OnKeypress="return isNumber(event)" required/></td>
+                        <td class="col-sm-3">
+                          <input type="hidden" name="minimum_stock" value="{{@$minimum_stock->minimum_stock!=''?@$minimum_stock->minimum_stock:''}}" OnKeypress="return isNumber(event)" readonly/>
+                          {{@$minimum_stock->minimum_stock!=''?@$minimum_stock->minimum_stock:''}}
+                        </td>
                         <td class="col-sm-3"><input type="text" name="stock_in_hand" id="stock_in_hand" class="stock_in_hand" value="{{@$minimum_stock->stock_in_hand!=''?@$minimum_stock->stock_in_hand:''}}" OnKeypress="return isNumber(event)"/></td>
                         <td class="col-sm-3"><input type="hidden" name="pro_unit" value="{{get_product_unit($product_id)}}" readonly/>@if(get_product_unit($product_id)==1){{'Litre'}}@elseif(get_product_unit($product_id)==2){{'ML'}}@elseif(get_product_unit($product_id)==3){{'Pcs.'}}@elseif(get_product_unit($product_id)==4){{'Gms.'}}@endif</td>
                       </tr>
@@ -126,7 +129,7 @@
                       </td>
                       <td>
                         @if(!empty($value->updated_at))
-                        {{$value->updated_at}}
+                        {{$value->updated_at}} 
                         @else
                         {{'-'}}
                         @endif

@@ -213,8 +213,9 @@ class AsmController extends Controller
     public function dealer_management(Request $request)
     {
         $search = $request->search;
-        $ASM = Auth::id();
-        $dealers = User::where('dealer_id', $ASM)
+        $user_id = Auth::id();
+        // $dealers = User::where('dealer_id', $ASM)
+        $dealers = User::whereRaw("find_in_set($user_id,reporting_authority)")
             ->where(function ($query) use ($search) {
                 if (!empty($search)) {
                     if (isset($search)) {
@@ -226,7 +227,9 @@ class AsmController extends Controller
                     }
                 }
             })
-            ->orderBy('name', 'ASC')->paginate(15);
+            ->orderBy('name', 'ASC')
+            ->where('role',2)
+            ->paginate(15);
 
         return view('asm.dealers', [
             'dealers' => $dealers->appends(Input::except('page')),
@@ -394,6 +397,284 @@ class AsmController extends Controller
         return redirect('/asm/dealer_management');
     }
 
+    public function dealerProducts(Request $request, $dealer_id)
+    {
+        $month = $request->month;
+        if (!empty($month)) {
+            $selectedMonth = explode('-', $month);
+            $month = $selectedMonth[1];
+            $year = $selectedMonth[0];
+        } else {
+            $currentMonthYear = explode('-', date('Y-m'));
+            $month = $currentMonthYear[1];
+            $year = $currentMonthYear[0];
+        }
+
+        $products = DB::table('dealer_templates as dt')->where(['dt.dealer_id' => $dealer_id])
+            ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+            ->join('products_treatments as pt', 't.id', '=', 'pt.tre_id')
+            ->select('pt.pro_id')
+            ->groupBy('pt.pro_id')
+            ->get();
+        
+        $treatmentConsumptionOfProduct = DB::table('jobs as j')
+            ->join('jobs_treatment as jt', 'jt.job_id', '=', 'j.id')
+            ->join('products_treatments as pt', 'pt.tre_id', '=', 'jt.treatment_id')
+            ->where(['j.dealer_id' => $dealer_id])
+            ->whereMonth('j.job_date', $month)
+            ->whereYear('j.job_date', $year)
+            ->get(['pt.id', 'pt.tre_id', 'pt.pro_id', 'pt.quantity', 'pt.uom', 'pt.price', 'pt.status', 'pt.created_at']);
+
+        $result = array();
+        foreach ($treatmentConsumptionOfProduct as $k => $v) {
+            $id = $v->pro_id;
+            $result[$id]['quantity'][] = $v->quantity;
+            $result[$id]['price'][] = $v->price;
+            $result[$id]['uom'] = $v->uom;
+        }
+        $consumeData = array();
+        foreach ($result as $i => $j) {
+            $consumeData[] = array('id' => $i, 'quanity' => array_sum($j['quantity']), 'price' => array_sum($j['price']), 'uom' => $j['uom']);
+        }
+        $productDetail = array();
+        foreach ($products as $key => $value) {
+            $detail = new \stdClass();
+            $detail->id = $value->pro_id;
+            $detail->pro_name = get_product_name($value->pro_id);
+            $detail->pro_unit = get_product_unit($value->pro_id);
+            $getStock = DB::table('dealer_product_inventory')->where(['dealer_id' => $dealer_id, 'product_id' => $value->pro_id, 'uom' => get_product_unit($value->pro_id)])
+                ->orderBy('updated_at', 'DESC')
+                ->whereMonth('updated_at', $month)
+                ->whereYear('updated_at', $year)
+                ->first();
+            if (!empty($getStock)) {
+                $detail->minimum_stock = $getStock->minimum_stock;
+                $detail->stock_in_hand = $getStock->stock_in_hand;
+                $detail->updated_at = $getStock->updated_at;
+            } else {
+                $detail->minimum_stock = '';
+                $detail->stock_in_hand = '';
+                $detail->updated_at = '';
+            }
+            $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
+            foreach ($consumeData as $key1 => $value1) {
+                if ($value1['id'] == $detail->id  && $value1['uom'] == $detail->pro_unit) {
+                    $detail->consumedQuantity = (string)$value1['quanity'];
+                    $detail->totalPrice = (string)$value1['price'];
+                }
+            }
+            $productDetail[] = $detail;
+        }
+
+        foreach ($productDetail as $key3 => $value3) {
+            if (!isset($value3->consumedQuantity)) {
+                $productDetail[$key3]->consumedQuantity = '';
+                $productDetail[$key3]->totalPrice = '';
+            }
+        }
+        // dd($productDetail);
+        $selectedDate = $year . '-' . $month;
+        return view('asm.dealerProductInventory', compact('dealer_id', 'productDetail', 'selectedDate'));
+    }
+
+    public function dealerProductInventory($dealer_id, $product_id)
+    {
+        Session::put('prevUrl', \URL::previous());
+        $selectedMonth = Session::get('selectedMonth');
+        if (!empty($selectedMonth)) {
+            $date = explode('-', $selectedMonth);
+            $month = $date[1];
+            $year = $date[0];
+        } else {
+            $currentMonthYear = explode('-', date('Y-m'));
+            $month = $currentMonthYear[1];
+            $year = $currentMonthYear[0];
+        }
+        for ($i = 1; $i <=  date('t'); $i++) {
+            $dates[] = date('Y') . "-" . date('m') . "-" . str_pad($i, 2, '0', STR_PAD_LEFT);
+        }
+        $lastThreeDays = array_slice($dates, -3, 3, true);
+        
+        $minimum_stock = DB::table('dealer_product_inventory')->where(['dealer_id' => $dealer_id, 'product_id' => $product_id])
+            ->orderBy('updated_at', 'DESC')
+            ->whereMonth('updated_at', $month)
+            ->whereYear('updated_at', $year)
+            ->first();
+        
+        $updateHistory = DB::table('dealer_product_inventory')->where(['dealer_id' => $dealer_id, 'product_id' => $product_id])->orderBy('updated_at', 'DESC')->whereMonth('updated_at', $month)
+            ->whereYear('updated_at', $year)->get();
+
+        return view('asm.updateDealerProductInventory', compact('dealer_id', 'product_id', 'minimum_stock', 'updateHistory'));
+    }
+
+    public function updateDealerProductInventory(Request $request)
+    {
+        $post = $request->all();
+        $selectedMonth = $post['selectedMonth'];
+        $user_id = Auth::id();
+        $data = array(
+            'dealer_id' => $post['dealer_id'],
+            'product_id' => $post['product_id'],
+            // 'minimum_stock' => $post['minimum_stock'],
+            'stock_in_hand' => $post['stock_in_hand'],
+            'uom' => $post['pro_unit'],
+            'updated_at' => getCurrentTimestamp(),
+            'updated_by' => $user_id
+        );
+
+        $check = DB::table('dealer_product_inventory')->where(['dealer_id' => $post['dealer_id'], 'product_id' => $post['product_id'], 'uom' => $post['pro_unit']])->first();
+
+        $checkMonth = DB::table('dealer_product_inventory')->where(['dealer_id' => $post['dealer_id'], 'product_id' => $post['product_id']])->whereMonth('updated_at', date('m'))->first();
+        
+        if ($selectedMonth == date('Y-m') || empty($selectedMonth)) {
+            if(!empty($post['minimum_stock'])){
+                if ($post['stock_in_hand'] >= $post['minimum_stock']) {
+                    return redirect()->back()->with('error', "Stock in hand should be less then Minimum Stock");
+                } else {
+                    DB::table('dealer_product_inventory')->insert(['dealer_id'=>$post['dealer_id'], 'product_id' => $post['product_id'], 'minimum_stock'=>$post['minimum_stock'], 'stock_in_hand'=>$post['stock_in_hand'], 'uom'=>$post['pro_unit'], 'updated_by'=>$user_id, 'updated_at'=>getCurrentTimestamp()]);
+                }
+            } else {
+                DB::table('dealer_product_inventory')->insert($data);
+            }
+        } else {
+            return redirect()->back()->with('error', "You can update only current month inventory");
+        }
+        return redirect(Session::get('prevUrl'))->with('success', "Inventory updated successfully");
+    }
+
+    public function downloadProductInventory(Request $request, $dealer_id)
+    {
+        $month = $request->month;
+        if (!empty($month)) {
+            $selectedMonth = explode('-', $month);
+            $month = $selectedMonth[1];
+            $year = $selectedMonth[0];
+        } else {
+            $currentMonthYear = explode('-', date('Y-m'));
+            $month = $currentMonthYear[1];
+            $year = $currentMonthYear[0];
+        }
+
+        $products = DB::table('dealer_templates as dt')->where(['dt.dealer_id' => $dealer_id])
+            ->join('treatments as t', 'dt.template_id', '=', 't.temp_id')
+            ->join('products_treatments as pt', 't.id', '=', 'pt.tre_id')
+            ->select('pt.pro_id')
+            ->groupBy('pt.pro_id')
+            ->get();
+
+        $treatmentConsumptionOfProduct = DB::table('jobs as j')
+            ->join('jobs_treatment as jt', 'jt.job_id', '=', 'j.id')
+            ->join('products_treatments as pt', 'pt.tre_id', '=', 'jt.treatment_id')
+            ->where(['j.dealer_id' => $dealer_id])
+            ->whereMonth('j.job_date', $month)
+            ->whereYear('j.job_date', $year)
+            ->get(['pt.id', 'pt.tre_id', 'pt.pro_id', 'pt.quantity', 'pt.uom', 'pt.price', 'pt.status', 'pt.created_at']);
+
+        $result = array();
+        foreach ($treatmentConsumptionOfProduct as $k => $v) {
+            $id = $v->pro_id;
+            $result[$id]['quantity'][] = $v->quantity;
+            $result[$id]['price'][] = $v->price;
+            $result[$id]['uom'] = $v->uom;
+        }
+        $consumeData = array();
+        foreach ($result as $i => $j) {
+            $consumeData[] = array('id' => $i, 'quanity' => array_sum($j['quantity']), 'price' => array_sum($j['price']), 'uom' => $j['uom']);
+        }
+        $productDetail = array();
+        foreach ($products as $key => $value) {
+            $detail = new \stdClass();
+            $detail->id = $value->pro_id;
+            $detail->pro_name = get_product_name($value->pro_id);
+            $detail->pro_unit = get_product_unit($value->pro_id);
+            $getStock = DB::table('dealer_product_inventory')->where(['dealer_id' => $dealer_id, 'product_id' => $value->pro_id, 'uom' => get_product_unit($value->pro_id)])
+                ->orderBy('updated_at', 'DESC')
+                ->whereMonth('updated_at', $month)
+                ->whereYear('updated_at', $year)
+                ->first();
+            if (!empty($getStock)) {
+                $detail->minimum_stock = $getStock->minimum_stock;
+                $detail->stock_in_hand = $getStock->stock_in_hand;
+                $detail->updated_by = $getStock->updated_by;
+                $detail->updated_at = $getStock->updated_at;
+            } else {
+                $detail->minimum_stock = '';
+                $detail->stock_in_hand = '';
+                $detail->updated_by = '';
+                $detail->updated_at = '';
+            }
+            $detail->unit_name = get_unit_name(get_product_unit($value->pro_id));
+            foreach ($consumeData as $key1 => $value1) {
+                if ($value1['id'] == $detail->id  && $value1['uom'] == $detail->pro_unit) {
+                    $detail->consumedQuantity = (string)$value1['quanity'];
+                    $detail->totalPrice = (string)$value1['price'];
+                }
+            }
+            $productDetail[] = $detail;
+        }
+
+        foreach ($productDetail as $key3 => $value3) {
+            if (!isset($value3->consumedQuantity)) {
+                $productDetail[$key3]->consumedQuantity = '';
+                $productDetail[$key3]->totalPrice = '';
+            }
+        }
+
+        return Excel::create('Dealers ' . date("d M,Y"), function ($excel) use ($productDetail) {
+            $excel->sheet('mySheet', function ($sheet) use ($productDetail) {
+                $sheet->setCellValue('A1', 'Product Name');
+                $sheet->setCellValue('B1', 'Minimum Stock');
+                $sheet->setCellValue('C1', 'Treatmentwise Consumption');
+                $sheet->setCellValue('D1', 'Expected Stock');
+                $sheet->setCellValue('E1', 'Stock in Hand');
+                $sheet->setCellValue('F1', 'Last Updated');
+                $sheet->setCellValue('G1', 'Updated By');
+                $i = 2;
+                $loop = 1;
+                foreach ($productDetail as $key => $value) {
+                    if (!empty($value->minimum_stock) || $value->minimum_stock != 0) {
+                        $minimum_stock = (int)$value->minimum_stock . ' ' . $value->unit_name;
+                    } else {
+                        $minimum_stock = '';
+                    }
+
+                    if (!empty($value->consumedQuantity)) {
+                        $consumedQuantity = (int)$value->consumedQuantity . ' ' . $value->unit_name;
+                    } else {
+                        $consumedQuantity = '';
+                    }
+
+                    if (!empty($minimum_stock)) {
+                        $expectedStock = ((float)$value->minimum_stock - (float)$consumedQuantity) . ' ' . $value->unit_name;
+                    } else {
+                        $expectedStock = '';
+                    }
+
+                    if (!empty($value->stock_in_hand)) {
+                        $stock_in_hand = (int)$value->stock_in_hand . ' ' . $value->unit_name;
+                    } else {
+                        $stock_in_hand = '';
+                    }
+                    
+                    if (!empty($value->updated_by)) {
+                        $updated_by = get_name($value->updated_by);
+                    } else {
+                        $updated_by = '';
+                    }
+
+                    $sheet->setCellValue('A' . $i, $value->pro_name);
+                    $sheet->setCellValue('B' . $i, $minimum_stock);
+                    $sheet->setCellValue('C' . $i, $consumedQuantity);
+                    $sheet->setCellValue('D' . $i, $expectedStock);
+                    $sheet->setCellValue('E' . $i, $stock_in_hand);
+                    $sheet->setCellValue('F' . $i, $value->updated_at);
+                    $sheet->setCellValue('G' . $i, $updated_by);
+                    $i++;
+                    $loop++;
+                }
+            });
+        })->download('csv');
+    }
 
 
     // view Staff listing
@@ -2568,11 +2849,10 @@ class AsmController extends Controller
         // brand list end
         // dd($result4);
         if (!empty(request()->brand)) {
-
-
-            // filter by brand id 
-            $a =  array_filter($result1, fn ($value) => in_array(request()->brand, $value['brands']));
-
+            // filter by brand id
+            $a =  array_filter($result1, function ($value) {
+                return in_array(request()->brand, $value['brands']);
+            });
             $result1 = $a;
         }
 
@@ -2993,16 +3273,127 @@ class AsmController extends Controller
         $today = date('Y-m-d');
         $first_day = date('Y-m-01');
 
-        $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
-        $dealers = array();
-        $d_ids = array();
-        foreach ($dealer_ids as $i => $j) {
-            $report_ids = explode(",", $j->reporting_authority);
-            if (in_array($user_id, $report_ids)) {
-                $dealers[] = $dealer_ids[$i];
-                $d_ids[] = $dealer_ids[$i]->id;
+        // $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+        // $dealers = array();
+        // $d_ids = array();
+
+        if(!empty($search['oem']) && !empty($search['dealer'])) {
+            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'id' => $search['dealer'], 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+          
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'oem_id'=>$search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $oem_dealers = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+
+            $dealers = array();
+            $d_ids = array();
+            
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    // $d_ids[] = $dealer_ids[$i]->id;
+                }
             }
+
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers_list[] = $dealer_ids_list[$i];
+                    // $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+
+            
+            foreach ($oem_dealers as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    // $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $oem_dealers[$i]->id;
+                }
+            }
+            
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers_list;
+
+        } else if (!empty($search['oem']) &&  empty($search['dealer'])) {
+            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $dealers = array();
+            $d_ids = array();
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    // $d_ids[] = $dealer_ids[$i]->id;
+                }
+            }
+
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    // $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+            
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+
+            $dealers_list = $dealers;
+                    
+        } else if(empty($search['oem']) && !empty($search['dealer'])) {
+            $dealers = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'id' => $search['dealer'], 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            // $dealers = array();
+            $d_ids = array();
+            // foreach ($dealer_ids as $i => $j) {
+            //     $report_ids = explode(",", $j->reporting_authority);
+            //     if (in_array($user_id, $report_ids)) {
+            //         $dealers[] = $dealer_ids[$i];
+            //         $d_ids[] = $dealer_ids[$i]->id;
+            //     }
+            // }
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers_list;
+        } else {
+            $dealer_ids = User::where(['role'=>2, 'status'=>1])->select('id', 'name', 'reporting_authority')->orderBy('name', 'ASC')->get();
+            $dealers = array();
+            $d_ids = array();
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    $d_ids[] = $dealer_ids[$i]->id;
+                }
+            }
+            $oems = User::whereIn('id', $d_ids)->select('oem_id')->where('status', 1)->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers;
         }
+        // foreach ($dealer_ids as $i => $j) {
+        //     $report_ids = explode(",", $j->reporting_authority);
+        //     if (in_array($user_id, $report_ids)) {
+        //         $dealers[] = $dealer_ids[$i];
+        //         $d_ids[] = $dealer_ids[$i]->id;
+        //     }
+        // }
 
         /************************************ MIS Report Start *************************/
         // $users = DB::table('users')
@@ -3011,38 +3402,68 @@ class AsmController extends Controller
         //           ->orderBy('users.name','ASC')
         //           ->get();
 
-        $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+        // $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
 
-        $groups = User::where('status', 1)->whereIn('id', $d_ids)->select('group_id')->groupBy('group_id')->get();
-
+        // $groups = User::where('status', 1)->whereIn('id', $d_ids)->select('group_id')->groupBy('group_id')->get();
+        $brands = DB::table("product_brands")->where('status', 1)->get();
         $mist = array();
 
         foreach ($dealers as $key => $value) {
             $mis = DB::table('jobs')
                 // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
-                ->where(function ($query) use ($search, $first_day, $today) {
-                    if (isset($search['from1']) && isset($search['to1'])) {
-                        if (!empty(trim($search['from1']))) {
-                            $query->whereDate('jobs.job_date', '>=', $search['from1']);
-                            $query->whereDate('jobs.job_date', '<=', $search['to1']);
+                ->where(function ($query) use ($search, $first_day, $today, $value) {
+                    if(!empty($search['department']) || !empty($search['from1']) || !empty($search['to1']) || !empty($search['month']) || !empty($search['brand'])){
+                        if (isset($search['department'])) {
+                            if (!empty(trim($search['department']))) {
+                                $query->where('jobs.department_id', '=', $search['department']);
+                            }
                         }
-                    } elseif (isset($search['to1'])) {
-                        if (!empty(trim($search['to1']))) {
-                            $query->whereDate('jobs.job_date', '<=', $search['to1']);
-                        }
-                    } elseif (isset($search['from1'])) {
-                        if (!empty(trim($search['from1']))) {
 
-                            $query->whereDate('jobs.job_date', '>=', $search['from1']);
+                        if (isset($search['from1']) && isset($search['to1'])) {
+                            if (!empty(trim($search['from1']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from1']);
+                                $query->whereDate('jobs.job_date', '<=', $search['to1']);
+                            }
+                        } 
+                        
+                        if (isset($search['to1'])) {
+                            if (!empty(trim($search['to1']))) {
+                                $query->whereDate('jobs.job_date', '<=', $search['to1']);
+                            }
+                        } 
+                        
+                        if (isset($search['from1'])) {
+                            if (!empty(trim($search['from1']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from1']);
+                            }
+                        } 
+                        
+                        if (!empty($search['month'])) {
+                            $exp = explode('-', $search['month']);
+                            $query->whereMonth('jobs.job_date', $exp[1]);
+                            $query->whereYear('jobs.job_date', $exp[0]);
+                        } 
+                        
+                        if (!empty($search['brand'])) {
+                            $brandFilterDealer = DB::table('dealer_templates as dt')
+                            ->join('treatments as t','dt.template_id','t.temp_id')
+                            ->join('products_treatments as pt','t.id','pt.tre_id')
+                            ->join('products as p','pt.pro_id','p.id')
+                            ->where('p.brand_id', $search['brand'])
+                            ->where('dt.dealer_id', $value->id)
+                            ->groupBy('dt.dealer_id')
+                            ->select('dt.dealer_id')->get()->toArray();
+                            $brandFilterDealerArray= array_map(function($value2){
+                                return $value2->dealer_id;
+                            },$brandFilterDealer);
+                            $query->whereIn('jobs.dealer_id', $brandFilterDealerArray);
                         }
-                    } elseif (!empty($search['month'])) {
-                        $exp = explode('-', $search['month']);
-                        $query->whereMonth('jobs.job_date', $exp[1]);
-                        $query->whereYear('jobs.job_date', $exp[0]);
+
                     } else {
                         $query->whereDate('jobs.job_date', '>=', $first_day);
                         $query->whereDate('jobs.job_date', '<=', $today);
                     }
+                    
                 })
                 ->where('jobs.dealer_id', $value->id)
                 ->where('jobs.delete_job', 1)
@@ -3050,8 +3471,9 @@ class AsmController extends Controller
                 // ->groupBy('jobs.dealer_id')
                 ->get();
 
-            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $incentive = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
+            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $lvt_total = $lvt_value = $mvt_total = $mvt_value = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
+            $array['total_job_done'] = count($mis);
             if (count($mis) == 0) {
                 $data = new \stdClass();
                 $data->dealer_id = $value->id;
@@ -3060,7 +3482,14 @@ class AsmController extends Controller
                 $data->customer_price = 0;
                 $data->actual_price = 0;
                 $data->dealer_price = 0;
+                $data->powertech_share_price = 0;
                 $data->incentive = 0;
+                $data->lvt_total = 0;
+                $data->mtd_lvt = 0;
+                $data->lvt_value = 0;
+                $data->mvt_total = 0;
+                $data->mtd_mvt = 0;
+                $data->mvt_value = 0;
                 $data->hvt_total = 0;
                 $data->mtd_hvt = 0;
                 $data->hvt_value = 0;
@@ -3071,8 +3500,22 @@ class AsmController extends Controller
             }
             foreach ($mis as $key1 => $value1) {
                 $treatment_total += $value1->treatment_total;
-                $incentive       += $value1->incentive;
+                if (!empty($value1->incentive) || !empty($value1->dealer_price)) {
+                    $value1->incentive = $value1->incentive;
+                    $value1->dealer_price = $value1->dealer_price;
+                    $value1->powertech_share_price = $value1->powertech_share_price;
+                } else {
+                    $value1->incentive = 0;
+                    $value1->dealer_price = 0;
+                    $value1->powertech_share_price = 0;
+                }
+                $incentive       += (int)$value1->incentive;
                 $actual_price    += (int)$value1->actual_price;
+                $powertech_share_price    += (int)$value1->powertech_share_price;
+                $lvt_total       += $value1->lvt_total;
+                $lvt_value       += $value1->lvt_value;
+                $mvt_total       += $value1->mvt_total;
+                $mvt_value       += $value1->mvt_value;
                 $hvt_total       += $value1->hvt_total;
                 $hvt_value       += $value1->hvt_value;
                 $vas_total       += $value1->vas_total;
@@ -3088,10 +3531,10 @@ class AsmController extends Controller
                             foreach ($decoded_treatments as $key => $val1) {
                                 if (@$val1->job_type == 5) {
                                     $customer_price = $customer_price + $val1->customer_price;
-                                    $incentive = $incentive + $val1->incentive;
+                                    // $incentive = $incentive + $val1->incentive;
                                 } else {
                                     $customer_price = $customer_price + 0;
-                                    $incentive = $incentive + 0;
+                                    // $incentive = $incentive + 0;
                                 }
                                 if ($val1->treatment_type == 1) {
                                     $hvt_incentive = $hvt_incentive + $val1->incentive;
@@ -3104,7 +3547,14 @@ class AsmController extends Controller
                 $array['customer_price'] = $customer_price;
                 $array['actual_price'] = $actual_price;
                 $array['dealer_price'] = $dealer_price;
+                $array['powertech_share_price'] = $powertech_share_price;
                 $array['incentive'] = $incentive;
+                $array['lvt_total'] = $lvt_total;
+                $array['mtd_lvt'] = $lvt_total;
+                $array['mtd_lvt_value'] = $lvt_value;
+                $array['mvt_total'] = $mvt_total;
+                $array['mtd_mvt'] = $mvt_total;
+                $array['mtd_mvt_value'] = $mvt_value;
                 $array['hvt_total'] = $hvt_total;
                 $array['mtd_hvt'] = $hvt_total;
                 $array['mtd_hvt_value'] = $hvt_value;
@@ -3117,10 +3567,9 @@ class AsmController extends Controller
         }
 
         foreach ($mist as $key => $value2) {
-
             $total = DB::table('jobs_by_date')
                 ->select(DB::raw('SUM(total_jobs) as total_jobs,dealer_id'))
-                ->where('dealer_id', $value2['dealer_id'])
+                ->where('dealer_id', @$value2['dealer_id'])
                 ->where(function ($query) use ($search, $first_day, $today) {
                     if (isset($search['from1']) && isset($search['to1'])) {
                         if (!empty(trim($search['from1']))) {
@@ -3159,10 +3608,18 @@ class AsmController extends Controller
         return view('asm.misReport', [
             'mis' => $mist,
             'oems' => $oems,
-            'groups' => $groups,
+            'oldOem' => @$search['oem'],
+            // 'groups' => $groups,
             'oldFromDate1' => @$search['from1'],
             'oldToDate1' => @$search['to1'],
-            'oldMonth' => @$search['month'],
+            'dealers' => @$dealer,
+            'dealers_list' => @$dealers_list,
+            'oldDealer' => @$search['dealer'],
+            'oldSelectMonth' => @$search['month'],
+            'oldReport' => @$type,
+            'departments' => $departments,
+            'oldDepartment' => @$search['department'],
+            'brands' => @$brands,
         ]);
     }
 
@@ -3172,18 +3629,130 @@ class AsmController extends Controller
         $search = $request->all();
         $today = date('Y-m-d');
         $first_day = date('Y-m-01');
-
         $user_id = Auth::id();
-        $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
-        $dealers = array();
-        $d_ids = array();
-        foreach ($dealer_ids as $i => $j) {
-            $report_ids = explode(",", $j->reporting_authority);
-            if (in_array($user_id, $report_ids)) {
-                $dealers[] = $dealer_ids[$i];
-                $d_ids[] = $dealer_ids[$i]->id;
+
+        // $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+        // $dealers = array();
+        // $d_ids = array();
+
+        if(!empty($search['oem']) && !empty($search['dealer'])) {
+            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'id' => $search['dealer'], 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+          
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'oem_id'=>$search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $oem_dealers = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+
+            $dealers = array();
+            $d_ids = array();
+            
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    // $d_ids[] = $dealer_ids[$i]->id;
+                }
             }
+
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers_list[] = $dealer_ids_list[$i];
+                    // $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+
+            
+            foreach ($oem_dealers as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    // $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $oem_dealers[$i]->id;
+                }
+            }
+            
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers_list;
+
+        } else if (!empty($search['oem']) &&  empty($search['dealer'])) {
+            $dealer_ids = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'oem_id' => $search['oem'], 'status' => 1])->orderBy('id', 'DESC')->get();
+
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $dealers = array();
+            $d_ids = array();
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    // $d_ids[] = $dealer_ids[$i]->id;
+                }
+            }
+
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    // $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+            
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+
+            $dealers_list = $dealers;
+                    
+        } else if(empty($search['oem']) && !empty($search['dealer'])) {
+            $dealers = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'id' => $search['dealer'], 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            $dealer_ids_list = DB::table('users')->select('id', 'name', 'reporting_authority')->where(['role' => 2, 'status' => 1])->orderBy('id', 'DESC')->get();
+            
+            // $dealers = array();
+            $d_ids = array();
+            // foreach ($dealer_ids as $i => $j) {
+            //     $report_ids = explode(",", $j->reporting_authority);
+            //     if (in_array($user_id, $report_ids)) {
+            //         $dealers[] = $dealer_ids[$i];
+            //         $d_ids[] = $dealer_ids[$i]->id;
+            //     }
+            // }
+            $dealers_list = array();
+            foreach ($dealer_ids_list as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers_list[] = $dealer_ids_list[$i];
+                    $d_ids[] = $dealer_ids_list[$i]->id;
+                }
+            }
+
+            $oems = User::where('status', 1)->whereIn('id', $d_ids)->select('oem_id')->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers_list;
+        } else {
+            $dealer_ids = User::where(['role'=>2, 'status'=>1])->select('id', 'name', 'reporting_authority')->orderBy('name', 'ASC')->get();
+            $dealers = array();
+            $d_ids = array();
+            foreach ($dealer_ids as $i => $j) {
+                $report_ids = explode(",", $j->reporting_authority);
+                if (in_array($user_id, $report_ids)) {
+                    $dealers[] = $dealer_ids[$i];
+                    $d_ids[] = $dealer_ids[$i]->id;
+                }
+            }
+            $oems = User::whereIn('id', $d_ids)->select('oem_id')->where('status', 1)->groupBy('oem_id')->get();
+            $departments = DB::table('dealer_department')->where('status', 1)->get();
+            $dealers_list = $dealers;
         }
+
+        // foreach ($dealer_ids as $i => $j) {
+        //     $report_ids = explode(",", $j->reporting_authority);
+        //     if (in_array($user_id, $report_ids)) {
+        //         $dealers[] = $dealer_ids[$i];
+        //         $d_ids[] = $dealer_ids[$i]->id;
+        //     }
+        // }
 
         // $users = DB::table('users')
         // ->select('id')
@@ -3194,24 +3763,53 @@ class AsmController extends Controller
         foreach ($dealers as $key => $value) {
             $mis = DB::table('jobs')
                 // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
-                ->where(function ($query) use ($search, $first_day, $today) {
-                    if (isset($search['from12']) && isset($search['to12'])) {
-                        if (!empty(trim($search['from12']))) {
-                            $query->whereDate('jobs.job_date', '>=', $search['from12']);
-                            $query->whereDate('jobs.job_date', '<=', $search['to12']);
+                ->where(function ($query) use ($search, $first_day, $today, $value) {
+                    if(!empty($search['department']) || !empty($search['from12']) || !empty($search['to12']) || !empty($search['selectMonth2']) || !empty($search['brand'])){
+                        if (isset($search['department'])) {
+                            if (!empty(trim($search['department']))) {
+                                $query->where('jobs.department_id', '=', $search['department']);
+                            }
                         }
-                    } elseif (isset($search['to12'])) {
-                        if (!empty(trim($search['to12']))) {
-                            $query->whereDate('jobs.job_date', '<=', $search['to12']);
+
+                        if (isset($search['from12']) && isset($search['to12'])) {
+                            if (!empty(trim($search['from12']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from12']);
+                                $query->whereDate('jobs.job_date', '<=', $search['to12']);
+                            }
+                        } 
+                        
+                        if (isset($search['to12'])) {
+                            if (!empty(trim($search['to12']))) {
+                                $query->whereDate('jobs.job_date', '<=', $search['to12']);
+                            }
+                        } 
+                        
+                        if (isset($search['from12'])) {
+                            if (!empty(trim($search['from12']))) {
+                                $query->whereDate('jobs.job_date', '>=', $search['from12']);
+                            }
+                        } 
+                        
+                        if (!empty($search['selectMonth2'])) {
+                            $exp = explode('-', $search['selectMonth2']);
+                            $query->whereMonth('jobs.job_date', $exp[1]);
+                            $query->whereYear('jobs.job_date', $exp[0]);
                         }
-                    } elseif (isset($search['from12'])) {
-                        if (!empty(trim($search['from12']))) {
-                            $query->whereDate('jobs.job_date', '>=', $search['from12']);
+
+                        if (!empty($search['brand'])) {
+                            $brandFilterDealer = DB::table('dealer_templates as dt')
+                            ->join('treatments as t','dt.template_id','t.temp_id')
+                            ->join('products_treatments as pt','t.id','pt.tre_id')
+                            ->join('products as p','pt.pro_id','p.id')
+                            ->where('p.brand_id', $search['brand'])
+                            ->where('dt.dealer_id', $value->id)
+                            ->groupBy('dt.dealer_id')
+                            ->select('dt.dealer_id')->get()->toArray();
+                            $brandFilterDealerArray= array_map(function($value2){
+                                return $value2->dealer_id;
+                            },$brandFilterDealer);
+                            $query->whereIn('jobs.dealer_id', $brandFilterDealerArray); 
                         }
-                    } elseif (!empty($search['selectMonth2'])) {
-                        $exp = explode('-', $search['selectMonth2']);
-                        $query->whereMonth('jobs.job_date', $exp[1]);
-                        $query->whereYear('jobs.job_date', $exp[0]);
                     } else {
                         $query->whereDate('jobs.job_date', '>=', $first_day);
                         $query->whereDate('jobs.job_date', '<=', $today);
@@ -3221,9 +3819,11 @@ class AsmController extends Controller
                 ->where('jobs.delete_job', 1)
                 // ->where('jobs.foc_options',5)
                 // ->groupBy('jobs.dealer_id')
-                ->first();
-            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $incentive = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
+                ->get();
+            $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $lvt_total = $lvt_value = $mvt_total = $mvt_value = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
+            
+            $array['total_job_done'] = count($mis);
             if (count($mis) == 0) {
                 $data = new \stdClass();
                 $data->dealer_id = $value->id;
@@ -3232,7 +3832,14 @@ class AsmController extends Controller
                 $data->customer_price = 0;
                 $data->actual_price = 0;
                 $data->dealer_price = 0;
+                $data->powertech_share_price = 0;
                 $data->incentive = 0;
+                $data->lvt_total = 0;
+                $data->mtd_lvt = 0;
+                $data->lvt_value = 0;
+                $data->mvt_total = 0;
+                $data->mtd_mvt = 0;
+                $data->mvt_value = 0;
                 $data->hvt_total = 0;
                 $data->mtd_hvt = 0;
                 $data->hvt_value = 0;
@@ -3243,13 +3850,27 @@ class AsmController extends Controller
             }
             foreach ($mis as $key1 => $value1) {
                 $treatment_total += $value1->treatment_total;
-                $incentive       += $value1->incentive;
-                $actual_price    += (int)$value1->actual_price;
-                $hvt_total       += $value1->hvt_total;
-                $hvt_value       += $value1->hvt_value;
-                $vas_total       += $value1->vas_total;
-                $vas_value       += $value1->vas_value;
-                $dealer_price    += $value1->dealer_price;
+                if (!empty($value1->incentive) || !empty($value1->dealer_price)) {
+                    $value1->incentive = $value1->incentive;
+                    $value1->dealer_price = $value1->dealer_price;
+                    $value1->powertech_share_price = $value1->powertech_share_price;
+                } else {
+                    $value1->incentive = 0;
+                    $value1->dealer_price = 0;
+                    $value1->powertech_share_price = 0;
+                }
+                $incentive                += (int)$value1->incentive;
+                $actual_price             += (int)$value1->actual_price;
+                $dealer_price             += $value1->dealer_price;
+                $powertech_share_price    += (int)$value1->powertech_share_price;
+                $lvt_total                += $value1->lvt_total;
+                $lvt_value                += $value1->lvt_value;
+                $mvt_total                += $value1->mvt_total;
+                $mvt_value                += $value1->mvt_value;
+                $hvt_total                += $value1->hvt_total;
+                $hvt_value                += $value1->hvt_value;
+                $vas_total                += $value1->vas_total;
+                $vas_value                += $value1->vas_value;
 
                 if ($value1->id != 0) {
                     $decoded_jobs = explode(',', $value1->id);
@@ -3260,10 +3881,10 @@ class AsmController extends Controller
                             foreach ($decoded_treatments as $key => $val1) {
                                 if (@$val1->job_type == 5) {
                                     $customer_price = $customer_price + $val1->customer_price;
-                                    $incentive = $incentive + $val1->incentive;
+                                    // $incentive = $incentive + $val1->incentive;
                                 } else {
                                     $customer_price = $customer_price + 0;
-                                    $incentive = $incentive + 0;
+                                    // $incentive = $incentive + 0;
                                 }
                                 if ($val1->treatment_type == 1) {
                                     $hvt_incentive = $hvt_incentive + $val1->incentive;
@@ -3276,7 +3897,14 @@ class AsmController extends Controller
                 $array['customer_price'] = $customer_price;
                 $array['actual_price'] = $actual_price;
                 $array['dealer_price'] = $dealer_price;
+                $array['powertech_share_price'] = @$powertech_share_price;
                 $array['incentive'] = $incentive;
+                $array['lvt_total'] = $lvt_total;
+                $array['mtd_lvt'] = $lvt_total;
+                $array['mtd_lvt_value'] = $lvt_value;
+                $array['mvt_total'] = $mvt_total;
+                $array['mtd_mvt'] = $mvt_total;
+                $array['mtd_mvt_value'] = $mvt_value;
                 $array['hvt_total'] = $hvt_total;
                 $array['mtd_hvt'] = $hvt_total;
                 $array['mtd_hvt_value'] = $hvt_value;
@@ -3326,37 +3954,77 @@ class AsmController extends Controller
         return Excel::create('MIS_' . date("d-M-Y"), function ($excel) use ($mist) {
             $excel->sheet('sheet', function ($sheet) use ($mist) {
                 $arr = array();
-                $cp = $dp = $in = $hvt = $mtd_hvt = $service = 0;
+                 $cp = $ap = $dp = $pts = $in = $lvt = $mtd_lvt = $mvt = $mtd_mvt = $hvt = $mtd_hvt = $service = 0;
                 foreach ($mist as $val1) {
                     $cp = $cp + $val1['customer_price'];
+                    $ap = $ap + $val1['actual_price'];
                     $dp = $dp + $val1['dealer_price'];
+                    $pts = $pts + $val1['powertech_share_price'];
                     $in = $in + $val1['incentive'];
+                    $lvt=$lvt+round(@$val1['lvt_total']);
+                    $mtd_lvt=$mtd_lvt+round(@$val1['mtd_lvt_value']);
+                    $mvt=$mvt+round(@$val1['mvt_total']);
+                    $mtd_mvt=$mtd_mvt+round(@$val1['mtd_mvt_value']);
                     $hvt = $hvt + $val1['hvt_total'];
                     $mtd_hvt = $mtd_hvt + $val1['mtd_hvt_value'];
                     $service = $service + $val1['service_load'];
                 }
                 $array['CDC'] = 'Business Total';
-                $array['Cust_Bill'] = round($cp);
-                $array['Vendor'] = round($dp);
+                // $array['Cust_Bill'] = round($cp);
+                $array['Actual_Price'] = round($ap);
+                // $array['Vendor'] = round($dp);
+                $array['Dealer_Price'] = round($dp);
+                $array['Powertech_Share_Price'] = round($pts);
                 $array['Incentive'] = round($in);
+                $array['MTD_LVT'] = round($lvt);
+                $array['LVT_Value'] = round($mtd_lvt);
+                $array['LVT_%'] = hvt_in_percentage($mtd_lvt, $ap);
+                $array['MTD_MVT'] = round($mvt);
+                $array['MVT_Value'] = round($mtd_mvt);
+                $array['MVT_%'] = hvt_in_percentage($mtd_mvt, $ap);
                 $array['MTD_HVT'] = round($hvt);
                 $array['HVT_Value'] = round($mtd_hvt);
-                $array['HVT_%'] = hvt_in_percentage($mtd_hvt, $cp);
+                $array['HVT_%'] = hvt_in_percentage($mtd_hvt, $ap);
                 $array['RO'] = round($service);
+                $array['Business_per_RO'] = '';
+                $array['Business_per_Treatment'] = '';
+                $array['RO_Ratio'] = '';
                 $arr[] = $array;
                 foreach ($mist as $val) {
+                    $business_per_ro = $business_per_treatment =  $ro_ratio = 0; 
+                    if(@$val['service_load']>0){
+                        $business_per_ro = round(@$val['actual_price'])/@$val['service_load'];
+                        $ro_ratio = @$val['total_job_done']/@$val['service_load']*100;
+                    }
+
+                    if(@$val['mtd_total']>0){
+                        $business_per_treatment = round(@$val['actual_price'])/@$val['mtd_total'];
+                    }
+
                     $array['CDC'] = get_name($val['dealer_id']);
-                    $array['Cust_Bill'] = round($val['customer_price']);
-                    $array['Vendor'] = round($val['dealer_price']);
+                    // $array['Cust_Bill'] = round($val['customer_price']);
+                    $array['Actual_Price'] = round($val['actual_price']);
+                    // $array['Vendor'] = round($val['dealer_price']);
+                    $array['Dealer_Price'] = round($val['dealer_price']);
+                    $array['Powertech_Share_Price'] = round($val['powertech_share_price']);
                     $array['Incentive'] = round($val['incentive']);
+                    $array['MTD_LVT'] = round($val['lvt_total']);
+                    $array['LVT_Value'] = round($val['mtd_lvt_value']);
+                    $array['LVT_%'] = hvt_in_percentage($val['mtd_lvt_value'], $val['actual_price']);
+                    $array['MTD_MVT'] = round($val['mvt_total']);
+                    $array['MVT_Value'] = round($val['mtd_mvt_value']);
+                    $array['MVT_%'] = hvt_in_percentage($val['mtd_mvt_value'], $val['actual_price']);
                     $array['MTD_HVT'] = round($val['hvt_total']);
                     $array['HVT_Value'] = round($val['mtd_hvt_value']);
-                    $array['HVT_%'] = hvt_in_percentage($val['mtd_hvt_value'], $val['customer_price']);
-                    $array['Service_Load'] = $val['service_load'];
+                    $array['HVT_%'] = hvt_in_percentage($val['mtd_hvt_value'], $val['actual_price']);
+                    $array['RO'] = $val['service_load'];
+                    $array['Business_per_RO'] = number_format((float)$business_per_ro, 2, '.', '');
+                    $array['Business_per_Treatment'] = $business_per_treatment;
+                    $array['RO_Ratio'] = number_format((float)$ro_ratio, 2, '.', '');
                     $arr[] = $array;
                 }
                 $count = count($arr) + 1;
-                $sheet->setBorder('A3:H' . $count);
+                $sheet->setBorder('A3:R' . $count);
                 $sheet->cells('A3:A' . $count, function ($cells) {
                     $cells->setBackground('#FFFF00');
                 });
@@ -3367,19 +4035,49 @@ class AsmController extends Controller
                     $cells->setBackground('#F7FED0');
                 });
                 $sheet->cells('D3:D' . $count, function ($cells) {
-                    $cells->setBackground('#FFFF00');
+                    $cells->setBackground('#F7FED0');
                 });
                 $sheet->cells('E3:E' . $count, function ($cells) {
-                    $cells->setBackground('#F2DDDC');
+                    $cells->setBackground('#FFFF00');
                 });
                 $sheet->cells('F3:F' . $count, function ($cells) {
                     $cells->setBackground('#F2DDDC');
                 });
                 $sheet->cells('G3:G' . $count, function ($cells) {
-                    $cells->setBackground('#FFFF00');
+                    $cells->setBackground('#F2DDDC');
                 });
                 $sheet->cells('H3:H' . $count, function ($cells) {
+                    $cells->setBackground('#FFFF00');
+                });
+                $sheet->cells('I3:I' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('J3:J' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('K3:K' . $count, function ($cells) {
+                    $cells->setBackground('#FFFF00');
+                });
+                $sheet->cells('L3:L' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('M3:M' . $count, function ($cells) {
+                    $cells->setBackground('#F2DDDC');
+                });
+                $sheet->cells('N3:N' . $count, function ($cells) {
+                    $cells->setBackground('#FFFF00');
+                });
+                $sheet->cells('O3:O' . $count, function ($cells) {
                     $cells->setBackground('#B6DDE8');
+                });
+                $sheet->cells('P3:P' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
+                });
+                $sheet->cells('Q3:Q' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
+                });
+                $sheet->cells('R3:R' . $count, function ($cells) {
+                    $cells->setBackground('#F7FED0');
                 });
                 $sheet->fromArray(@$arr);
             });
