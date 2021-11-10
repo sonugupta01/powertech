@@ -865,6 +865,20 @@ class AdminController extends Controller
             } else if ($status == "delete") {
                 User::where('id', $id)->delete();
                 DB::table('users_email')->where('user_id', $id)->delete();
+                DB::table('advisors')->where('dealer_id', $id)->delete();
+                DB::table('advisor_shares')->where('dealer_id', $id)->delete();
+                DB::table('attendance')->where('dealer_id', $id)->delete();
+                DB::table('contacts')->where('user_id', $id)->delete();
+                DB::table('dealer_product_inventory')->where('dealer_id', $id)->delete();
+                DB::table('dealer_shares')->where('dealer_id', $id)->delete();
+                DB::table('dealer_templates')->where('dealer_id', $id)->delete();
+                DB::table('emp_hierarchy')->where('dealer_id', $id)->delete();
+                DB::table('history_jobs')->where('dealer_id', $id)->delete();
+                DB::table('jobs')->where('dealer_id', $id)->delete();
+                DB::table('jobs_by_date')->where('dealer_id', $id)->delete();
+                DB::table('target')->where('dealer_id', $id)->delete();
+                DB::table('timings')->where('user_id', $id)->delete();
+                DB::table('users')->where('dealer_id', $id)->update(['dealer_id'=>NULL]);
                 Session::flash('success', 'Dealer deleted successfully!');
             }
         } else {

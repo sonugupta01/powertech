@@ -133,7 +133,7 @@
                               <a href="{{ url('/admin/editDealer/')}}/{{$value->id}}" class="btn btn-success">Edit</a>
                                <a href="{{ asset('images')}}/{{ $value->qrcode}}" class="btn btn-primary" download="">QR Code</a>
                                <a href="{{ url('/admin/dealerProducts')}}/{{$value->id}}" class="btn btn-warning">MIL</a>
-                              {{-- <a href="{{ url('/admin/statusDealer/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a> --}}
+                              <a href="{{ url('/admin/statusDealer/delete/')}}/{{$value->id}}" onclick="return confirm('Are you sure want to delete?')" class="btn btn-danger">Delete</a>
                         </td>
                         <td>
                           <a href="{{ url('/admin/contacts/')}}/{{$value->id}}" class="btn btn-primary">Contacts</a>
