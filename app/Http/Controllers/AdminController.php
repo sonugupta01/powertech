@@ -5426,7 +5426,6 @@ class AdminController extends Controller
                 }
             }
 
-            
             foreach ($oem_dealers as $i => $j) {
                 $report_ids = explode(",", $j->reporting_authority);
                 if (in_array($search['asm'], $report_ids)) {
@@ -5535,7 +5534,7 @@ class AdminController extends Controller
             $mis = DB::table('jobs')
                 // // ->select(DB::raw('jobs.id as job_id,SUM(jobs.treatment_total) as mtd_total,SUM(jobs.customer_price) as customer_price,SUM(jobs.actual_price) as actual_price,SUM(jobs.hvt_total) as hvt_total, SUM(jobs.dealer_price) as dealer_price, SUM(jobs.incentive) as incentive,SUM(jobs.hvt_total) as mtd_hvt, SUM(jobs.hvt_value) as mtd_hvt_value,SUM(jobs.vas_total) as mtd_vas, SUM(jobs.vas_value) as mtd_vas_value, jobs.dealer_id, jobs.foc_options,jobs.treatments'))
                 ->where(function ($query) use ($search, $first_day, $today, $value) {
-                    if(!empty($search['department']) || !empty($search['from1']) || !empty($search['to1']) || !empty($search['month']) || !empty($search['brand'])){
+                    if(!empty($search['department']) || !empty($search['from1']) || !empty($search['to1']) || !empty($search['month']) || !empty($search['brand']) || !empty($search['price'])){
                         if (isset($search['department'])) {
                             if (!empty(trim($search['department']))) {
                                 $query->where('jobs.department_id', '=', $search['department']);
@@ -5592,8 +5591,12 @@ class AdminController extends Controller
                             $query->whereIn('jobs.dealer_id', $brandFilterDealerArray);
                         }
                     } else {
-                        $query->whereDate('jobs.job_date', '>=', $first_day);
-                        $query->whereDate('jobs.job_date', '<=', $today);
+                        if (!empty($search['report_type'])) {
+                            $query->whereYear('jobs.job_date', date('Y'));
+                        } else {
+                            $query->whereDate('jobs.job_date', '>=', $first_day);
+                            $query->whereDate('jobs.job_date', '<=', $today);
+                        }  
                     }
                 })
                 ->where('jobs.dealer_id', $value->id)
@@ -5601,7 +5604,7 @@ class AdminController extends Controller
                 // ->where('jobs.foc_options',5)
                 // ->groupBy('jobs.dealer_id')
                 ->get();
-          
+            
             $treatment_total = $hvt_incentive = $customer_price = $actual_price = $powertech_share_price = $incentive = $lvt_total = $lvt_value = $mvt_total = $mvt_value = $hvt_total = $hvt_value = $vas_total = $vas_value = $dealer_price = 0;
             $array = array();
             $array['total_job_done'] = count($mis);
@@ -5751,6 +5754,7 @@ class AdminController extends Controller
             'oldDealer' => @$search['dealer'],
             'oldSelectMonth' => @$search['month'],
             'oldReport' => @$type,
+            'report_type' => @$search['report_type'],
             'departments' => $departments,
             'oldDepartment' => @$search['department'],
             'brands' => @$brands,

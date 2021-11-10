@@ -103,8 +103,19 @@
                           </select>
                         </div>
                       </div>
+                      <div class="col-xs-12 col-md-offset-2 col-md-8">
+                        <div class="form-group report-field col-md-12 col-sm-12 col-xs-12">
+                          <label>Report Type</label>
+                          <select class="form-control" id="report_type" name="report_type">
+                            <option value="">Select Report Type</option>
+                            <option {{(@request()->report_type=='consolidate')?'selected':''}} value="consolidate">Consolidate</option>
+                            <option {{(@request()->report_type=='treatment_wise')?'selected':''}} value="treatment_wise">Treatment wise</option>
+                          </select>
+                        </div>
+                      </div>
                       <hr style="clear: both;" />
                       <div class="col-xs-12 col-md-offset-2 col-md-8">
+                        <div class="time_div">
                           <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                             <label>Start Date</label>
                             <input type="text"  id="fromDate from" name="from1" placeholder="From Date" value="{{@$oldFromDate1}}" class="datePicker form-control" autocomplete="off" />
@@ -120,19 +131,81 @@
                             <label>Select Month</label>
                             <input type="text"  id="selectMonth" name="month" value="{{@$oldSelectMonth}}" placeholder="Select Month" value="" class="datePicker1 form-control" autocomplete="off" />
                           </div>
-                          
+                        </div>
                           <div class="input-group form-group report-field col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
                             <input class="btn btn-primary" type="submit" value="Submit">
                           </div>
                       </div>
                     </div>
                   </form>
+                  
                 	<div class="table-responsive">
+                    @if(@$report_type=='consolidate')
+                    <table class="table table-bordered table-striped report-table mis-table">
+                      <thead>
+                        <tr>
+  	                      <!-- <th style="font-size: 12px;"></th> -->
+  	                      <th colspan="61" style="text-align:left;">Consolidate MIS</th>
+  	                      <!-- <th colspan="7">
+  	                        <button id="download2" class="btn btn-success">Download</button>
+  	                      </th> -->
+  	                    </tr>
+                        <?php
+                          $months = array('January','February','March','April','May','June','July','August','September','October','November','December');
+                        ?>
+                        <tr>
+                          <th></th>
+                          <?php
+                          // dd($mis);
+                            foreach ($months as $month){
+                          ?>
+                          <th colspan="5">{{$month}}</th>
+                          <?php
+                            }
+                          ?>
+                        </tr>
+                        <tr>
+                          <th>Dealer name</th>
+                          <?php 
+                            foreach ($months as $month){
+                          ?>
+                          <th>Business value</th>
+                          <th>No. of Treatments</th>
+                          <th>HVT%</th>
+                          <th>MVT%</th>
+                          <th>LVT%</th>
+                          <?php
+                            }
+                          ?>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                          <td>ABCD</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    @else
   	                <table class="table table-bordered table-striped report-table mis-table">
   	                  <thead>
   	                    <tr>
   	                      <th style="font-size: 12px;">Total Records: {{count($mis)}}</th>
-  	                      <th colspan="10" style="text-align:left;">MIS</th>
+  	                      <th colspan="10" style="text-align:center;">MIS</th>
   	                      <th colspan="7">
   	                        <button id="download2" class="btn btn-success">Download</button>
   	                      </th>
@@ -246,6 +319,7 @@
   	                  <?php } ?>
   	                  </tbody>
   	                </table>
+                    @endif
                   </div>
                 </div><!-- /.box-body -->
               </div>
@@ -279,6 +353,25 @@
 
   $(document).on('change','.datePicker1',function(){
     $('.datePicker').val('');
+  });
+
+  if($('#report_type').val()!==''){
+    $('.time_div').hide();
+    $('.datePicker').val('');
+    $('.datePicker1').val('');
+  } else {
+    $('.time_div').show();
+  }
+
+  $(document).on('change','#report_type',function(){
+    var report_type = $(this).val();
+    if (report_type != '') {
+      $('.time_div').hide();
+      $('.datePicker').val('');
+      $('.datePicker1').val('');
+    } else {
+      $('.time_div').show();
+    }
   });
 
   $(document).on('click', '.datePicker', function(){
@@ -353,6 +446,10 @@ $('#dealer').on('change',function(argument) {
 });
 
 $('#department').on('change',function(argument) {
+  $('#misreportform').submit();
+});
+
+$('#report_type').on('change',function(argument) {
   $('#misreportform').submit();
 });
 
