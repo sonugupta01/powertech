@@ -11883,7 +11883,7 @@ class AdminController extends Controller
         return redirect(Session::get('prevUrl'))->with('success', "Inventory updated successfully");
     }
 
-    public function consumptionReport(Request $request)
+    public function consumptionReport_old(Request $request)
     {
         $search = $request->all();
         if (@$search['selectMonth']) {
@@ -12402,6 +12402,138 @@ class AdminController extends Controller
             //   dd($data);
             return view('admin.closing_stock_report', [
                 'result' => @$data,
+            ]);
+        }
+    }
+
+    public function consumptionReport(Request $request)
+    {
+
+        $date = $request->date;
+        if (!empty($date)) {
+            $selectedDate = explode('-', $date);
+            // $day = $selectedDate[2];
+            $month = $selectedDate[1];
+            $year = $selectedDate[0];
+        } else {
+            $currentDate = explode('-', date('Y-m'));
+            // $day = $currentDate[2];
+            $month = $currentDate[1];
+            $year = $currentDate[0];
+        }
+        // dd("sdbcds");
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+        ->where(["role" => 5, 'status' => 1]);
+
+        if(!empty($request->firm_id)){
+            $result['allAsms'] = $result['allAsms']->where("firm_id" , $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if(!empty($request->firm_id)){
+           $result['allDealers'] = $result['allDealers']->where("firm_id" , $request->firm_id);
+        }
+
+        if(!empty($request->oem_id)){
+           $result['allDealers'] = $result['allDealers']->where("oem_id" , $request->oem_id);
+        }
+
+        if(!empty($request->asm_id)){
+           $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+        
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+        
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands']= $result['allBrands']->get();
+
+
+        // -----  start logic ----
+        $result['jobs'] = DB::table('jobs')->where("delete_job",1);
+
+        if(!empty($request->dealer_id)){
+            $result['jobs'] = $result['jobs']->where("dealer_id" , $request->dealer_id);
+        }
+
+        if(!empty($request->month)){
+            // dd($request->month);
+            $result['jobs'] = $result['jobs']->whereMonth("date_added" , $month);
+        }
+
+        if(!empty($request->year)){
+            // dd($request->year);
+            $result['jobs'] = $result['jobs']->whereYear("date_added" , $year);
+        }
+
+        $result['jobs'] =  $result['jobs']->get();
+        dd($result['jobs']);
+
+
+        if ($request->excel == "1") {
+
+            $excelData = $data['productDetail'];
+            // dd($excelData);
+
+            return Excel::create('Dealer_' . date("d-M-Y"), function ($excel) use ($excelData) {
+
+
+                foreach ($excelData as $key => $value) {
+                    // dd(count($value));
+                    if (count($value) < 2) {
+                        continue;
+                    }
+
+                    // $name = in_array(substr($value['dealer_detail']->name,25),$sheetName)?substr($value['dealer_detail']->name,25).rand(1,4):substr($value['dealer_detail']->name,25);
+                    $name = strlen(substr($value['dealer_detail']->name, 25) > 32) ? substr($value['dealer_detail']->name, 0, 31) . rand(1, 4) : $value['dealer_detail']->name;
+                    // $sheetName[] = $name;
+                    // dd($name);
+                    // $name = substr($value['dealer_detail']->name,0,31);
+                    $excel->sheet($name, function ($sheet) use ($value) {
+                        $result = array();
+                        $array = array();
+                        foreach ($value as $key2 => $value2) {
+                            // dd($value2)
+                            if ($key2 === array_key_last($value)) {
+                                continue;
+                            }
+                            $array['Sr.no'] = ++$key2;
+                            $array['Product Name'] = @$value2->pro_name;
+                            // $array['Minimum Stock'] = !empty($value2->minimum_stock) ? $value2->minimum_stock : "0" . " " . $value2->unit_name;
+                            $array['Closing Stock'] = !empty($value2->stock_in_hand) ? $value2->stock_in_hand : "0" . " " . $value2->unit_name;
+
+                            $array['LastUpdated At'] = $value2->updated_at ? $value2->updated_at : "-";
+                            $array['LastUpdated By'] = get_name($value2->updated_by) ? get_name($value2->updated_by) : "-";
+
+                            $result[] = $array;
+                        }
+                        // dd($result);
+                        $sheet->fromArray($result);
+                        // dd("sxa");
+                    });
+                }
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.consumptionReport', [
+                'result' => @$result,
             ]);
         }
     }
