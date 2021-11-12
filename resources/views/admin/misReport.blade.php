@@ -156,7 +156,6 @@
                         <tr>
                           <th></th>
                           <?php
-                          // dd($mis);
                             foreach ($months as $month){
                           ?>
                           <th colspan="5">{{$month}}</th>
@@ -180,24 +179,42 @@
                         </tr>
                       </thead>
                       <tbody>
+                        <?php
+                          foreach ($mis as $k => $val){
+                        ?>
                         <tr>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
-                          <td>ABCD</td>
+                          <td style="background-color:#FFFF00; width: 275px;">{{get_name(@$val['dealer_id'])}}</td>
+                          <?php 
+                            foreach ($months as $month){
+                              foreach($val['consolidate_data'] as $cdata){
+                                $month_num = date('Y-m', strtotime($month));
+                                if ($month_num == $cdata->month) {
+                                  if(!empty($cdata->data)){
+                                    $business_total   = @$cdata->data->consolidate_business_total;
+                                    $total_treatments = @$cdata->data->consolidate_treatment_total;
+                                    $consolidate_hvt  = @$cdata->data->consolidate_hvt;
+                                    $consolidate_mvt  = @$cdata->data->consolidate_mvt;
+                                    $consolidate_lvt  = @$cdata->data->consolidate_lvt;
+                                  } else {
+                                    $business_total   = 0;
+                                    $total_treatments = 0;
+                                    $consolidate_hvt  = 0;
+                                    $consolidate_mvt  = 0;
+                                    $consolidate_lvt  = 0;
+                                  }
+                                } 
+                              }   
+                          ?>
+                            <td style="background-color:#B6DDE8;">{{$business_total}}</td>
+                            <td style="background-color:#F2DDDC;">{{$total_treatments}}</td>
+                            <td style="background-color:#F7FED0;">{{hvt_in_percentage($consolidate_hvt,$business_total)}}%</td>
+                            <td style="background-color:#F7FED0;">{{hvt_in_percentage($consolidate_mvt,$business_total)}}%</td>
+                            <td style="background-color:#F7FED0;">{{hvt_in_percentage($consolidate_lvt,$business_total)}}%</td>
+                          <?php
+                            }
+                          ?>
                         </tr>
+                        <?php }?>
                       </tbody>
                     </table>
                     @else
@@ -372,6 +389,7 @@
     } else {
       $('.time_div').show();
     }
+    $('#misreportform').submit();
   });
 
   $(document).on('click', '.datePicker', function(){
@@ -446,10 +464,6 @@ $('#dealer').on('change',function(argument) {
 });
 
 $('#department').on('change',function(argument) {
-  $('#misreportform').submit();
-});
-
-$('#report_type').on('change',function(argument) {
   $('#misreportform').submit();
 });
 
