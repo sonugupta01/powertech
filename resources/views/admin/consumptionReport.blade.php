@@ -46,6 +46,7 @@
                       @endforeach
                     </select>
                   </div>
+                  @if(Auth::user()->role==1)
                   <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                     <label>ASM</label>
                     <select name="asm_id" class="form-control" id="asm_id" onchange="this.form.submit()">
@@ -55,6 +56,7 @@
                       @endforeach
                     </select>
                   </div>
+                  @endif
                   <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                     <label>OEM</label>
                     {{-- {{dd($result['allOems'])}} --}}
@@ -164,9 +166,10 @@
 
 <script type="text/javascript">
 
-$("form :input").change(function() {
-  $(this).closest('form').data('changed', true);
-});
+// $("#filterForm").change(function() {
+//   // alert("Dfc");
+//   $(this).form.submit();
+// });
 
 function addUrlParameter(name, value) {
   var searchParams = new URLSearchParams(window.location.search)
