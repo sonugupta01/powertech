@@ -579,6 +579,9 @@ function get_unit_name($unit_id = NULL)
 	}elseif($unit_id==4){
 		$unit = 'Gms.';
 	}
+	else{
+		$unit = '';
+	}
 	return $unit;
 }
 

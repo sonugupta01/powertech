@@ -105,26 +105,46 @@
             <table class="table table-bordered table-striped report-table datatable">
               <thead>
                 <th style="text-align:center;">
-                  {{-- {{dd($result['productDetail'])}} --}}
-                  {{-- @if(count($result['productDetail'][0])>0 || empty(request()->dealer_id))
+                 
+                  @if (!empty($result['productConsumptionData']))
                     
                     <button onclick="addUrlParameter('excel', '1')" class="btn btn-success" type="">Download</button>
    
-                  @endif --}}
+                  @endif
                 </th>
-                <th colspan="8" style="font-size: 12px;">Dealer Count: {{}}</th>
+                <th colspan="8" style="font-size: 12px;">Count: {{count($result['productConsumptionData'])}}</th>
                 <tr>
                     <th>Sr.no</th>
                     <th>Product Name</th>
                     {{-- <th>Minimum Stock</th> --}}
-                    <th>Closing Stock</th>
-                    <th>LastUpdated At</th>
-                    <th>LastUpdated By</th>
+                    <th>Total Quantity</th>
+                    <th>Total Price</th>
                 </tr>
             </thead>
               <tbody>
+       
+              @if (!empty($result['productConsumptionData']))
+              @php
+                  $i=0;
+              @endphp
+                  @foreach ($result['productConsumptionData'] as $key => $value)
+                      <tr>
+                        <td>{{++$i}}</td>
+                        <td>{{get_product_name($value->product_id)}}</td>
+                        <td>{{$value->quantity}} {{get_unit_name($value->uom)}}</td>
+                        <td>{{$value->price}}</td>
+                      </tr>
+                  @endforeach
+
+              @else
+              <tr>
+                <td colspan="8">
+                  No Record
+                </td>
                
+              </tr>
               
+              @endif
                                      
                                       
                                       
