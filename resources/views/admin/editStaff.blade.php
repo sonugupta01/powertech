@@ -532,7 +532,7 @@ $(document).ready(function(){
 //     }
 //   });
 // });
-
+// sonu 01
 $(document).ready(function(){
 if($('#designation').val() == '14') {
   $(".level").removeAttr("id");
