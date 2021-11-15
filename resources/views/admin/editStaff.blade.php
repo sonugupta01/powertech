@@ -533,6 +533,7 @@ $(document).ready(function(){
 //   });
 // });
 
+$(document).ready(function(){
 if($('#designation').val() == '14') {
   $(".level").removeAttr("id");
   $("#authority").removeAttr("name");
@@ -604,6 +605,9 @@ if($('#designation').val() == '14') {
   $("#authoritySelector").show();
   $("#reportingLevelSelector").show();
 }
+});
+
+
 $(document).ready(function(){
   $('#designation').on('change', function() {
     if(this.value == '14') {
