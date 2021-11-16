@@ -586,7 +586,8 @@ $('#state_id').on("change",function(e) {
     $('.loading').show();
     var address = $("#address").val();
     token = $('input[name=_token]').val();
-    url = '<?php echo url("/"); ?>admin/getlatlong';
+    url = '<?php echo url("/"); ?>/admin/getlatlong';
+    
     data = {
       address: address,
     };
