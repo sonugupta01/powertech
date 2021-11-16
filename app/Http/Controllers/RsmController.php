@@ -3117,7 +3117,7 @@ class RsmController extends Controller
     }
 
     // view Consumption Report 
-    public function consumptionReport(Request $request)
+    public function consumptionReport_old(Request $request)
     {
         $search = $request->all();
         if (@$search['selectMonth']) {
@@ -3236,7 +3236,7 @@ class RsmController extends Controller
             }
         }
         //dd($first_array, $treatments);
-        return view('rsm.consumptionReport', [
+        return view('rsm.consumptionReport_old', [
             'treatments' => @$treatments,
             'dealers' => $dealers,
             'oldDealer' => @$search['dealer'],
@@ -4540,6 +4540,204 @@ class RsmController extends Controller
             //   dd($data);
             return view('rsm.closing_stock_report', [
                 'result' => @$data,
+            ]);
+        }
+    }
+
+    public function consumptionReport(Request $request)
+    {
+        $request->asm_id = Auth::id();
+
+        $date = $request->month;
+        if (!empty($date)) {
+            $selectedDate = explode('-', $date);
+            // $day = $selectedDate[2];
+            $month = $selectedDate[1];
+            $year = $selectedDate[0];
+        } else {
+            $currentDate = explode('-', date('Y-m'));
+            // $day = $currentDate[2];
+            $month = $currentDate[1];
+            $year = $currentDate[0];
+        }
+        // dd("sdbcds");
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+       
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+        $result['jobs'] = DB::table('jobs')->where("delete_job", 1);
+
+        if (!empty($request->dealer_id)) {
+            $result['jobs'] = $result['jobs']->where("dealer_id", $request->dealer_id);
+        }
+        $result['jobs'] = $result['jobs']->whereIn("dealer_id", $result['allDealers']->pluck('id')->toArray());
+
+        if (!empty($month)) {
+            // dd($month);
+            $result['jobs'] = $result['jobs']->whereMonth("date_added", $month);
+        }
+
+        if (!empty($year)) {
+            // dd($request->year);
+            $result['jobs'] = $result['jobs']->whereYear("date_added", $year);
+        }
+
+        $result['jobs'] =  $result['jobs']->get();
+        // dd($result['jobs']);
+
+        $productConsumptionData = array();
+        $totalConsumptionValue = 0;
+
+        if (!empty($result['jobs'])) {
+            foreach ($result['jobs'] as $key => $value) {
+
+                $jobs_treatment = DB::table('jobs_treatment')->where('job_id', $value->id)->get();
+
+                if (!empty($jobs_treatment)) {
+                    foreach ($jobs_treatment as $key1 => $value1) {
+                        // dd($request->brand_id,"s",!empty($request->brand_id));
+                        $products_treatments = DB::table('products_treatments')
+                        ->where('products_treatments.tre_id', $value1->treatment_id)
+                        ->join('products','products.id','=','products_treatments.pro_id')
+                        ->select('products_treatments.*','products.brand_id');
+
+                        if (!empty($request->brand_id)) {
+                            $products_treatments =  $products_treatments->where('products.brand_id',$request->brand_id);
+                        }
+
+                        $products_treatments =  $products_treatments->get();
+                        // dd($products_treatments);
+                        if (!empty($products_treatments)) {
+                            foreach ($products_treatments as $key2 => $value2) {
+                                         
+                                $totalConsumptionValue += $value2->price;
+
+                                $productDetailObject = new \stdClass();
+                                $productDetailObject->product_id = $value2->pro_id;
+                                $productDetailObject->uom = $value2->uom;
+
+                                if (array_key_exists($value2->pro_id, $productConsumptionData)) {
+                                $repeatProductDetailObject = $productConsumptionData[$value2->pro_id];
+                                $productDetailObject->price = $repeatProductDetailObject->price + $value2->price;
+                                $productDetailObject->quantity = $repeatProductDetailObject->quantity + $value2->quantity;
+                                }
+                                else{
+                                $productDetailObject->price = $value2->price;
+                                $productDetailObject->quantity = $value2->quantity;
+                                }
+
+                                $productConsumptionData[$value2->pro_id] = $productDetailObject;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $result['productConsumptionData'] = $productConsumptionData;
+
+        $result['totalConsumptionValue'] = $totalConsumptionValue;
+
+
+        if ($request->excel == "1") {
+
+            $excelData = $result['productConsumptionData'];
+            // dd($excelData);
+
+            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData,$request,$totalConsumptionValue) {
+
+                    $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) :"All";
+                    $excel->sheet($sheetName, function ($sheet) use ($excelData,$request,$totalConsumptionValue) {
+                        $count = count($excelData);
+                        $result = array();
+                        $array = array();
+                        $i = 0;
+
+                        $sheet->setBorder('A1:D1');
+                        $sheet->cells('A1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('B1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('C1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('D1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->mergeCells('C1:D1');
+                        $sheet->mergeCells('A1:B1');
+                        $sheet->setCellValue('A1', 'Count: '.$count);
+               
+                        $sheet->setCellValue('C1', 'Total consumption value: '.$totalConsumptionValue);
+                  
+
+
+                        $sheet->setCellValue('A2', 'Sr.no');
+                        $sheet->setCellValue('B2', 'Product Name');
+                        $sheet->setCellValue('C2', 'Total Quantity');
+                        $sheet->setCellValue('D2', 'Total Price');
+
+
+                        foreach ($excelData as $key => $value) {
+                            $row = $i+3;
+                            $sheet->setCellValue('A'.$row, ++$i);
+                            $sheet->setCellValue('B'.$row, @get_product_name(@$value->product_id));
+                            $sheet->setCellValue('C'.$row, (string) (@$value->quantity ." ".get_unit_name(@$value->uom)));
+                            $sheet->setCellValue('D'.$row, (string) @$value->price);
+                        }
+          
+                        // $sheet->fromArray($result);
+                   
+                    });
+            
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.consumptionReport', [
+                'result' => @$result,
             ]);
         }
     }
