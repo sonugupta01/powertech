@@ -4625,6 +4625,7 @@ class RsmController extends Controller
         // dd($result['jobs']);
 
         $productConsumptionData = array();
+        $totalConsumptionValue = 0;
 
         if (!empty($result['jobs'])) {
             foreach ($result['jobs'] as $key => $value) {
@@ -4647,6 +4648,8 @@ class RsmController extends Controller
                         // dd($products_treatments);
                         if (!empty($products_treatments)) {
                             foreach ($products_treatments as $key2 => $value2) {
+                                         
+                                $totalConsumptionValue += $value2->price;
 
                                 $productDetailObject = new \stdClass();
                                 $productDetailObject->product_id = $value2->pro_id;
@@ -4673,6 +4676,7 @@ class RsmController extends Controller
 
         $result['productConsumptionData'] = $productConsumptionData;
 
+        $result['totalConsumptionValue'] = $totalConsumptionValue;
 
 
         if ($request->excel == "1") {
@@ -4680,25 +4684,51 @@ class RsmController extends Controller
             $excelData = $result['productConsumptionData'];
             // dd($excelData);
 
-            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData,$request) {
-// dd(get_name($request->dealer_id));
+            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData,$request,$totalConsumptionValue) {
 
                     $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) :"All";
-                    $excel->sheet($sheetName, function ($sheet) use ($excelData) {
+                    $excel->sheet($sheetName, function ($sheet) use ($excelData,$request,$totalConsumptionValue) {
+                        $count = count($excelData);
                         $result = array();
                         $array = array();
                         $i = 0;
+
+                        $sheet->setBorder('A1:D1');
+                        $sheet->cells('A1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('B1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('C1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('D1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->mergeCells('C1:D1');
+                        $sheet->mergeCells('A1:B1');
+                        $sheet->setCellValue('A1', 'Count: '.$count);
+               
+                        $sheet->setCellValue('C1', 'Total consumption value: '.$totalConsumptionValue);
+                  
+
+
+                        $sheet->setCellValue('A2', 'Sr.no');
+                        $sheet->setCellValue('B2', 'Product Name');
+                        $sheet->setCellValue('C2', 'Total Quantity');
+                        $sheet->setCellValue('D2', 'Total Price');
+
+
                         foreach ($excelData as $key => $value) {
-                            $array['Sr.no'] = ++$i;
-                            $array['Product Name'] = @get_product_name(@$value->product_id);
-                            $array['Total Quantity'] = (string) (@$value->quantity ." ".get_unit_name(@$value->uom));
-
-                            $array['Total Price'] =(string) @$value->price;
-
-                            $result[] = $array;
+                            $row = $i+3;
+                            $sheet->setCellValue('A'.$row, ++$i);
+                            $sheet->setCellValue('B'.$row, @get_product_name(@$value->product_id));
+                            $sheet->setCellValue('C'.$row, (string) (@$value->quantity ." ".get_unit_name(@$value->uom)));
+                            $sheet->setCellValue('D'.$row, (string) @$value->price);
                         }
           
-                        $sheet->fromArray($result);
+                        // $sheet->fromArray($result);
                    
                     });
             

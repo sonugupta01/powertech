@@ -114,7 +114,8 @@
    
                   @endif
                 </th>
-                <th colspan="8" style="font-size: 12px;">Count: {{count($result['productConsumptionData'])}}</th>
+                <th colspan="1" style="font-size: 12px;">Count: {{count($result['productConsumptionData'])}}</th>
+                <th colspan="2" style="">Total consumption value: {{$result['totalConsumptionValue']}}</th>
                 <tr>
                     <th>Sr.no</th>
                     <th>Product Name</th>
@@ -128,6 +129,7 @@
               @if (!empty($result['productConsumptionData']))
               @php
                   $i=0;
+                  $total = 0;
               @endphp
                   @foreach ($result['productConsumptionData'] as $key => $value)
                       <tr>
@@ -136,6 +138,9 @@
                         <td>{{$value->quantity}} {{get_unit_name($value->uom)}}</td>
                         <td>{{$value->price}}</td>
                       </tr>
+                      @php
+                          $total+=$value->price;
+                      @endphp
                   @endforeach
 
               @else
@@ -153,6 +158,7 @@
               
               </tbody>
               <tfoot>
+                {{-- {{ $total}} --}}
               </tfoot>
             </table>
           </div>
