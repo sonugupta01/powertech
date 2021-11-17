@@ -592,15 +592,18 @@ class AdminController extends Controller
         //$id = DB::getPdo()->lastInsertId();
         $filename = str_replace(" ", "_", $post['name']) . time();
         $filename = $filename . '.png';
+
+        // dd($filename);
         foreach ($emails as $value) {
             $data = array(
                 'user_id' => $userId,
                 'email' => trim($value),
             );
             DB::table('users_email')->insertGetId($data);
+            // dd($userId,public_path('images/' . $filename));
             \QrCode::backgroundColor(255, 255, 0)->color(255, 0, 127)
                 ->format('png')->size('700')
-                ->generate($userId, public_path('images/' . $filename));
+                ->generate((string) $userId, public_path('images/' . $filename));
             User::where('id', $userId)->update(array(
                 'qrcode' => $filename
             ));
