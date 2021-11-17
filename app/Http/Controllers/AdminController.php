@@ -12605,13 +12605,14 @@ class AdminController extends Controller
 
     public function treatment_not_done_report(Request $request)
     {
-        $request->type = 1; // ceneter/dealer wise
-
+        // $request->type = 1; // ceneter/dealer wise
+// dd($request->type);
         $from = $request->from;
         $to = $request->to;
 
         if (empty($from) && empty($to)) {
-            $currentMonth = date("Y-m");   
+            $currentMonth = date("m");   
+            $currentYear = date("Y");   
         }
 
         $result['allFirms'] = DB::table('firms')->get();
@@ -12675,7 +12676,12 @@ class AdminController extends Controller
 
         if (!empty($currentMonth)) {
             // dd($currentMonth);
-            $result['doneTreatments'] = $result['doneTreatments']->whereDate("jobs.date_added",$currentMonth);
+            $result['doneTreatments'] = $result['doneTreatments']->whereMonth("jobs.date_added",$currentMonth);
+        }
+
+        if (!empty($currentYear)) {
+            // dd($currentYear);
+            $result['doneTreatments'] = $result['doneTreatments']->whereYear("jobs.date_added",$currentYear);
         }
 
 
@@ -12689,14 +12695,16 @@ class AdminController extends Controller
                 ->select("jobs.dealer_id",'jobs_treatment.treatment_id')
                 ->get();
 
-
-        $result['totalTreatments'] = DB::table('dealer_templates')->distinct('dealer_templates.template_id');
+// dd($result['allDealers']->pluck('id')->toArray());
+        $result['totalTreatments'] = DB::table('dealer_templates')
+        ->distinct('dealer_templates.template_id')
+        ->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray());
         if (!empty($request->dealer_id)) {
             $result['totalTreatments'] = $result['totalTreatments']->where("dealer_templates.dealer_id", $request->dealer_id);
         }
         $result['totalTreatments'] = $result['totalTreatments']
         ->join("treatments","treatments.temp_id","dealer_templates.template_id")
-       
+       ->where("treatments.id",559)
         ->select("treatments.*","treatments.id as treatment_id")
         ->get();
 
@@ -12704,7 +12712,7 @@ class AdminController extends Controller
             $result['notDoneTreatments'] = array_diff($result['totalTreatments']->pluck("treatment_id")->toArray(),$result['doneTreatments']->pluck("treatment_id")->toArray());
         }
 
-        // dd($result['totalTreatments'],$result['doneTreatments'],$result['notDoneTreatments']);
+        // dd($result['totalTreatments']);
 
         if ($request->excel == "1") {
             // dd("excel");
@@ -12732,7 +12740,7 @@ class AdminController extends Controller
             
                         $sheet->setCellValue('B1', 'Count: '.$count);
 
-                        
+
                         $sheet->setCellValue('A2', 'Sr.no');
                         $sheet->setCellValue('B2', 'Treatment Name');
 

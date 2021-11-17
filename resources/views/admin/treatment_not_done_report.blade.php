@@ -71,7 +71,7 @@
                     </select>
                   </div> --}}
 
-
+                  @if(request()->type == 1)
                   <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                     <label>Dealer</label>
                     <select class="form-control" id="dealer_id" name="dealer_id">
@@ -81,6 +81,19 @@
                       @endforeach
                     </select>
                   </div>
+                  @endif
+
+                  @if(request()->type == 2)
+                  <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
+                    <label>Treatments</label>
+                    <select class="form-control" id="treatment_id" name="treatment_id">
+                      <option value="">Select Treatment</option>
+                      @foreach($result['totalTreatments'] as $value)
+                      <option {{(@request()->treatment_id==$value->id)?'selected':''}} value="{{$value->id}}">{{$value->treatment}}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                  @endif
 
                   {{-- <div class="form-group report-field col-md-6 col-sm-6 col-xs-12">
                     <label>Brands</label>
@@ -101,8 +114,17 @@
                     <input type="text" id="to" name="to" placeholder="To" value="{{!empty(request()->to)?request()->to:""}}" class="datePickerDate form-control" autocomplete="off" />
                 </div>
 
+                <div class="form-group report-field col-md-12 col-sm-12 col-xs-12">
+                  <label>Report Type</label>
+                  {{-- {{dd(request()->type == 2)}} --}}
+                  <div class="form-control required">
+                    <input type="radio" checked value="1" name="type"> Center Wise
+                    <input type="radio" value="2" name="type" {{request()->type == 2 ? "checked" : ""}}> Treatment Wise
+                  </div>
+                </div>
 
-                <input type="hidden" name="type" value="1">
+
+                {{-- <input type="hidden" name="type" value="1"> --}}
 
                 <div class="input-group form-group report-field col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
                   <input class="btn btn-primary" type="submit" value="Submit">

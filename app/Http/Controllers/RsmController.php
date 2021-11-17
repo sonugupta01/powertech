@@ -4741,4 +4741,164 @@ class RsmController extends Controller
             ]);
         }
     }
+
+
+    public function treatment_not_done_report(Request $request)
+    {
+        $request->asm_id = Auth::id();
+        $request->type = 1; // ceneter/dealer wise
+
+        $from = $request->from;
+        $to = $request->to;
+
+        if (empty($from) && empty($to)) {
+            $currentMonth = date("m");   
+            $currentYear = date("Y");   
+        }
+
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+        $result['doneTreatments'] = DB::table('jobs')->where("jobs.delete_job", 1);
+
+        if (!empty($request->dealer_id)) {
+            $result['doneTreatments'] = $result['doneTreatments']->where("jobs.dealer_id", $request->dealer_id);
+        }
+
+        $result['doneTreatments'] = $result['doneTreatments']->whereIn("jobs.dealer_id", $result['allDealers']->pluck('id')->toArray());
+        if (!empty($from)) {
+            $result['doneTreatments'] = $result['doneTreatments']->whereDate("jobs.date_added",">=", $from);
+        }
+
+        if (!empty($to)) {
+            $result['doneTreatments'] = $result['doneTreatments']->whereDate("jobs.date_added","<=", $to);
+        }
+        // dd($result['doneTreatments']->get());
+        if (!empty($currentMonth)) {
+            // dd($currentMonth);
+            $result['doneTreatments'] = $result['doneTreatments']->whereMonth("jobs.date_added",$currentMonth);
+        }
+        if (!empty($currentYear)) {
+            // dd($currentYear);
+            $result['doneTreatments'] = $result['doneTreatments']->whereYear("jobs.date_added",$currentYear);
+        }
+        // dd($result['doneTreatments']->get());
+
+        $result['doneTreatments'] =  $result['doneTreatments']
+                ->join("jobs_treatment","jobs_treatment.job_id","jobs.id")
+                ->join("treatments","treatments.id","jobs_treatment.treatment_id")
+                ->where('treatments.status',1);
+                                              
+        $result['doneTreatments'] = $result['doneTreatments']
+                ->distinct('treatments.id')
+                ->select("jobs.dealer_id",'jobs_treatment.treatment_id')
+                ->get();
+
+
+        $result['totalTreatments'] = DB::table('dealer_templates')->distinct('dealer_templates.template_id');
+        if (!empty($request->dealer_id)) {
+            $result['totalTreatments'] = $result['totalTreatments']->where("dealer_templates.dealer_id", $request->dealer_id);
+        }
+        $result['totalTreatments'] = $result['totalTreatments']
+        ->join("treatments","treatments.temp_id","dealer_templates.template_id")
+       
+        ->select("treatments.*","treatments.id as treatment_id")
+        ->get();
+
+        if ($request->type == 1) { //treatment name show centerwise report
+            $result['notDoneTreatments'] = array_diff($result['totalTreatments']->pluck("treatment_id")->toArray(),$result['doneTreatments']->pluck("treatment_id")->toArray());
+        }
+
+        // dd($result['totalTreatments'],$result['doneTreatments'],$result['notDoneTreatments']);
+
+        if ($request->excel == "1") {
+            // dd("excel");
+
+            $excelData = $result['notDoneTreatments'];
+
+            return Excel::create('Treatment_Not_Done' . date("d-M-Y"), function ($excel) use ($excelData,$request) {
+
+                    $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) :"All";
+                    $excel->sheet($sheetName, function ($sheet) use ($excelData,$request) {
+                        $count = count($excelData);
+                        $result = array();
+                        $array = array();
+                        $i = 0;
+
+                        if ($request->type == 1) {
+
+                        $sheet->setBorder('A1:B1');
+                        $sheet->cells('A1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+                        $sheet->cells('B1', function ($cells) {
+                            $cells->setBackground('#FFFF00');
+                        });
+            
+                        $sheet->setCellValue('B1', 'Count: '.$count);
+
+                        
+                        $sheet->setCellValue('A2', 'Sr.no');
+                        $sheet->setCellValue('B2', 'Treatment Name');
+
+
+                        foreach ($excelData as $key => $value) {
+                            $row = $i+3;
+                            $sheet->setCellValue('A'.$row, ++$i);
+                            $sheet->setCellValue('B'.$row, @get_treatment_name(@$value));
+                        }
+                    }
+                   
+                    });
+            
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.treatment_not_done_report', [
+                'result' => @$result,
+            ]);
+        }
+    }
 }
