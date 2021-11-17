@@ -353,6 +353,7 @@
 				<li><a href="{{url('/admin/job_types_report')}}"><i class="fa fa-file"></i> Job Types Report</a></li>
 				<li><a href="{{url('/admin/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/admin/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
+				<li><a href="{{url('/admin/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
 				
 			</ul>
 		</li>

@@ -256,6 +256,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web', 'a
   Route::get('/downloadAllDealerReport', 'AdminController@downloadAllDealerReport');
   Route::get('/material_ordering_report', 'AdminController@material_ordering_report');
   Route::get('/closing_stock_report', 'AdminController@closing_stock_report');
+  Route::get('/treatment_not_done_report', 'AdminController@treatment_not_done_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 
   // Job Module
