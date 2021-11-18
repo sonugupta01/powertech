@@ -5082,7 +5082,7 @@ class SseController extends Controller
         if (!empty($request->asm_id)) {
             $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
         }
-       
+
         $result['allDealers'] = $result['allDealers']
             ->select('id', 'name')
             ->orderBy('name', 'asc')->get();
@@ -5126,19 +5126,19 @@ class SseController extends Controller
                     foreach ($jobs_treatment as $key1 => $value1) {
                         // dd($request->brand_id,"s",!empty($request->brand_id));
                         $products_treatments = DB::table('products_treatments')
-                        ->where('products_treatments.tre_id', $value1->treatment_id)
-                        ->join('products','products.id','=','products_treatments.pro_id')
-                        ->select('products_treatments.*','products.brand_id');
+                            ->where('products_treatments.tre_id', $value1->treatment_id)
+                            ->join('products', 'products.id', '=', 'products_treatments.pro_id')
+                            ->select('products_treatments.*', 'products.brand_id');
 
                         if (!empty($request->brand_id)) {
-                            $products_treatments =  $products_treatments->where('products.brand_id',$request->brand_id);
+                            $products_treatments =  $products_treatments->where('products.brand_id', $request->brand_id);
                         }
 
                         $products_treatments =  $products_treatments->get();
                         // dd($products_treatments);
                         if (!empty($products_treatments)) {
                             foreach ($products_treatments as $key2 => $value2) {
-                                         
+
                                 $totalConsumptionValue += $value2->price;
 
                                 $productDetailObject = new \stdClass();
@@ -5146,17 +5146,15 @@ class SseController extends Controller
                                 $productDetailObject->uom = $value2->uom;
 
                                 if (array_key_exists($value2->pro_id, $productConsumptionData)) {
-                                $repeatProductDetailObject = $productConsumptionData[$value2->pro_id];
-                                $productDetailObject->price = $repeatProductDetailObject->price + $value2->price;
-                                $productDetailObject->quantity = $repeatProductDetailObject->quantity + $value2->quantity;
-                                }
-                                else{
-                                $productDetailObject->price = $value2->price;
-                                $productDetailObject->quantity = $value2->quantity;
+                                    $repeatProductDetailObject = $productConsumptionData[$value2->pro_id];
+                                    $productDetailObject->price = $repeatProductDetailObject->price + $value2->price;
+                                    $productDetailObject->quantity = $repeatProductDetailObject->quantity + $value2->quantity;
+                                } else {
+                                    $productDetailObject->price = $value2->price;
+                                    $productDetailObject->quantity = $value2->quantity;
                                 }
 
                                 $productConsumptionData[$value2->pro_id] = $productDetailObject;
-
                             }
                         }
                     }
@@ -5174,59 +5172,269 @@ class SseController extends Controller
             $excelData = $result['productConsumptionData'];
             // dd($excelData);
 
-            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData,$request,$totalConsumptionValue) {
+            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData, $request, $totalConsumptionValue) {
 
-                    $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) :"All";
-                    $excel->sheet($sheetName, function ($sheet) use ($excelData,$request,$totalConsumptionValue) {
-                        $count = count($excelData);
-                        $result = array();
-                        $array = array();
-                        $i = 0;
+                $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
+                $excel->sheet($sheetName, function ($sheet) use ($excelData, $request, $totalConsumptionValue) {
+                    $count = count($excelData);
+                    $result = array();
+                    $array = array();
+                    $i = 0;
 
-                        $sheet->setBorder('A1:D1');
-                        $sheet->cells('A1', function ($cells) {
-                            $cells->setBackground('#FFFF00');
-                        });
-                        $sheet->cells('B1', function ($cells) {
-                            $cells->setBackground('#FFFF00');
-                        });
-                        $sheet->cells('C1', function ($cells) {
-                            $cells->setBackground('#FFFF00');
-                        });
-                        $sheet->cells('D1', function ($cells) {
-                            $cells->setBackground('#FFFF00');
-                        });
-                        $sheet->mergeCells('C1:D1');
-                        $sheet->mergeCells('A1:B1');
-                        $sheet->setCellValue('A1', 'Count: '.$count);
-               
-                        $sheet->setCellValue('C1', 'Total consumption value: '.$totalConsumptionValue);
-                  
-
-
-                        $sheet->setCellValue('A2', 'Sr.no');
-                        $sheet->setCellValue('B2', 'Product Name');
-                        $sheet->setCellValue('C2', 'Total Quantity');
-                        $sheet->setCellValue('D2', 'Total Price');
-
-
-                        foreach ($excelData as $key => $value) {
-                            $row = $i+3;
-                            $sheet->setCellValue('A'.$row, ++$i);
-                            $sheet->setCellValue('B'.$row, @get_product_name(@$value->product_id));
-                            $sheet->setCellValue('C'.$row, (string) (@$value->quantity ." ".get_unit_name(@$value->uom)));
-                            $sheet->setCellValue('D'.$row, (string) @$value->price);
-                        }
-          
-                        // $sheet->fromArray($result);
-                   
+                    $sheet->setBorder('A1:D1');
+                    $sheet->cells('A1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
                     });
-            
+                    $sheet->cells('B1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('C1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('D1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->mergeCells('C1:D1');
+                    $sheet->mergeCells('A1:B1');
+                    $sheet->setCellValue('A1', 'Count: ' . $count);
+
+                    $sheet->setCellValue('C1', 'Total consumption value: ' . $totalConsumptionValue);
+
+
+
+                    $sheet->setCellValue('A2', 'Sr.no');
+                    $sheet->setCellValue('B2', 'Product Name');
+                    $sheet->setCellValue('C2', 'Total Quantity');
+                    $sheet->setCellValue('D2', 'Total Price');
+
+
+                    foreach ($excelData as $key => $value) {
+                        $row = $i + 3;
+                        $sheet->setCellValue('A' . $row, ++$i);
+                        $sheet->setCellValue('B' . $row, @get_product_name(@$value->product_id));
+                        $sheet->setCellValue('C' . $row, (string) (@$value->quantity . " " . get_unit_name(@$value->uom)));
+                        $sheet->setCellValue('D' . $row, (string) @$value->price);
+                    }
+
+                    // $sheet->fromArray($result);
+
+                });
+
                 // dd($sheetName);
             })->export('xlsx');
         } else {
             //   dd($result);
             return view('admin.consumptionReport', [
+                'result' => @$result,
+            ]);
+        }
+    }
+
+    public function treatment_not_done_report(Request $request)
+    {
+        $request->asm_id = Auth::id();
+
+        $from = $request->from;
+        $to = $request->to;
+
+        if (empty($from) && empty($to)) {
+            $currentMonth = date("m");
+            $currentYear = date("Y");
+        }
+
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+        $result['doneTreatments'] = DB::table('jobs')->where("jobs.delete_job", 1);
+
+        if (!empty($request->dealer_id) && $request->type == 1) {
+            $result['doneTreatments'] = $result['doneTreatments']->where("jobs.dealer_id", $request->dealer_id);
+        }
+
+        $result['doneTreatments'] = $result['doneTreatments']->whereIn("jobs.dealer_id", $result['allDealers']->pluck('id')->toArray());
+        if (!empty($from)) {
+            $result['doneTreatments'] = $result['doneTreatments']->whereDate("jobs.date_added", ">=", $from);
+        }
+
+        if (!empty($to)) {
+            $result['doneTreatments'] = $result['doneTreatments']->whereDate("jobs.date_added", "<=", $to);
+        }
+
+        if (!empty($currentMonth)) {
+            // dd($currentMonth);
+            $result['doneTreatments'] = $result['doneTreatments']->whereMonth("jobs.date_added", $currentMonth);
+        }
+
+        if (!empty($currentYear)) {
+            // dd($currentYear);
+            $result['doneTreatments'] = $result['doneTreatments']->whereYear("jobs.date_added", $currentYear);
+        }
+
+
+        $result['doneTreatments'] =  $result['doneTreatments']
+            ->join("jobs_treatment", "jobs_treatment.job_id", "jobs.id");
+
+        if ($request->type == 2) {
+
+            if (!empty($request->treatment_id)) {
+                $result['dealerDoneTreatment'] = $result['doneTreatments']
+                    ->where("jobs_treatment.treatment_id", $request->treatment_id);
+            }
+
+            $result['dealerDoneTreatment'] = $result['doneTreatments']
+                ->groupBy('jobs.dealer_id')
+                ->get();
+            // dd($result['dealerDoneTreatment']);
+        }
+
+        $result['doneTreatments'] =  $result['doneTreatments']
+            ->join("treatments", "treatments.id", "jobs_treatment.treatment_id")
+            ->where('treatments.status', 1);
+
+        $result['doneTreatments'] = $result['doneTreatments']
+            ->distinct('treatments.id')
+            ->select("jobs.dealer_id", 'jobs_treatment.treatment_id')
+            ->get();
+
+        // dd($result['allDealers']->pluck('id')->toArray());
+        $result['totalTreatments'] = DB::table('dealer_templates')
+            ->distinct('dealer_templates.template_id')
+            ->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray());
+        if (!empty($request->dealer_id) && $request->type == 1) {
+            $result['totalTreatments'] = $result['totalTreatments']->where("dealer_templates.dealer_id", $request->dealer_id);
+        }
+        $result['totalTreatments'] = $result['totalTreatments']
+            ->join("treatments", "treatments.temp_id", "dealer_templates.template_id")
+            //    ->where("treatments.id",559)
+            ->select("treatments.*", "treatments.id as treatment_id", "dealer_templates.dealer_id")
+            ->get();
+
+        if ($request->type == 1) { //treatment name show centerwise report
+            $result['notDoneTreatments'] = array_diff($result['totalTreatments']->pluck("treatment_id")->toArray(), $result['doneTreatments']->pluck("treatment_id")->toArray());
+        }
+
+        // dd($result['totalTreatments']->distinct('dealer_templates.dealer_id'));
+
+        if ($request->type == 2) {
+            $result['treatmentTotalDealer'] = DB::table('treatments');
+
+            if (!empty($request->treatment_id)) {
+                $result['treatmentTotalDealer'] =  $result['treatmentTotalDealer']->where('treatments.id', $request->treatment_id);
+            }
+
+            $result['treatmentTotalDealer'] =  $result['treatmentTotalDealer']
+                ->join("dealer_templates", "dealer_templates.template_id", "treatments.temp_id")
+                ->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray())
+                ->groupBy('dealer_templates.dealer_id')->get();;
+
+
+            $result['notDoneTreatmentDealer'] = array_diff($result['treatmentTotalDealer']->pluck("dealer_id")->toArray(), $result['dealerDoneTreatment']->pluck("dealer_id")->toArray());
+
+
+            // dd($result['treatmentTotalDealer'],$result['dealerDoneTreatment'],$result['notDoneTreatmentDealer']);
+        }
+
+        if ($request->excel == "1") {
+            // dd("excel");
+            if ($request->type == 1) {
+                $excelData = $result['notDoneTreatments'];
+            }
+
+            if ($request->type == 2) {
+                $excelData = $result['notDoneTreatmentDealer'];
+            }
+
+            return Excel::create('Treatment_Not_Done' . date("d-M-Y"), function ($excel) use ($excelData, $request) {
+                if ($request->type == 1) {
+                    $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
+                }
+                if ($request->type == 2) {
+                    $sheetName = !empty($request->treatment_id) ? get_treatment_name($request->treatment_id) : "All";
+                }
+                $excel->sheet($sheetName, function ($sheet) use ($excelData, $request) {
+                    $count = count($excelData);
+                    $result = array();
+                    $array = array();
+                    $i = 0;
+
+
+
+                    $sheet->setBorder('A1:B1');
+                    $sheet->cells('A1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('B1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+
+                    $sheet->setCellValue('B1', 'Count: ' . $count);
+
+
+                    $sheet->setCellValue('A2', 'Sr.no');
+
+                    if ($request->type == 1) {
+                        $sheet->setCellValue('B2', 'Treatment Name');
+                    } elseif ($request->type == 2) {
+                        $sheet->setCellValue('B2', 'Dealer Name');
+                    }
+
+                    foreach ($excelData as $key => $value) {
+                        $row = $i + 3;
+                        $sheet->setCellValue('A' . $row, ++$i);
+                        if ($request->type == 1) {
+                            $sheet->setCellValue('B' . $row, @get_treatment_name(@$value));
+                        } elseif ($request->type == 2) {
+                            $sheet->setCellValue('B' . $row, @get_name(@$value));
+                        }
+                    }
+                });
+
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.treatment_not_done_report', [
                 'result' => @$result,
             ]);
         }

@@ -256,6 +256,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin::', 'middleware' => ['web', 'a
   Route::get('/downloadAllDealerReport', 'AdminController@downloadAllDealerReport');
   Route::get('/material_ordering_report', 'AdminController@material_ordering_report');
   Route::get('/closing_stock_report', 'AdminController@closing_stock_report');
+  Route::get('/treatment_not_done_report', 'AdminController@treatment_not_done_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 
   // Job Module
@@ -403,6 +404,7 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']
   Route::get('/consumption_report', 'AsmController@consumptionReport');
   Route::get('/material_ordering_report', 'AsmController@material_ordering_report');
   Route::get('/closing_stock_report', 'AsmController@closing_stock_report');
+  Route::get('/treatment_not_done_report', 'AsmController@treatment_not_done_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
 Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web', 'rsm']], function () {
@@ -470,6 +472,7 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web', 'rsm']
   Route::get('/consumption_report', 'RsmController@consumptionReport');
   Route::get('/material_ordering_report', 'RsmController@material_ordering_report');
   Route::get('/closing_stock_report', 'RsmController@closing_stock_report');
+  Route::get('/treatment_not_done_report', 'RsmController@treatment_not_done_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
 Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web', 'sse']], function () {
@@ -535,5 +538,6 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web', 'sse']
   Route::get('/consumption_report', 'SseController@consumptionReport');
   Route::get('/material_ordering_report', 'SseController@material_ordering_report');
   Route::get('/closing_stock_report', 'SseController@closing_stock_report');
+  Route::get('/treatment_not_done_report', 'SseController@treatment_not_done_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
