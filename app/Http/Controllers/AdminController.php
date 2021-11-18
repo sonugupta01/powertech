@@ -12661,7 +12661,7 @@ class AdminController extends Controller
         // -----  start logic ----
         $result['doneTreatments'] = DB::table('jobs')->where("jobs.delete_job", 1);
 
-        if (!empty($request->dealer_id)) {
+        if (!empty($request->dealer_id) && $request->type == 1) {
             $result['doneTreatments'] = $result['doneTreatments']->where("jobs.dealer_id", $request->dealer_id);
         }
 
@@ -12684,9 +12684,24 @@ class AdminController extends Controller
             $result['doneTreatments'] = $result['doneTreatments']->whereYear("jobs.date_added",$currentYear);
         }
 
-
+        
         $result['doneTreatments'] =  $result['doneTreatments']
-                ->join("jobs_treatment","jobs_treatment.job_id","jobs.id")
+                ->join("jobs_treatment","jobs_treatment.job_id","jobs.id");
+
+        if ($request->type == 2) {
+
+            if (!empty($request->treatment_id)) {
+                $result['dealerDoneTreatment'] = $result['doneTreatments']
+                ->where("jobs_treatment.treatment_id",$request->treatment_id);
+            }
+
+            $result['dealerDoneTreatment'] = $result['doneTreatments']
+            ->groupBy('jobs.dealer_id')
+            ->get();
+            // dd($result['dealerDoneTreatment']);
+        }
+     
+        $result['doneTreatments'] =  $result['doneTreatments']
                 ->join("treatments","treatments.id","jobs_treatment.treatment_id")
                 ->where('treatments.status',1);
                                               
@@ -12698,37 +12713,66 @@ class AdminController extends Controller
 // dd($result['allDealers']->pluck('id')->toArray());
         $result['totalTreatments'] = DB::table('dealer_templates')
         ->distinct('dealer_templates.template_id')
-        ->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray());
-        if (!empty($request->dealer_id)) {
+        ->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray())
+        ;
+        if (!empty($request->dealer_id) && $request->type == 1) {
             $result['totalTreatments'] = $result['totalTreatments']->where("dealer_templates.dealer_id", $request->dealer_id);
         }
         $result['totalTreatments'] = $result['totalTreatments']
         ->join("treatments","treatments.temp_id","dealer_templates.template_id")
-       ->where("treatments.id",559)
-        ->select("treatments.*","treatments.id as treatment_id")
+    //    ->where("treatments.id",559)
+        ->select("treatments.*","treatments.id as treatment_id","dealer_templates.dealer_id")
         ->get();
 
         if ($request->type == 1) { //treatment name show centerwise report
             $result['notDoneTreatments'] = array_diff($result['totalTreatments']->pluck("treatment_id")->toArray(),$result['doneTreatments']->pluck("treatment_id")->toArray());
         }
 
-        // dd($result['totalTreatments']);
+        // dd($result['totalTreatments']->distinct('dealer_templates.dealer_id'));
+
+        if ($request->type == 2) {
+            $result['treatmentTotalDealer'] = DB::table('treatments');
+
+            if (!empty($request->treatment_id)) {
+                $result['treatmentTotalDealer'] =  $result['treatmentTotalDealer']->where('treatments.id',$request->treatment_id);
+            }
+
+            $result['treatmentTotalDealer'] =  $result['treatmentTotalDealer']
+            ->join("dealer_templates","dealer_templates.template_id","treatments.temp_id")
+            ->groupBy('dealer_templates.dealer_id')->get();
+            ;
+
+
+            $result['notDoneTreatmentDealer'] = array_diff($result['treatmentTotalDealer']->pluck("dealer_id")->toArray(),$result['dealerDoneTreatment']->pluck("dealer_id")->toArray());
+
+
+            // dd($result['treatmentTotalDealer'],$result['dealerDoneTreatment'],$result['notDoneTreatmentDealer']);
+        }
 
         if ($request->excel == "1") {
             // dd("excel");
-
+            if ($request->type == 1) {
             $excelData = $result['notDoneTreatments'];
+            }
+
+            if ($request->type == 2) {
+                $excelData = $result['notDoneTreatmentDealer'];
+            }
 
             return Excel::create('Treatment_Not_Done' . date("d-M-Y"), function ($excel) use ($excelData,$request) {
-
+                if ($request->type == 1) {
                     $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) :"All";
+                }
+                if ($request->type == 2) {
+                    $sheetName = !empty($request->treatment_id) ? get_treatment_name($request->treatment_id) :"All";
+                }
                     $excel->sheet($sheetName, function ($sheet) use ($excelData,$request) {
                         $count = count($excelData);
                         $result = array();
                         $array = array();
                         $i = 0;
 
-                        if ($request->type == 1) {
+                        
 
                         $sheet->setBorder('A1:B1');
                         $sheet->cells('A1', function ($cells) {
@@ -12742,15 +12786,25 @@ class AdminController extends Controller
 
 
                         $sheet->setCellValue('A2', 'Sr.no');
-                        $sheet->setCellValue('B2', 'Treatment Name');
 
+                        if ($request->type == 1) {
+                        $sheet->setCellValue('B2', 'Treatment Name');
+                        }
+                        elseif ($request->type == 2) {
+                        $sheet->setCellValue('B2', 'Dealer Name');
+                        }
 
                         foreach ($excelData as $key => $value) {
                             $row = $i+3;
                             $sheet->setCellValue('A'.$row, ++$i);
+                            if ($request->type == 1) {
                             $sheet->setCellValue('B'.$row, @get_treatment_name(@$value));
+                            }
+                            elseif ($request->type == 2) {
+                            $sheet->setCellValue('B'.$row, @get_name(@$value));
+                            }
                         }
-                    }
+                   
                    
                     });
             

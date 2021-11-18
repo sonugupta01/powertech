@@ -118,8 +118,8 @@
                   <label>Report Type</label>
                   {{-- {{dd(request()->type == 2)}} --}}
                   <div class="form-control required">
-                    <input type="radio" checked value="1" name="type"> Center Wise
-                    <input type="radio" value="2" name="type" {{request()->type == 2 ? "checked" : ""}}> Treatment Wise
+                    <input type="radio" checked value="1" name="type" onchange="this.form.submit()"> Center Wise
+                    <input type="radio" value="2" name="type" onchange="this.form.submit()" {{request()->type == 2 ? "checked" : ""}}> Treatment Wise
                   </div>
                 </div>
 
@@ -142,28 +142,51 @@
             <table class="table table-bordered table-striped report-table datatable">
               <thead>
                 <th style="text-align:center;">
-                 
+                  @if (request()->type == 1)
                   @if (!empty($result['notDoneTreatments']))
                     
                     <button onclick="addUrlParameter('excel', '1')" class="btn btn-success" type="">Download</button>
    
                   @endif
+                  @endif
+
+                  @if (request()->type == 2)
+                  @if (!empty($result['notDoneTreatmentDealer']))
+                    
+                    <button onclick="addUrlParameter('excel', '1')" class="btn btn-success" type="">Download</button>
+   
+                  @endif
+                  @endif
 
                 </th>
                 <th colspan="1" style="font-size: 12px;">Count:
-                   {{request()->type == 1 ? count($result['notDoneTreatments']) : 0}} 
+
+                   @if (request()->type == 1)
+                  {{ count($result['notDoneTreatments'])}}
+                   @endif
+                   @if (request()->type == 2)
+                  {{ count($result['notDoneTreatmentDealer'])}}
+                   @endif
                   
                 </th>
                 {{-- <th colspan="1" style="">Total consumption value: </th> --}}
                 <tr>
                   
                     <th>Sr.no</th>
+                    @if (request()->type == 1)
                     <th>Treatment Name</th>
+                    @endif
+
+                    @if (request()->type == 2)
+                    <th>Dealer Name</th>
+                    @endif
+                    
                   
                 </tr>
             </thead>
               <tbody>
-       
+            
+              @if (request()->type == 1)
               @if (!empty($result['notDoneTreatments']))
               @php
                   $i=0;
@@ -183,6 +206,31 @@
                
               </tr>
               
+              @endif
+              @endif
+       
+              @if (request()->type == 2)
+              @if (!empty($result['notDoneTreatmentDealer']))
+              {{-- {{dd($result['notDoneTreatmentDealer'])}} --}}
+              @php
+                  $i=0;
+              @endphp
+                  @foreach ($result['notDoneTreatmentDealer'] as $key => $value)
+                      <tr>
+                        <td>{{++$i}}</td>
+                        <td>{{get_name($value)}}</td>
+                      </tr>
+                  @endforeach
+
+              @else
+              <tr>
+                <td colspan="8">
+                  No Record
+                </td>
+               
+              </tr>
+              
+              @endif
               @endif
                                      
                                       
