@@ -12818,4 +12818,124 @@ class AdminController extends Controller
             ]);
         }
     }
+
+
+    public function advisor_percentage_share_report(Request $request)
+    {
+        $from = $request->from;
+        $to = $request->to;
+
+        if (empty($from) && empty($to)) {
+            $currentMonth = date("m");
+            $currentYear = date("Y");
+        }
+
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+
+
+
+        if ($request->excel == "1") {
+
+            $excelData = $result['productConsumptionData'];
+
+            return Excel::create('Consumption_Report_' . date("d-M-Y"), function ($excel) use ($excelData, $request, $totalConsumptionValue) {
+
+                $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
+                $excel->sheet($sheetName, function ($sheet) use ($excelData, $request, $totalConsumptionValue) {
+                    $count = count($excelData);
+                    $result = array();
+                    $array = array();
+                    $i = 0;
+
+                    $sheet->setBorder('A1:D1');
+                    $sheet->cells('A1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('B1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('C1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->cells('D1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+                    $sheet->mergeCells('C1:D1');
+                    $sheet->mergeCells('A1:B1');
+                    $sheet->setCellValue('A1', 'Count: ' . $count);
+
+                    $sheet->setCellValue('C1', 'Total consumption value: ' . $totalConsumptionValue);
+
+
+
+                    $sheet->setCellValue('A2', 'Sr.no');
+                    $sheet->setCellValue('B2', 'Product Name');
+                    $sheet->setCellValue('C2', 'Total Quantity');
+                    $sheet->setCellValue('D2', 'Total Price');
+
+
+                    foreach ($excelData as $key => $value) {
+                        $row = $i + 3;
+                        $sheet->setCellValue('A' . $row, ++$i);
+                        $sheet->setCellValue('B' . $row, @get_product_name(@$value->product_id));
+                        $sheet->setCellValue('C' . $row, (string) (@$value->quantity . " " . get_unit_name(@$value->uom)));
+                        $sheet->setCellValue('D' . $row, (string) @$value->price);
+                    }
+
+                    // $sheet->fromArray($result);
+
+                });
+
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.advisor_percentage_share_report', [
+                'result' => @$result,
+            ]);
+        }
+    }
 }

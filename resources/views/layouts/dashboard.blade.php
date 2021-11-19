@@ -354,6 +354,7 @@
 				<li><a href="{{url('/admin/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/admin/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				<li><a href="{{url('/admin/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
+				<li><a href="{{url('/admin/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor Percentage Share Report</a></li>
 				
 			</ul>
 		</li>
