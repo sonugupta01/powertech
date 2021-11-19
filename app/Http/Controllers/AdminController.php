@@ -9352,6 +9352,15 @@ class AdminController extends Controller
         //    Session::flash('alert-class', 'alert-danger');
         //     return redirect('/admin/addJob')->with('error',$error);
         // }else{
+
+
+        $advisorPercentage = DB::table('advisor_shares')
+            ->where(['dealer_id' => $request->dealer_id, 'advisor_id' => $request->advisor_id])
+            ->first()->advisor_share;
+
+        $advisorSharePrice = ($actual_price * $advisorPercentage) / 100;
+
+
         $data = array(
             // 'user_id' => Auth::user()->id,
             'user_id' => $request->user_id,
@@ -9382,6 +9391,7 @@ class AdminController extends Controller
             'dealer_price' => $dealer_price,
             'powertech_share_price' => $powertech_price,
             // 'incentive' => $incentive,
+            'advisor_share_price' => $advisorSharePrice,
             'date_added' => getCurrentTimestamp(),
             // 'foc_options' => $request->option,
 
@@ -9628,6 +9638,14 @@ class AdminController extends Controller
         //          Session::flash('alert-class', 'alert-danger');
         //        return back()->with('error',$error);
         // }else{
+
+
+        $advisorPercentage = DB::table('advisor_shares')
+            ->where(['dealer_id' => $request->dealer_id, 'advisor_id' => $request->advisor_id])
+            ->first()->advisor_share;
+
+        $advisorSharePrice = ($actual_price * $advisorPercentage) / 100;
+
         $data = array(
             'user_id' => $request->user_id,
             'job_date' => $request->job_date,
@@ -9657,6 +9675,7 @@ class AdminController extends Controller
             'dealer_price' => $dealer_price,
             'powertech_share_price' => $powertech_price,
             // 'incentive' => $incentive,
+            'advisor_share_price' => $advisorSharePrice,
             'last_updated' => getCurrentTimestamp(),
             // 'foc_options' => $request->option,
         );
