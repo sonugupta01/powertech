@@ -522,6 +522,14 @@ function get_advisor_name($advisor_id = NULL)
 	return ucwords(@$result->name . ' - ' . @$result->department_name);
 }
 
+// get advisor department
+function get_advisor_department_id($advisor_id = NULL)
+{
+	$result = DB::table('advisors')
+		->where('id', $advisor_id)->first();
+	return @$result->department;
+}
+
 // get oem name
 function get_oem_name($oem_id = NULL)
 {
@@ -570,16 +578,15 @@ function get_product_unit($product_id = NULL)
 function get_unit_name($unit_id = NULL)
 {
 
-	if($unit_id==1){
+	if ($unit_id == 1) {
 		$unit = 'Litre';
-	}elseif($unit_id==2){
+	} elseif ($unit_id == 2) {
 		$unit = 'ML';
-	}elseif($unit_id==3){
+	} elseif ($unit_id == 3) {
 		$unit = 'Pcs.';
-	}elseif($unit_id==4){
+	} elseif ($unit_id == 4) {
 		$unit = 'Gms.';
-	}
-	else{
+	} else {
 		$unit = '';
 	}
 	return $unit;
@@ -875,11 +882,11 @@ function get_dealer_ro($dealer_id)
 {
 	$date = explode('-', date('Y-m-d'));
 	$dealer_ro = DB::table('jobs_by_date')
-        		->select(DB::raw('SUM(total_jobs) as total_jobs,dealer_id'))
-                ->where('dealer_id', @$dealer_id)
-				->whereMonth('job_added_date', $date[1])
-				->whereYear('job_added_date', $date[0])
-				->groupBy('dealer_id')
-				->first();			
-	return $dealer_ro;	
+		->select(DB::raw('SUM(total_jobs) as total_jobs,dealer_id'))
+		->where('dealer_id', @$dealer_id)
+		->whereMonth('job_added_date', $date[1])
+		->whereYear('job_added_date', $date[0])
+		->groupBy('dealer_id')
+		->first();
+	return $dealer_ro;
 }

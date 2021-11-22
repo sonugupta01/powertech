@@ -354,7 +354,7 @@
 				<li><a href="{{url('/admin/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/admin/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				<li><a href="{{url('/admin/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
-				<li><a href="{{url('/admin/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor Percentage Share Report</a></li>
+				<li><a href="{{url('/admin/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor % Share Report</a></li>
 				
 			</ul>
 		</li>
@@ -468,6 +468,7 @@
 				<li><a href="{{url('/asm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/asm/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				<li><a href="{{url('/asm/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
+				<li><a href="{{url('/asm/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor % Share Report</a></li>
 				
 			</ul>
 		</li>
@@ -560,6 +561,7 @@
 				<li><a href="{{url('/rsm/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/rsm/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				<li><a href="{{url('/rsm/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
+				<li><a href="{{url('/rsm/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor % Share Report</a></li>
 
 				
 			</ul>
@@ -653,6 +655,7 @@
 				<li><a href="{{url('/sse/material_ordering_report')}}"><i class="fa fa-file"></i> Material Order Report</a></li>
 				<li><a href="{{url('/sse/closing_stock_report')}}"><i class="fa fa-file"></i> Closing Stock Report</a></li>
 				<li><a href="{{url('/sse/treatment_not_done_report?type=1')}}"><i class="fa fa-file"></i> Treatment Not Done Report</a></li>
+				<li><a href="{{url('/sse/advisor_percentage_share_report')}}"><i class="fa fa-file"></i>Advisor % Share Report</a></li>
 				
 				
 			</ul>

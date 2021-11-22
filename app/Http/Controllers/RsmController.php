@@ -4949,4 +4949,217 @@ class RsmController extends Controller
             ]);
         }
     }
+
+
+    public function advisor_percentage_share_report(Request $request)
+    {
+        $request->asm_id = Auth::id();
+        $from = $request->from;
+        $to = $request->to;
+
+        if (empty($from) && empty($to)) {
+            $currentMonth = date("m");
+            $currentYear = date("Y");
+        }
+
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+
+        $result['jobs'] = DB::table('jobs')->where("delete_job", 1);
+
+        if (!empty($request->dealer_id)) {
+            $result['jobs'] = $result['jobs']->where("dealer_id", $request->dealer_id);
+        }
+
+        $result['jobs'] = $result['jobs']->whereIn("dealer_id", $result['allDealers']->pluck('id')->toArray());
+
+        if (!empty($from)) {
+            $result['jobs'] = $result['jobs']->whereDate("date_added", ">=", $from);
+        }
+
+        if (!empty($to)) {
+            $result['jobs'] = $result['jobs']->whereDate("date_added", "<=", $to);
+        }
+
+        if (!empty($currentMonth)) {
+            // dd($currentMonth);
+            $result['jobs'] = $result['jobs']->whereMonth("date_added", $currentMonth);
+        }
+
+        if (!empty($currentYear)) {
+            // dd($currentYear);
+            $result['jobs'] = $result['jobs']->whereYear("date_added", $currentYear);
+        }
+
+        $result['jobs'] =  $result['jobs']->get();
+
+        // dd($result['jobs']);
+        $advisorPercentageShareReport = array();
+
+        foreach ($result['jobs'] as $key => $value) {
+
+            // dd($value);
+
+            $advisorDepartment = get_advisor_department_id($value->advisor_id);
+
+            $object = new \stdClass();
+            $object->dealer_id = $value->dealer_id;
+
+
+            if (array_key_exists($value->dealer_id, $advisorPercentageShareReport)) {
+                $repeatObject = $advisorPercentageShareReport[$value->dealer_id];
+
+                $object->totalBussinessValue = $repeatObject->totalBussinessValue + $value->actual_price;
+
+                if ($advisorDepartment == 1) { //sales
+                    $object->saleBussinessValue = $repeatObject->saleBussinessValue +  $value->advisor_share_price;
+
+                    $object->serviceBussinessValue = !empty($repeatObject->serviceBussinessValue) ? $repeatObject->serviceBussinessValue : 0;
+
+                    $object->bodyshopBussinessValue = !empty($repeatObject->bodyshopBussinessValue) ? $repeatObject->bodyshopBussinessValue : 0;
+                } elseif ($advisorDepartment == 2) { //Service
+                    $object->saleBussinessValue = !empty($repeatObject->saleBussinessValue) ? $repeatObject->saleBussinessValue : 0;
+
+                    $object->serviceBussinessValue = $repeatObject->serviceBussinessValue +  $value->advisor_share_price;
+
+                    $object->bodyshopBussinessValue = !empty($repeatObject->bodyshopBussinessValue) ? $repeatObject->bodyshopBussinessValue : 0;
+                } elseif ($advisorDepartment == 3) { //bodyshop
+                    $object->saleBussinessValue = !empty($repeatObject->saleBussinessValue) ? $repeatObject->saleBussinessValue : 0;
+
+                    $object->serviceBussinessValue = !empty($repeatObject->serviceBussinessValue) ? $repeatObject->serviceBussinessValue : 0;
+
+                    $object->bodyshopBussinessValue = $repeatObject->bodyshopBussinessValue +   $value->advisor_share_price;
+                }
+            } else {
+                $object->totalBussinessValue = $value->actual_price;
+
+                if ($advisorDepartment == 1) { //sales
+                    $object->saleBussinessValue = $value->advisor_share_price;
+
+                    $object->serviceBussinessValue = 0;
+
+                    $object->bodyshopBussinessValue = 0;
+                } elseif ($advisorDepartment == 2) { //Service
+                    $object->saleBussinessValue = 0;
+
+                    $object->serviceBussinessValue = $value->advisor_share_price;
+
+                    $object->bodyshopBussinessValue = 0;
+                } elseif ($advisorDepartment == 3) { //bodyshop
+                    $object->saleBussinessValue = 0;
+
+                    $object->serviceBussinessValue = 0;
+
+                    $object->bodyshopBussinessValue = $value->advisor_share_price;
+                }
+            }
+
+            $advisorPercentageShareReport[$value->dealer_id] = $object;
+        }
+
+        $result['advisorPercentageShareReport'] = $advisorPercentageShareReport;
+
+        // dd($result['advisorPercentageShareReport']);
+        if ($request->excel == "1") {
+
+            $excelData = $result['advisorPercentageShareReport'];
+
+            return Excel::create('Advisor_Percentage_Sharing_Report' . date("d-M-Y"), function ($excel) use ($excelData, $request) {
+
+                $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
+                $excel->sheet($sheetName, function ($sheet) use ($excelData, $request) {
+                    $count = count($excelData);
+
+                    $i = 0;
+
+                    $sheet->setBorder('A1:I1');
+                    $sheet->cells('A1:I1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+
+                    $sheet->mergeCells('A1:I1');
+                    $sheet->setCellValue('A1', 'Count: ' . $count);
+
+
+
+                    $sheet->setCellValue('A2', 'Sr.no');
+                    $sheet->setCellValue('B2', 'Dealer Name');
+                    $sheet->setCellValue('C2', 'Total Business Value');
+                    $sheet->setCellValue('D2', 'Sales Business Value');
+                    $sheet->setCellValue('E2', 'Sales Business Value %');
+                    $sheet->setCellValue('F2', 'Service Business Value %');
+                    $sheet->setCellValue('G2', 'Service Business Value %');
+                    $sheet->setCellValue('H2', 'Bodyshop Business Value %');
+                    $sheet->setCellValue('I2', 'Bodyshop Business Value %');
+
+
+                    foreach ($excelData as $key => $value) {
+                        $row = $i + 3;
+                        $sheet->setCellValue('A' . $row, ++$i);
+                        $sheet->setCellValue('B' . $row, @get_name($value->dealer_id));
+                        $sheet->setCellValue('C' . $row, (string) @$value->totalBussinessValue);
+
+                        $sheet->setCellValue('D' . $row, (string) @$value->saleBussinessValue);
+                        $sheet->setCellValue('E' . $row, (string) number_format(($value->saleBussinessValue * 100) / $value->totalBussinessValue, 2));
+                        $sheet->setCellValue('F' . $row, (string) $value->serviceBussinessValue);
+                        $sheet->setCellValue('G' . $row, (string) number_format(($value->serviceBussinessValue * 100) / $value->totalBussinessValue, 2));
+                        $sheet->setCellValue('H' . $row, (string) $value->bodyshopBussinessValue);
+                        $sheet->setCellValue('I' . $row, (string) number_format(($value->bodyshopBussinessValue * 100) / $value->totalBussinessValue, 2));
+                    }
+
+                    // $sheet->fromArray($result);
+
+                });
+
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.advisor_percentage_share_report', [
+                'result' => @$result,
+            ]);
+        }
+    }
 }

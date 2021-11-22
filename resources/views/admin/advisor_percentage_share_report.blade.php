@@ -130,18 +130,18 @@
             <table class="table table-bordered table-striped report-table datatable">
               <thead>
                 <th style="text-align:center;">
-                  @if (!empty($result['advisorShareReport']))
+                  @if (!empty($result['advisorPercentageShareReport']))
                     
                     <button onclick="addUrlParameter('excel', '1')" class="btn btn-success" type="">Download</button>
    
                   @endif
-
-
                 </th>
-                <th colspan="1" style="font-size: 12px;">Count:
+                <th colspan="8" style="font-size: 12px;">Count:
 
-                  @if (!empty($result['advisorShareReport']))
-                  {{ count($result['advisorShareReport'])}}
+                  @if (!empty($result['advisorPercentageShareReport']))
+                  {{ count($result['advisorPercentageShareReport'])}}
+                  @else   
+                  0
                    @endif
                   
                 </th>
@@ -149,21 +149,35 @@
                 <tr>
                   
                     <th>Sr.no</th>
-                  
-                    
+                    <th>Dealer Name</th>
+                    <th>Total Business Value</th>
+                    <th>Sales Business Value</th>
+                    <th>Sales Business Value %</th>
+                    <th>Service Business Value</th>
+                    <th>Service Business Value %</th>
+                    <th>Bodyshop Business Value</th>
+                    <th>Bodyshop Business Value %</th>
                   
                 </tr>
             </thead>
               <tbody>
             
-              @if (!empty($result['notDoneTreatments']))
+              @if (!empty($result['advisorPercentageShareReport']))
               @php
                   $i=0;
               @endphp
-                  @foreach ($result['notDoneTreatments'] as $key => $value)
+                  @foreach ($result['advisorPercentageShareReport'] as $key => $value)
+                  
                       <tr>
                         <td>{{++$i}}</td>
-                        <td>{{get_treatment_name($value)}}</td>
+                        <td>{{get_name($value->dealer_id)}}</td>
+                        <td>{{$value->totalBussinessValue}}</td>
+                        <td>{{$value->saleBussinessValue}}</td>
+                        <td>{{number_format(($value->saleBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
+                        <td>{{$value->serviceBussinessValue}}</td>
+                        <td>{{number_format(($value->serviceBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
+                        <td>{{$value->bodyshopBussinessValue}}</td>
+                        <td>{{number_format(($value->bodyshopBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
                       </tr>
                   @endforeach
 
