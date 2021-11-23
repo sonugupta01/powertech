@@ -408,6 +408,7 @@ Route::group(['prefix' => 'asm', 'as' => 'asm::', 'middleware' => ['web', 'asm']
   Route::get('/closing_stock_report', 'AsmController@closing_stock_report');
   Route::get('/treatment_not_done_report', 'AsmController@treatment_not_done_report');
   Route::get('/advisor_percentage_share_report', 'AsmController@advisor_percentage_share_report');
+  Route::get('/job_type_report', 'AsmController@job_type_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
 Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web', 'rsm']], function () {
@@ -477,6 +478,7 @@ Route::group(['prefix' => 'rsm', 'as' => 'rsm::', 'middleware' => ['web', 'rsm']
   Route::get('/closing_stock_report', 'RsmController@closing_stock_report');
   Route::get('/treatment_not_done_report', 'RsmController@treatment_not_done_report');
   Route::get('/advisor_percentage_share_report', 'RsmController@advisor_percentage_share_report');
+  Route::get('/job_type_report', 'RsmController@job_type_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
 Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web', 'sse']], function () {
@@ -544,5 +546,6 @@ Route::group(['prefix' => 'sse', 'as' => 'sse::', 'middleware' => ['web', 'sse']
   Route::get('/closing_stock_report', 'SseController@closing_stock_report');
   Route::get('/treatment_not_done_report', 'SseController@treatment_not_done_report');
   Route::get('/advisor_percentage_share_report', 'SseController@advisor_percentage_share_report');
+  Route::get('/job_type_report', 'SseController@job_type_report');
   //Route::get('/viewServices/{id}','AdminController@viewServices');
 });
