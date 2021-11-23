@@ -9269,10 +9269,10 @@ class AdminController extends Controller
         foreach ($post['treatment_id'] as $key => $value) {
             $data1 = DB::table('treatments')->where('id', $value)->first();
             $data1->job_type = $post['job_type'][$key];
-            $data1->actualPrice = $post['actualPrice'][$key];
-            $data1->powertechPrice = $post['actualPrice'][$key] - $post['dealer_price'][$key];
+            $data1->actualPrice = @$post['actualPrice'][$key];
+            $data1->powertechPrice = @$post['actualPrice'][$key] - @$post['dealer_price'][$key];
             // $data1->discountPrice = $post['discountPrice'][$key];
-            $data1->difference = $post['difference'][$key];
+            $data1->difference = @$post['difference'][$key];
             $data1->dealer_price = $post['dealer_price'][$key];
             $treatment_data[] = $data1;
             if ($data1->job_type == '5') {
@@ -9360,7 +9360,7 @@ class AdminController extends Controller
 
         $advisorSharePrice = ($actual_price * $advisorPercentage) / 100;
 
-
+// dd($treatment_data);
         $data = array(
             // 'user_id' => Auth::user()->id,
             'user_id' => $request->user_id,
@@ -9403,10 +9403,20 @@ class AdminController extends Controller
         // }
         $result = DB::table('jobs')->insert($data);
         $id = DB::getPdo()->lastInsertId();
-        foreach ($treatment_id as $value) {
+        // foreach ($treatment_id as $value) {
+        //     $data = array(
+        //         'job_id' => $id,
+        //         'treatment_id' => $value['id'],
+        //     );
+        //     DB::table('jobs_treatment')->insert($data);
+        // }
+
+        foreach ($treatment_data as $value) {
             $data = array(
                 'job_id' => $id,
-                'treatment_id' => $value['id'],
+                'treatment_id' => $value->id,
+                'job_type' => $value->job_type,
+                'treatment_type' => $value->treatment_type,
             );
             DB::table('jobs_treatment')->insert($data);
         }
