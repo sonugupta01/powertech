@@ -13050,4 +13050,214 @@ class AdminController extends Controller
             ]);
         }
     }
+
+
+    public function job_type_report(Request $request)
+    {
+        $from = $request->from;
+        $to = $request->to;
+
+        if (empty($from) && empty($to)) {
+            $currentMonth = date("m");
+            $currentYear = date("Y");
+        }
+
+        $result['allFirms'] = DB::table('firms')->get();
+
+        //asm
+        $result['allAsms'] = DB::table('users')
+            ->where(["role" => 5, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allAsms'] = $result['allAsms']->where("firm_id", $request->firm_id);
+        }
+
+        $result['allAsms'] = $result['allAsms']->get();
+
+        //oems
+        $result['allOems'] = DB::table('oems')->where(['status' => 1]);
+
+        $result['allOems'] = $result['allOems']->get();
+
+        //dealers
+        $result['allDealers'] = User::where(['role' => 2, 'status' => 1]);
+
+        if (!empty($request->firm_id)) {
+            $result['allDealers'] = $result['allDealers']->where("firm_id", $request->firm_id);
+        }
+
+        if (!empty($request->oem_id)) {
+            $result['allDealers'] = $result['allDealers']->where("oem_id", $request->oem_id);
+        }
+
+        if (!empty($request->asm_id)) {
+            $result['allDealers'] = $result['allDealers']->whereRaw("find_in_set($request->asm_id,reporting_authority)");
+        }
+
+        $result['allDealers'] = $result['allDealers']
+            ->select('id', 'name')
+            ->orderBy('name', 'asc')->get();
+
+        // total treatments 
+        $result['allTreatments'] = DB::table('dealer_templates');
+
+        $result['allTreatments'] = $result['allTreatments']->whereIn("dealer_templates.dealer_id", $result['allDealers']->pluck('id')->toArray());
+
+        if (!empty($request->dealer_id)) {
+            $result['allTreatments'] = $result['allTreatments']->where("dealer_templates.dealer_id", $request->dealer_id);
+        }
+ 
+        if (!empty($request->treatment_type) || $request->treatment_type == "0") {
+            
+            $result['allTreatments'] = $result['allTreatments']->where("treatments.treatment_type", $request->treatment_type);
+        }
+
+        $result['allTreatments'] = $result['allTreatments']->join('treatments','treatments.temp_id','dealer_templates.template_id');
+
+        $result['allTreatments'] = $result['allTreatments']->get();
+
+        // dd($result['allTreatments']);
+        //brands
+        $result['allBrands'] = DB::table('product_brands')->where(['status' => 1]);
+
+        $result['allBrands'] = $result['allBrands']->get();
+
+
+        // -----  start logic ----
+
+        $result['jobs'] = DB::table('jobs')->where("jobs.delete_job", 1);
+
+        if (!empty($request->dealer_id)) {
+            $result['jobs'] = $result['jobs']->where("jobs.dealer_id", $request->dealer_id);
+        }
+
+        $result['jobs'] = $result['jobs']->whereIn("jobs.dealer_id", $result['allDealers']->pluck('id')->toArray());
+
+        if (!empty($from)) {
+            $result['jobs'] = $result['jobs']->whereDate("jobs.date_added", ">=", $from);
+        }
+
+        if (!empty($to)) {
+            $result['jobs'] = $result['jobs']->whereDate("jobs.date_added", "<=", $to);
+        }
+
+        if (!empty($currentMonth)) {
+            // dd($currentMonth);
+            $result['jobs'] = $result['jobs']->whereMonth("jobs.date_added", $currentMonth);
+        }
+
+        if (!empty($currentYear)) {
+            // dd($currentYear);
+            $result['jobs'] = $result['jobs']->whereYear("jobs.date_added", $currentYear);
+        }
+
+        $result['jobs'] = $result['jobs']
+        ->join('jobs_treatment','jobs_treatment.job_id','jobs.id')
+        // ->join('treatments','treatments.id','jobs_treatment.treatment_id')
+        ;
+
+        $result['jobs'] = $result['jobs']->where("jobs_treatment.job_type",'!=', "5");
+
+        if (!empty($request->treatment_id)) {
+            $result['jobs'] = $result['jobs']->where("jobs_treatment.treatment_id", $request->treatment_id);
+        }
+
+        if (!empty($request->treatment_type)) {
+            $result['jobs'] = $result['jobs']->where("jobs_treatment.treatment_type", $request->treatment_type);
+        }
+
+
+        $result['jobs'] =  $result['jobs']
+        ->select('jobs.*', 'jobs_treatment.treatment_id','jobs_treatment.job_type','jobs_treatment.treatment_type')
+        ->get();
+
+        $result['unPaidJobTreatments'] = $result['jobs'];
+
+        // dd($result['jobs']);
+
+
+        if ($request->excel == "1") {
+
+            $excelData = $result['unPaidJobTreatments'];
+
+            return Excel::create('Job_Type_Report_' . date("d-M-Y"), function ($excel) use ($excelData, $request) {
+
+                $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
+                $excel->sheet($sheetName, function ($sheet) use ($excelData, $request) {
+                    $count = count($excelData);
+                 
+                    $i = 0;
+
+                    $sheet->setBorder('A1:I1');
+                    $sheet->cells('A1:I1', function ($cells) {
+                        $cells->setBackground('#FFFF00');
+                    });
+      
+                    $sheet->mergeCells('A1:J1');
+                    $sheet->setCellValue('A1', 'Count: ' . $count);
+
+
+
+                    $sheet->setCellValue('A2', 'Sr.no');
+                    $sheet->setCellValue('B2', 'Dealer Name');
+                    $sheet->setCellValue('C2', 'Job Type');
+                    $sheet->setCellValue('D2', 'Treatment Name');
+                    $sheet->setCellValue('E2', 'Type Of Treatment');
+                    $sheet->setCellValue('F2', 'Job Card Number');
+                    $sheet->setCellValue('G2', 'Regn Number');
+                    $sheet->setCellValue('H2', 'Bill Number');
+                    $sheet->setCellValue('I2', 'Job Added Date');
+                    $sheet->setCellValue('J2', 'Customer Price');
+
+
+                    foreach ($excelData as $key => $value) {
+                        $row = $i + 3;
+                        $sheet->setCellValue('A' . $row, ++$i);
+                        $sheet->setCellValue('B' . $row, @get_name($value->dealer_id));
+                        switch ($value->job_type) {
+                            case $value->job_type == 1:
+                           $job_type = "Free of Cost";
+                                break;
+                            case $value->job_type == 2:
+                           $job_type = "Demo";
+                                break;
+                            case $value->job_type == 3:
+                           $job_type = "Recheck";
+                                break;
+                            case $value->job_type == 4:
+                           $job_type = "Repeat Work";
+                                break;
+                            case $value->job_type == 5:
+                           $job_type = "Paid";
+                                break;
+                            
+                            default:
+                            $job_type = "N/A";
+                                break;
+                        }
+                        $sheet->setCellValue('C' . $row, (string) @$job_type);
+                        $sheet->setCellValue('D' . $row, (string) @get_treatment_name($value->treatment_id));
+
+                        $sheet->setCellValue('E' . $row, (string) $value->treatment_type == 1 ? "Heavy":"Normal" );
+                        $sheet->setCellValue('F' . $row, (string) @$value->job_card_no);
+                        $sheet->setCellValue('G' . $row, (string) @$value->regn_no);
+                        $sheet->setCellValue('H' . $row, (string) @$value->bill_no);
+                        $sheet->setCellValue('I' . $row, (string) @$value->date_added);
+                        $sheet->setCellValue('J' . $row, (string) @$value->customer_price);
+                      
+                    }
+
+                    // $sheet->fromArray($result);
+
+                });
+
+                // dd($sheetName);
+            })->export('xlsx');
+        } else {
+            //   dd($result);
+            return view('admin.job_type_report', [
+                'result' => @$result,
+            ]);
+        }
+    }
 }
