@@ -173,11 +173,33 @@
                         <td>{{get_name($value->dealer_id)}}</td>
                         <td>{{$value->totalBussinessValue}}</td>
                         <td>{{$value->saleBussinessValue}}</td>
-                        <td>{{number_format(($value->saleBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
+                        <td>
+                          @if ($value->saleBussinessValue > 0 && $value->totalBussinessValue>0)
+                          {{number_format(($value->saleBussinessValue * 100)/$value->totalBussinessValue,2)}}
+                          @else
+                          0
+                          @endif
+                          
+                          
+                          %</td>
                         <td>{{$value->serviceBussinessValue}}</td>
-                        <td>{{number_format(($value->serviceBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
-                        <td>{{$value->bodyshopBussinessValue}}</td>
-                        <td>{{number_format(($value->bodyshopBussinessValue * 100)/$value->totalBussinessValue,2)}} %</td>
+                        <td>
+                          @if ($value->serviceBussinessValue > 0 && $value->totalBussinessValue>0)
+                          {{number_format(($value->serviceBussinessValue * 100)/$value->totalBussinessValue,2)}}
+                          @else
+                          0
+                          @endif
+                          
+                           %</td>
+                        <td>
+                          {{$value->bodyshopBussinessValue}}</td>
+                        <td>
+                          @if ($value->bodyshopBussinessValue > 0 && $value->totalBussinessValue>0)
+                          {{number_format(($value->bodyshopBussinessValue * 100)/$value->totalBussinessValue,2)}}
+                          @else
+                          0
+                          @endif
+                           %</td>
                       </tr>
                   @endforeach
 

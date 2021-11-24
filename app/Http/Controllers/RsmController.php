@@ -5111,14 +5111,14 @@ class RsmController extends Controller
                 $sheetName = !empty($request->dealer_id) ? get_name($request->dealer_id) : "All";
                 $excel->sheet($sheetName, function ($sheet) use ($excelData, $request) {
                     $count = count($excelData);
-
+                 
                     $i = 0;
 
                     $sheet->setBorder('A1:I1');
                     $sheet->cells('A1:I1', function ($cells) {
                         $cells->setBackground('#FFFF00');
                     });
-
+      
                     $sheet->mergeCells('A1:I1');
                     $sheet->setCellValue('A1', 'Count: ' . $count);
 
@@ -5142,11 +5142,27 @@ class RsmController extends Controller
                         $sheet->setCellValue('C' . $row, (string) @$value->totalBussinessValue);
 
                         $sheet->setCellValue('D' . $row, (string) @$value->saleBussinessValue);
-                        $sheet->setCellValue('E' . $row, (string) number_format(($value->saleBussinessValue * 100) / $value->totalBussinessValue, 2));
+
+                        if ($value->saleBussinessValue > 0 && $value->totalBussinessValue > 0) {
+                            $a = number_format(($value->saleBussinessValue * 100)/$value->totalBussinessValue,2);
+                        }else{
+                            $a = 0 ;
+                        }
+                        $sheet->setCellValue('E' . $row, (string) $a);
                         $sheet->setCellValue('F' . $row, (string) $value->serviceBussinessValue);
-                        $sheet->setCellValue('G' . $row, (string) number_format(($value->serviceBussinessValue * 100) / $value->totalBussinessValue, 2));
+                        if ($value->serviceBussinessValue > 0 && $value->totalBussinessValue > 0) {
+                            $a = number_format(($value->serviceBussinessValue * 100)/$value->totalBussinessValue,2);
+                        }else{
+                            $a = 0 ;
+                        }
+                        $sheet->setCellValue('G' . $row, (string) $a);
                         $sheet->setCellValue('H' . $row, (string) $value->bodyshopBussinessValue);
-                        $sheet->setCellValue('I' . $row, (string) number_format(($value->bodyshopBussinessValue * 100) / $value->totalBussinessValue, 2));
+                        if ($value->bodyshopBussinessValue > 0 && $value->totalBussinessValue > 0) {
+                            $a = number_format(($value->bodyshopBussinessValue * 100)/$value->totalBussinessValue,2);
+                        }else{
+                            $a = 0 ;
+                        }
+                        $sheet->setCellValue('I' . $row, (string) $a);
                     }
 
                     // $sheet->fromArray($result);
