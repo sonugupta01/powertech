@@ -9280,9 +9280,9 @@ class AdminController extends Controller
                 // $discount_price = $discount_price + $data1->discountPrice;
                 $difference_price = $difference_price + $data1->difference;
             } else {
-                $actual_price = 0;
+                $actual_price = $actual_price + 0;
                 // $discount_price = 0;
-                $difference_price = 0;
+                $difference_price = $difference_price + 0;
             }
             $customer_price = $customer_price + $data1->customer_price;
             $dealer_price = $dealer_price + $data1->dealer_price;
