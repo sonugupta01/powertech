@@ -1442,8 +1442,8 @@ class AsmController extends Controller
                 $actual_price = $actual_price + $data1->actualPrice;
                 $difference_price = $difference_price + $data1->difference;
             } else {
-                $actual_price = 0;
-                $difference_price = 0;
+                $actual_price = $actual_price + 0;
+                $difference_price = $difference_price + 0;
             }
             $customer_price = $customer_price + $data1->customer_price;
             // $dealer_price = $dealer_price + $data1->dealer_price;
